@@ -1,7 +1,51 @@
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { Timer } from 'lucide-react'
+import { AppDataGrid } from '../AppDataGrid'
 import { Badge, Card, EmptyState } from '../ui'
 import { formatAuditTime } from '../../lib/format'
 import type { PendingDeletions } from '../../types/retentionUi.types'
+
+type PendingRow = PendingDeletions['rows'][number]
+
+const columns: GridColDef<PendingRow>[] = [
+  {
+    field: 'category',
+    headerName: 'Category',
+    flex: 1,
+    minWidth: 160,
+    renderCell: (p) => <span className="font-medium text-ink-700">{p.row.category}</span>,
+  },
+  {
+    field: 'targetId',
+    headerName: 'Target',
+    width: 180,
+    renderCell: (p) => <span className="font-mono text-ink-500">{p.row.targetId}</span>,
+  },
+  {
+    field: 'sessionId',
+    headerName: 'Case',
+    width: 180,
+    renderCell: (p) => <span className="font-mono text-ink-500">{p.row.sessionId ?? '—'}</span>,
+  },
+  {
+    field: 'expiresAt',
+    headerName: 'Due',
+    width: 160,
+    renderCell: (p) => <span className="text-ink-500">{formatAuditTime(p.row.expiresAt)}</span>,
+  },
+  {
+    field: 'daysUntil',
+    headerName: 'Status',
+    width: 140,
+    renderCell: (p) => (
+      <Badge
+        className={p.row.due ? 'bg-rose-50 text-rose-700 ring-rose-200' : 'bg-amber-50 text-amber-700 ring-amber-200'}
+      >
+        {p.row.due ? `overdue ${Math.abs(p.row.daysUntil)}d` : `${p.row.daysUntil}d`}
+      </Badge>
+    ),
+  },
+]
 
 export function PendingDeletionsTable({ pending }: { pending: PendingDeletions }) {
   return (
@@ -16,34 +60,16 @@ export function PendingDeletionsTable({ pending }: { pending: PendingDeletions }
       {pending.rows.length === 0 ? (
         <EmptyState icon={<Timer size={18} />} title="Nothing due right now." />
       ) : (
-        <div className="max-h-80 overflow-auto">
-          <table className="w-full text-left text-[11px]">
-            <thead className="sticky top-0 bg-white text-ink-400">
-              <tr>
-                <th className="py-1.5 pr-2 font-semibold">Category</th>
-                <th className="py-1.5 pr-2 font-semibold">Target</th>
-                <th className="py-1.5 pr-2 font-semibold">Case</th>
-                <th className="py-1.5 pr-2 font-semibold">Due</th>
-                <th className="py-1.5 pr-2 font-semibold">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pending.rows.map((row) => (
-                <tr key={`${row.category}:${row.targetId}`} className="border-t border-ink-100">
-                  <td className="py-1.5 pr-2 font-medium text-ink-700">{row.category}</td>
-                  <td className="py-1.5 pr-2 font-mono text-ink-500">{row.targetId}</td>
-                  <td className="py-1.5 pr-2 font-mono text-ink-500">{row.sessionId ?? '—'}</td>
-                  <td className="py-1.5 pr-2 text-ink-500">{formatAuditTime(row.expiresAt)}</td>
-                  <td className="py-1.5 pr-2">
-                    <Badge className={row.due ? 'bg-rose-50 text-rose-700 ring-rose-200' : 'bg-amber-50 text-amber-700 ring-amber-200'}>
-                      {row.due ? `overdue ${Math.abs(row.daysUntil)}d` : `${row.daysUntil}d`}
-                    </Badge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <AppDataGrid<PendingRow>
+          rows={pending.rows}
+          columns={columns}
+          ariaLabel="Pending deletions"
+          getRowId={(row) => `${row.category}:${row.targetId}`}
+          hideToolbar
+          hideFooter
+          defaultDensity="compact"
+          maxHeight={320}
+        />
       )}
     </Card>
   )

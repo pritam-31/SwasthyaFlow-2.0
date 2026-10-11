@@ -1,8 +1,49 @@
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { useState } from 'react'
 import { Gauge, Save } from 'lucide-react'
+import { AppDataGrid } from '../AppDataGrid'
 import { Badge, Button, Card } from '../ui'
 import { updateRetentionSla } from '../../services/retentionUiApi'
 import type { RetentionSlaView } from '../../types/retentionUi.types'
+
+type RetentionSlaBucket = RetentionSlaView['buckets'][number]
+
+const columns: GridColDef<RetentionSlaBucket>[] = [
+  {
+    field: 'label',
+    headerName: 'Category',
+    flex: 1,
+    minWidth: 160,
+    valueGetter: (_value, row) => row.label,
+    renderCell: (p) => <span className="font-medium text-ink-700">{p.row.label}</span>,
+  },
+  {
+    field: 'due',
+    headerName: 'Due',
+    width: 100,
+    renderCell: (p) => <span className="text-ink-800">{p.row.due}</span>,
+  },
+  {
+    field: 'oldestOverdueDays',
+    headerName: 'Oldest overdue',
+    width: 150,
+    renderCell: (p) => <span className="text-ink-500">{p.row.oldestOverdueDays}d</span>,
+  },
+  {
+    field: 'breached',
+    headerName: 'Status',
+    width: 140,
+    renderCell: (p) => (
+      <Badge
+        className={
+          p.row.breached ? 'bg-rose-50 text-rose-700 ring-rose-200' : 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+        }
+      >
+        {p.row.breached ? 'Breached' : 'Within SLA'}
+      </Badge>
+    ),
+  },
+]
 
 export function RetentionSlaCard({ sla, canEdit, onSaved }: { sla: RetentionSlaView; canEdit: boolean; onSaved: (next: RetentionSlaView) => void }) {
   const [days, setDays] = useState(String(sla.slaDays))
@@ -58,32 +99,15 @@ export function RetentionSlaCard({ sla, canEdit, onSaved }: { sla: RetentionSlaV
         </span>
         <span>Next sweep: {new Date(sla.nextRunAt).toLocaleString('en-IN')}</span>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-[11px]">
-          <thead className="text-ink-400">
-            <tr>
-              <th className="py-1.5 pr-2 font-semibold">Category</th>
-              <th className="py-1.5 pr-2 font-semibold">Due</th>
-              <th className="py-1.5 pr-2 font-semibold">Oldest overdue</th>
-              <th className="py-1.5 pr-2 font-semibold">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sla.buckets.map((bucket) => (
-              <tr key={bucket.category} className="border-t border-ink-100">
-                <td className="py-1.5 pr-2 font-medium text-ink-700">{bucket.label}</td>
-                <td className="py-1.5 pr-2 text-ink-800">{bucket.due}</td>
-                <td className="py-1.5 pr-2 text-ink-500">{bucket.oldestOverdueDays}d</td>
-                <td className="py-1.5 pr-2">
-                  <Badge className={bucket.breached ? 'bg-rose-50 text-rose-700 ring-rose-200' : 'bg-emerald-50 text-emerald-700 ring-emerald-200'}>
-                    {bucket.breached ? 'Breached' : 'Within SLA'}
-                  </Badge>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <AppDataGrid<RetentionSlaBucket>
+        rows={sla.buckets}
+        columns={columns}
+        ariaLabel="Retention SLA"
+        getRowId={(bucket) => bucket.category}
+        hideToolbar
+        hideFooter
+        defaultDensity="compact"
+      />
       {error && <p className="mt-2 text-[11px] text-rose-600">{error}</p>}
     </Card>
   )

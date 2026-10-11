@@ -205,44 +205,25 @@ export default function TriageDashboard() {
         title="Queue"
         subtitle="Sorted by review priority — this ranking is a workflow label, not a diagnosis."
       >
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[860px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-ink-200 bg-ink-50/70 text-[10px] uppercase tracking-[0.08em] text-ink-500">
-                <th className="px-5 py-3 font-bold">Patient</th>
-                <th className="px-3 py-3 font-bold" aria-sort={ariaSort('risk')}>
-                  <SortButton label="Review priority" active={sortKey === 'risk'} dir={sortDir} onClick={() => toggleSort('risk')} />
-                </th>
-                <th className="px-3 py-3 font-bold">Chief complaint (AI draft)</th>
-                <th className="px-3 py-3 font-bold">Flags</th>
-                <th className="px-3 py-3 font-bold">Missing</th>
-                <th className="px-3 py-3 font-bold" aria-sort={ariaSort('status')}>
-                  <SortButton label="Status" active={sortKey === 'status'} dir={sortDir} onClick={() => toggleSort('status')} />
-                </th>
-                <th className="px-3 py-3 font-bold" aria-sort={ariaSort('time')}>
-                  <SortButton label="Updated" active={sortKey === 'time'} dir={sortDir} onClick={() => toggleSort('time')} />
-                </th>
-                <th className="px-3 py-3">
-                  <span className="sr-only">Open</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-100">
-              <AnimatePresence initial={false}>
-                {sorted.map((s) => (
-                  <QueueRow key={s.id} session={s} active={s.id === activeId} onOpen={() => selectSession(s.id)} />
-                ))}
-              </AnimatePresence>
-            </tbody>
-          </table>
-          {sorted.length === 0 && (
-            <EmptyState
-              icon={<Stethoscope size={20} />}
-              title="No sessions yet"
-              hint="Create one from Multimodal Intake — it will appear here with an AI-prepared draft."
-            />
-          )}
-        </div>
+        {sessions.length === 0 ? (
+          <EmptyState
+            icon={<Stethoscope size={20} />}
+            title="No sessions yet"
+            hint="Create one from Multimodal Intake — it will appear here with an AI-prepared draft."
+          />
+        ) : (
+          <AppDataGrid<PatientSession>
+            rows={sessions}
+            columns={QUEUE_COLUMNS}
+            ariaLabel="Review queue"
+            getRowId={(s) => s.id}
+            onRowClick={(s) => selectSession(s.id)}
+            getRowClassName={(s) => (s.id === activeId ? 'bg-brand-50/60' : '')}
+            hideToolbar
+            hideFooter
+            defaultDensity="compact"
+          />
+        )}
         <div className="border-t border-ink-100 px-5 py-2.5 text-[11px] text-ink-500">
           {permissions.canFinalizeNote
             ? 'You can edit, accept, finalize and approve referrals. Nothing is prescribed by this system.'
@@ -268,99 +249,6 @@ export default function TriageDashboard() {
         </Card>
       )}
     </div>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/*  Queue                                                              */
-/* ------------------------------------------------------------------ */
-
-function SortButton({
-  label,
-  active,
-  dir,
-  onClick,
-}: {
-  label: string
-  active: boolean
-  dir: 'asc' | 'desc'
-  onClick: () => void
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cx(
-        'inline-flex items-center gap-1 uppercase tracking-[0.08em] transition-colors',
-        active ? 'text-brand-700' : 'hover:text-ink-800',
-      )}
-    >
-      {label}
-      <ArrowDownUp
-        size={12}
-        className={cx(dir === 'asc' && active ? 'rotate-180' : '', active ? 'opacity-100' : 'opacity-40')}
-      />
-    </button>
-  )
-}
-
-function QueueRow({ session, active, onOpen }: { session: PatientSession; active: boolean; onOpen: () => void }) {
-  const note = session.triageNote
-  const risk = note?.riskScore ?? 'Low'
-  const meta = NOTE_META[note?.status ?? 'ai-draft']
-  const overrides = session.overrides ?? []
-  const slaBreached = note?.slaBreached ?? false
-  const timelineEvents = note?.timeline ?? []
-  return (
-    <motion.tr
-      layout
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -12 }}
-      transition={{ duration: 0.25, ease: EASE }}
-      onClick={onOpen}
-      className={cx('group cursor-pointer transition-colors', active ? 'bg-brand-50/60' : 'hover:bg-ink-50')}
-    >
-      <td className="px-5 py-3.5">
-        <span className="flex items-center gap-2.5 text-left">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-900 text-[11px] font-extrabold text-white">
-            {session.patientId.slice(-3)}
-          </span>
-          <span>
-            <span className="block font-bold text-ink-800">{session.patientId}</span>
-            <span className="block text-[11px] text-ink-400">
-              {session.demographics.ageBand} · {session.demographics.sex} · {session.raw.language}
-            </span>
-          </span>
-        </span>
-        <TimelineMiniBar events={timelineEvents} />
-      </td>
-      <td className="px-3 py-3.5">
-        <Badge className={RISK_META[risk].classes}>
-          <span className={cx('h-1.5 w-1.5 rounded-full', RISK_META[risk].dot)} />
-          {RISK_META[risk].label}
-        </Badge>
-      </td>
-      <td className="px-3 py-3.5">
-<QueueRowRationale
-          risk={risk}
-          overrides={overrides}
-          slaBreached={slaBreached}
-/>
-      </td>
-      <td className="max-w-[240px] px-3 py-3.5">
-        <p className="truncate text-[13px] text-ink-700">{note?.structuredNote.chiefComplaint ?? '—'}</p>
-      </td>
-      <td className="px-3 py-3.5 text-xs font-semibold text-ink-600">{note?.urgencyFlags.length ?? 0}</td>
-      <td className="px-3 py-3.5 text-xs font-semibold text-ink-600">{note?.missingInformation.length ?? 0}</td>
-      <td className="px-3 py-3.5">
-        <Badge className={meta.classes}>{meta.label}</Badge>
-      </td>
-      <td className="whitespace-nowrap px-3 py-3.5 text-[11px] text-ink-500">{formatAuditTime(session.updatedAt)}</td>
-      <td className="px-3 py-3.5">
-        <ChevronRight size={16} className="text-ink-300 transition-transform group-hover:translate-x-0.5" />
-      </td>
-    </motion.tr>
   )
 }
 

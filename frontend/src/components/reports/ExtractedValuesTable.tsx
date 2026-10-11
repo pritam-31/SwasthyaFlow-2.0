@@ -6,7 +6,9 @@
  * is a text-match confidence — never a clinical one.
  */
 
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { Activity, Beaker } from 'lucide-react'
+import { AppDataGrid } from '../AppDataGrid'
 import type { ExtractedLabValue, ExtractedVital, ValueFlag } from '../../types/report.types'
 import { Badge, cx, EmptyState } from '../ui'
 
@@ -33,41 +35,51 @@ function Confidence({ value }: { value: number }) {
   )
 }
 
-function ValueRow({
-  name,
-  value,
-  unit,
-  flag,
-  confidence,
-  referenceRange,
-}: {
-  name: string
-  value: number
-  unit: string
-  flag: ValueFlag
-  confidence: number
-  referenceRange?: string | null
-}) {
-  const flagMeta = FLAG_META[flag]
-  return (
-    <tr className="border-b border-ink-100 last:border-0">
-      <td className="py-2.5 pr-3">
-        <p className="text-[12px] font-bold text-ink-800">{name}</p>
-        {referenceRange && <p className="text-[11px] text-ink-400">range {referenceRange}</p>}
-      </td>
-      <td className="whitespace-nowrap py-2.5 px-3 text-right">
-        <span className="text-[13px] font-bold text-ink-900">{value}</span>
-        <span className="ml-1.5 text-[11px] text-ink-400">{unit}</span>
-      </td>
-      <td className="whitespace-nowrap py-2.5 px-3 text-right">
-        <Badge className={flagMeta.classes}>{flagMeta.label}</Badge>
-      </td>
-      <td className="whitespace-nowrap py-2.5 pl-3 text-right">
-        <Confidence value={confidence} />
-      </td>
-    </tr>
-  )
-}
+type ExtractedValueRow = ExtractedLabValue | ExtractedVital
+
+const valueColumns: GridColDef<ExtractedValueRow>[] = [
+  {
+    field: 'name',
+    headerName: 'Name',
+    flex: 1,
+    minWidth: 140,
+    renderCell: (p) => (
+      <div>
+        <p className="text-[12px] font-bold text-ink-800">{p.row.name}</p>
+        {'referenceRange' in p.row && p.row.referenceRange && (
+          <p className="text-[11px] text-ink-400">range {p.row.referenceRange}</p>
+        )}
+      </div>
+    ),
+  },
+  {
+    field: 'value',
+    headerName: 'Value',
+    width: 110,
+    align: 'right',
+    headerAlign: 'right',
+    renderCell: (p) => (
+      <span className="whitespace-nowrap">
+        <span className="text-[13px] font-bold text-ink-900">{p.row.value}</span>
+        <span className="ml-1.5 text-[11px] text-ink-400">{p.row.unit}</span>
+      </span>
+    ),
+  },
+  {
+    field: 'flag',
+    headerName: 'Flag',
+    width: 180,
+    renderCell: (p) => <Badge className={FLAG_META[p.row.flag].classes}>{FLAG_META[p.row.flag].label}</Badge>,
+  },
+  {
+    field: 'confidence',
+    headerName: 'Confidence',
+    width: 110,
+    align: 'right',
+    headerAlign: 'right',
+    renderCell: (p) => <Confidence value={p.row.confidence} />,
+  },
+]
 
 export default function ExtractedValuesTable({
   labValues,
@@ -98,21 +110,15 @@ export default function ExtractedValuesTable({
           <header className="flex items-center gap-1.5 border-b border-ink-100 px-3.5 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-500">
             <Beaker size={12} className="text-brand-600" /> Lab values ({labValues.length})
           </header>
-          <table className="w-full px-3 py-1 text-sm">
-            <tbody>
-              {labValues.map((v) => (
-                <ValueRow
-                  key={v.id}
-                  name={v.name}
-                  value={v.value}
-                  unit={v.unit}
-                  flag={v.flag}
-                  confidence={v.confidence}
-                  referenceRange={v.referenceRange}
-                />
-              ))}
-            </tbody>
-          </table>
+          <AppDataGrid<ExtractedValueRow>
+            rows={labValues}
+            columns={valueColumns}
+            ariaLabel={`Lab values (${labValues.length})`}
+            getRowId={(v) => v.id}
+            hideToolbar
+            hideFooter
+            defaultDensity="compact"
+          />
         </section>
       )}
 
@@ -121,13 +127,15 @@ export default function ExtractedValuesTable({
           <header className="flex items-center gap-1.5 border-b border-ink-100 px-3.5 py-2.5 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-500">
             <Activity size={12} className="text-violet-600" /> Vitals ({vitals.length})
           </header>
-          <table className="w-full px-3 py-1 text-sm">
-            <tbody>
-              {vitals.map((v) => (
-                <ValueRow key={v.id} name={v.name} value={v.value} unit={v.unit} flag={v.flag} confidence={v.confidence} />
-              ))}
-            </tbody>
-          </table>
+          <AppDataGrid<ExtractedValueRow>
+            rows={vitals}
+            columns={valueColumns}
+            ariaLabel={`Vitals (${vitals.length})`}
+            getRowId={(v) => v.id}
+            hideToolbar
+            hideFooter
+            defaultDensity="compact"
+          />
         </section>
       )}
     </div>

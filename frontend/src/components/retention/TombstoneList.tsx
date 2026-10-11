@@ -1,7 +1,58 @@
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { EmptyState } from '../ui'
 import { ShieldCheck } from 'lucide-react'
+import { AppDataGrid } from '../AppDataGrid'
 import { formatAuditTime } from '../../lib/format'
 import type { Tombstone } from '../../types/retention.types'
+
+const columns: GridColDef<Tombstone>[] = [
+  {
+    field: 'deletedAt',
+    headerName: 'Deleted',
+    width: 160,
+    renderCell: (p) => (
+      <span className="whitespace-nowrap text-[11px] text-ink-500">{formatAuditTime(p.row.deletedAt)}</span>
+    ),
+  },
+  {
+    field: 'scope',
+    headerName: 'Scope',
+    width: 120,
+    renderCell: (p) => <span className="text-xs font-semibold text-ink-700">{p.row.scope}</span>,
+  },
+  {
+    field: 'case',
+    headerName: 'Case',
+    width: 180,
+    valueGetter: (_value, row) => row.patientId ?? row.sessionId ?? '',
+    renderCell: (p) => (
+      <span className="font-mono text-[10px] text-ink-500">
+        {p.row.patientId ?? '—'}
+        {p.row.sessionId && <span className="block text-ink-400">{p.row.sessionId}</span>}
+      </span>
+    ),
+  },
+  {
+    field: 'reason',
+    headerName: 'Reason',
+    flex: 1,
+    minWidth: 200,
+    renderCell: (p) => <span className="text-[11px] text-ink-600">{p.row.reason}</span>,
+  },
+  {
+    field: 'deletedBy',
+    headerName: 'By',
+    width: 200,
+    renderCell: (p) => (
+      <span className="text-[11px] text-ink-500">
+        {p.row.deletedBy}
+        <span className="block text-[10px] text-ink-400">
+          {p.row.deletedByRole} · policy {p.row.policyVersion}
+        </span>
+      </span>
+    ),
+  },
+]
 
 /**
  * Deletion proof (admin). Tombstones carry identifiers and reasons only —
@@ -18,37 +69,14 @@ export default function TombstoneList({ tombstones }: { tombstones: Tombstone[] 
     )
   }
   return (
-    <div className="overflow-x-auto">
-      <table className="sf-table min-w-[640px]">
-        <thead>
-          <tr>
-            <th>Deleted</th>
-            <th>Scope</th>
-            <th>Case</th>
-            <th>Reason</th>
-            <th>By</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tombstones.map((tb) => (
-            <tr key={tb.id}>
-              <td className="whitespace-nowrap text-[11px] text-ink-500">{formatAuditTime(tb.deletedAt)}</td>
-              <td className="text-xs font-semibold text-ink-700">{tb.scope}</td>
-              <td className="font-mono text-[10px] text-ink-500">
-                {tb.patientId ?? '—'}
-                {tb.sessionId && <span className="block text-ink-400">{tb.sessionId}</span>}
-              </td>
-              <td className="text-[11px] text-ink-600">{tb.reason}</td>
-              <td className="text-[11px] text-ink-500">
-                {tb.deletedBy}
-                <span className="block text-[10px] text-ink-400">
-                  {tb.deletedByRole} · policy {tb.policyVersion}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <AppDataGrid<Tombstone>
+      rows={tombstones}
+      columns={columns}
+      ariaLabel="Deletion tombstones"
+      getRowId={(tb) => tb.id}
+      hideToolbar
+      hideFooter
+      defaultDensity="compact"
+    />
   )
 }

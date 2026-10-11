@@ -1,5 +1,7 @@
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { useEffect, useMemo, useState } from 'react'
 import { RotateCcw, Save } from 'lucide-react'
+import { AppDataGrid } from '../AppDataGrid'
 import { Button } from '../ui'
 import type { RetentionPolicy, RetentionRule } from '../../types/retention.types'
 import type { RetentionRulePatch } from '../../services/retentionApi'
@@ -56,55 +58,71 @@ export default function RetentionPolicyEditor({
     setDraft(next)
   }
 
+  const columns: GridColDef<RetentionRule>[] = [
+    {
+      field: 'category',
+      headerName: 'Category',
+      flex: 1,
+      minWidth: 220,
+      renderCell: (p) => (
+        <div>
+          <p className="font-semibold text-ink-700">{p.row.label}</p>
+          <p className="text-[10px] text-ink-400">{p.row.description}</p>
+        </div>
+      ),
+    },
+    {
+      field: 'retentionDays',
+      headerName: 'Retention (days)',
+      width: 160,
+      renderCell: (p) => {
+        const row = draft[p.row.category] ?? { retentionDays: p.row.retentionDays, enabled: p.row.enabled }
+        return (
+          <input
+            type="number"
+            min={0}
+            max={3650}
+            value={row.retentionDays}
+            onChange={(e) => update(p.row, { retentionDays: Number(e.target.value) })}
+            className="w-24 rounded-lg border border-ink-200 bg-white px-2 py-1 text-xs text-ink-700 outline-none focus:border-brand-500"
+            aria-label={`${p.row.label} retention days`}
+          />
+        )
+      },
+    },
+    {
+      field: 'enabled',
+      headerName: 'Enabled',
+      width: 160,
+      renderCell: (p) => {
+        const row = draft[p.row.category] ?? { retentionDays: p.row.retentionDays, enabled: p.row.enabled }
+        return (
+          <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-ink-600">
+            <input
+              type="checkbox"
+              checked={row.enabled}
+              onChange={(e) => update(p.row, { enabled: e.target.checked })}
+              className="h-4 w-4 accent-[#1f7d6b]"
+              aria-label={`${p.row.label} enabled`}
+            />
+            {row.enabled ? 'Enabled' : 'Keep forever'}
+          </label>
+        )
+      },
+    },
+  ]
+
   return (
     <div className="space-y-3">
-      <div className="overflow-x-auto">
-        <table className="sf-table min-w-[620px]">
-          <thead>
-            <tr>
-              <th>Category</th>
-              <th>Retention (days)</th>
-              <th>Enabled</th>
-            </tr>
-          </thead>
-          <tbody>
-            {policy.rules.map((rule) => {
-              const row = draft[rule.category] ?? { retentionDays: rule.retentionDays, enabled: rule.enabled }
-              return (
-                <tr key={rule.category}>
-                  <td>
-                    <p className="font-semibold text-ink-700">{rule.label}</p>
-                    <p className="text-[10px] text-ink-400">{rule.description}</p>
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      min={0}
-                      max={3650}
-                      value={row.retentionDays}
-                      onChange={(e) => update(rule, { retentionDays: Number(e.target.value) })}
-                      className="w-24 rounded-lg border border-ink-200 bg-white px-2 py-1 text-xs text-ink-700 outline-none focus:border-brand-500"
-                      aria-label={`${rule.label} retention days`}
-                    />
-                  </td>
-                  <td>
-                    <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-ink-600">
-                      <input
-                        type="checkbox"
-                        checked={row.enabled}
-                        onChange={(e) => update(rule, { enabled: e.target.checked })}
-                        className="h-4 w-4 accent-[#1f7d6b]"
-                        aria-label={`${rule.label} enabled`}
-                      />
-                      {row.enabled ? 'Enabled' : 'Keep forever'}
-                    </label>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+      <AppDataGrid<RetentionRule>
+        rows={policy.rules}
+        columns={columns}
+        ariaLabel="Retention policy rules"
+        getRowId={(rule) => rule.category}
+        hideToolbar
+        hideFooter
+        defaultDensity="compact"
+      />
       <div className="flex justify-end gap-2">
         <Button variant="secondary" size="sm" onClick={reset} disabled={saving || patches.length === 0}>
           <RotateCcw size={14} /> Reset

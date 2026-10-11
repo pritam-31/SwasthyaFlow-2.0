@@ -1,5 +1,7 @@
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { RefreshCw, Smartphone, XCircle } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { AppDataGrid } from '../AppDataGrid'
 import { EmptyState, Button } from '../ui'
 import { useApp } from '../../store/AppStore'
 import { SECURITY_SECTION_LABELS } from '../../services/safetyPolicy'
@@ -37,6 +39,54 @@ export function DeviceList({ lang = 'en' }: { lang?: Lang }) {
     }
   }
 
+  const columns: GridColDef<Device>[] = [
+    {
+      field: 'device',
+      headerName: 'Device',
+      flex: 1,
+      minWidth: 200,
+      valueGetter: (_value, row) => row.userAgent,
+      renderCell: (p) => (
+        <div className="flex items-center gap-2">
+          <Smartphone size={14} className="shrink-0 text-ink-400" />
+          <div className="min-w-0">
+            <p className="truncate text-[12px] font-semibold text-ink-800">{p.row.userAgent || '—'}</p>
+            <p className="font-mono text-[11px] text-ink-400">{p.row.ip || ''}</p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      field: 'firstSeenAt',
+      headerName: 'First seen',
+      flex: 1,
+      minWidth: 140,
+      renderCell: (p) => <span className="text-[12px] text-ink-500">{new Date(p.row.firstSeenAt).toLocaleString()}</span>,
+    },
+    {
+      field: 'lastSeenAt',
+      headerName: 'Last seen',
+      flex: 1,
+      minWidth: 140,
+      renderCell: (p) => <span className="text-[12px] text-ink-500">{new Date(p.row.lastSeenAt).toLocaleString()}</span>,
+    },
+    {
+      field: 'revoke',
+      headerName: 'Action',
+      width: 90,
+      align: 'right',
+      headerAlign: 'right',
+      sortable: false,
+      filterable: false,
+      disableColumnMenu: true,
+      renderCell: (p) => (
+        <Button variant="ghost" size="sm" onClick={() => revoke(p.row.deviceId)} aria-label={t.revokeDevice}>
+          <XCircle size={14} />
+        </Button>
+      ),
+    },
+  ]
+
   return (
     <div className="space-y-2.5">
       <div className="flex items-center justify-between">
@@ -48,40 +98,15 @@ export function DeviceList({ lang = 'en' }: { lang?: Lang }) {
       {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-[12px] font-semibold text-rose-700 ring-1 ring-inset ring-rose-200">{error}</p>}
       {devices && devices.length === 0 && <EmptyState icon={<Smartphone size={18} />} title={t.noDevices} />}
       {devices && devices.length > 0 && (
-        <div className="overflow-x-auto rounded-xl ring-1 ring-inset ring-ink-200">
-          <table className="w-full min-w-[520px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-ink-200 bg-ink-50/70 text-[10px] uppercase tracking-[0.08em] text-ink-500">
-                <th className="px-4 py-2.5 font-bold">Device</th>
-                <th className="px-3 py-2.5 font-bold">First seen</th>
-                <th className="px-3 py-2.5 font-bold">Last seen</th>
-                <th className="px-3 py-2.5 text-right font-bold">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-100">
-              {devices.map((d) => (
-                <tr key={d.deviceId} className="transition-colors hover:bg-ink-50/60">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Smartphone size={14} className="shrink-0 text-ink-400" />
-                      <div className="min-w-0">
-                        <p className="truncate text-[12px] font-semibold text-ink-800">{d.userAgent || '—'}</p>
-                        <p className="font-mono text-[11px] text-ink-400">{d.ip || ''}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-3 py-3 text-[12px] text-ink-500">{new Date(d.firstSeenAt).toLocaleString()}</td>
-                  <td className="px-3 py-3 text-[12px] text-ink-500">{new Date(d.lastSeenAt).toLocaleString()}</td>
-                  <td className="px-3 py-3 text-right">
-                    <Button variant="ghost" size="sm" onClick={() => revoke(d.deviceId)} aria-label={t.revokeDevice}>
-                      <XCircle size={14} />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <AppDataGrid<Device>
+          rows={devices}
+          columns={columns}
+          ariaLabel="Devices"
+          getRowId={(d) => d.deviceId}
+          hideToolbar
+          hideFooter
+          defaultDensity="compact"
+        />
       )}
     </div>
   )

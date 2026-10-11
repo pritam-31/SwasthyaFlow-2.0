@@ -1,5 +1,7 @@
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { Activity, RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { AppDataGrid } from '../AppDataGrid'
 import { Badge, Button, EmptyState } from '../ui'
 import { SECURITY_SECTION_LABELS } from '../../services/safetyPolicy'
 import type { SecurityEvent, SecurityEventType } from '../../types/security.types'
@@ -63,6 +65,56 @@ function severityOf(type: SecurityEventType): { tone: 'rose' | 'amber' | 'emeral
   return { tone: 'rose', class: 'bg-rose-50 text-rose-700 ring-rose-200' }
 }
 
+const columns: GridColDef<SecurityEvent>[] = [
+  {
+    field: 'createdAt',
+    headerName: 'When',
+    flex: 1,
+    minWidth: 180,
+    renderCell: (p) => (
+      <span className="text-[11px] text-ink-500">
+        {new Date(p.row.createdAt).toLocaleString(undefined, {
+          day: '2-digit',
+          month: 'short',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        })}
+      </span>
+    ),
+  },
+  {
+    field: 'type',
+    headerName: 'Event',
+    width: 220,
+    renderCell: (p) => <Badge className={severityOf(p.row.type).class}>{EVENT_LABEL[p.row.type] ?? p.row.type}</Badge>,
+  },
+  {
+    field: 'actorRole',
+    headerName: 'Role',
+    width: 120,
+    renderCell: (p) => <span className="text-[12px] text-ink-600">{p.row.actorRole ?? '—'}</span>,
+  },
+  {
+    field: 'detail',
+    headerName: 'Detail',
+    flex: 1.4,
+    minWidth: 240,
+    renderCell: (p) => <span className="max-w-[280px] truncate text-[12px] text-ink-500">{p.row.detail}</span>,
+  },
+  {
+    field: 'origin',
+    headerName: 'Origin',
+    width: 150,
+    valueGetter: (_value, row) => row.ip ?? (row.facilityId ? 'facility' : ''),
+    renderCell: (p) => (
+      <span className="font-mono text-[11px] text-ink-400">
+        {p.row.ip ? `IP ${p.row.ip}` : p.row.facilityId ? 'facility' : '—'}
+      </span>
+    ),
+  },
+]
+
 /** Pseudonymised security trail — no identifiers are ever rendered. */
 export function SecurityEventsTable({ lang = 'en' }: { lang?: Lang }) {
   const t = SECURITY_SECTION_LABELS[lang]
@@ -103,39 +155,15 @@ export function SecurityEventsTable({ lang = 'en' }: { lang?: Lang }) {
       {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-[12px] font-semibold text-rose-700 ring-1 ring-inset ring-rose-200">{error}</p>}
       {visible.length === 0 && <EmptyState icon={<Activity size={18} />} title={t.noEvents} />}
       {visible.length > 0 && (
-        <div className="overflow-x-auto rounded-xl ring-1 ring-inset ring-ink-200">
-          <table className="w-full min-w-[620px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-ink-200 bg-ink-50/70 text-[10px] uppercase tracking-[0.08em] text-ink-500">
-                <th className="px-4 py-2.5 font-bold">When</th>
-                <th className="px-3 py-2.5 font-bold">Event</th>
-                <th className="px-3 py-2.5 font-bold">Role</th>
-                <th className="px-3 py-2.5 font-bold">Detail</th>
-                <th className="px-3 py-2.5 font-bold">Origin</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-100">
-              {visible.map((e) => {
-                const { class: toneClass } = severityOf(e.type)
-                return (
-                  <tr key={e.id} className="transition-colors hover:bg-ink-50/60">
-                    <td className="px-4 py-2.5 text-[11px] text-ink-500">
-                      {new Date(e.createdAt).toLocaleString(undefined, { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                    </td>
-                    <td className="px-3 py-2.5">
-                      <Badge className={toneClass}>{EVENT_LABEL[e.type] ?? e.type}</Badge>
-                    </td>
-                    <td className="px-3 py-2.5 text-[12px] text-ink-600">{e.actorRole ?? '—'}</td>
-                    <td className="max-w-[280px] truncate px-3 py-2.5 text-[12px] text-ink-500">{e.detail}</td>
-                    <td className="px-3 py-2.5">
-                      <span className="font-mono text-[11px] text-ink-400">{e.ip ? `IP ${e.ip}` : e.facilityId ? 'facility' : '—'}</span>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+        <AppDataGrid<SecurityEvent>
+          rows={visible}
+          columns={columns}
+          ariaLabel="Security events"
+          getRowId={(e) => e.id}
+          hideToolbar
+          hideFooter
+          defaultDensity="compact"
+        />
       )}
     </div>
   )

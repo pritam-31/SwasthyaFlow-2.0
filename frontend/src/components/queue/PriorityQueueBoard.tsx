@@ -1,3 +1,4 @@
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   CheckCircle2,
@@ -7,6 +8,7 @@ import {
   SlidersHorizontal,
   TrendingDown,
 } from 'lucide-react'
+import { AppDataGrid } from '../AppDataGrid'
 import { Button, Card, EmptyState, cx } from '../ui'
 import { useApp } from '../../store/AppStore'
 import { useQueue } from '../../hooks/useQueue'
@@ -112,6 +114,125 @@ export function PriorityQueueBoard({
   const canOverride = permissions.canOverridePriority || permissions.canPinCase || permissions.canDeprioritiseCase
   const canManage = permissions.canPinCase || permissions.canDeprioritiseCase || permissions.canMarkReviewed
 
+  const columns: GridColDef<PriorityScore>[] = [
+    {
+      field: 'patient',
+      headerName: 'Patient',
+      flex: 1,
+      minWidth: 200,
+      valueGetter: (_value, row) => row.sessionId,
+      renderCell: (p) => (
+        <div>
+          <button
+            type="button"
+            onClick={() => onSelectSession?.(p.row.sessionId)}
+            className="text-left font-bold text-ink-800 hover:text-brand-700"
+          >
+            {p.row.sessionId.slice(0, 10)}
+          </button>
+          <div className="mt-1">
+            <PriorityMarks entry={p.row} labelLang={labelLang} />
+          </div>
+        </div>
+      ),
+    },
+    {
+      field: 'score',
+      headerName: labels.score,
+      width: 180,
+      valueGetter: (_value, row) => row.score,
+      renderCell: (p) => (
+        <div>
+          <PriorityBadge band={p.row.band} score={p.row.score} />
+          {p.row.override?.kind === 'score' && p.row.computedBand !== p.row.band && (
+            <p className="mt-1 text-[10px] text-ink-400">
+              {labels.computedBand}: {PRIORITY_BAND_LABELS[p.row.computedBand]}
+            </p>
+          )}
+        </div>
+      ),
+    },
+    {
+      field: 'sla',
+      headerName: labels.waiting,
+      width: 160,
+      renderCell: (p) => <SlaBadge entry={p.row} labelLang={labelLang} />,
+    },
+    {
+      field: 'assignedTo',
+      headerName: labels.assignment,
+      width: 220,
+      valueGetter: (_value, row) => (row.assignedTo ? (staffName.get(row.assignedTo) ?? row.assignedTo) : ''),
+      renderCell: (p) =>
+        permissions.canAssignCase ? (
+          <select
+            value={p.row.assignedTo ?? ''}
+            onChange={(e) => {
+              const value = e.target.value
+              run(
+                () =>
+                  (value ? assignCase(p.row.sessionId, value) : unassignCase(p.row.sessionId)).then((r) => r.entry),
+                labels.saved,
+              )
+            }}
+            className="rounded-lg border border-ink-200 bg-white px-2 py-1 text-[11px] text-ink-700"
+          >
+            <option value="">{labels.unassigned}</option>
+            {staff.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.displayName}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span className="text-[11px] text-ink-500">
+            {p.row.assignedTo ? (staffName.get(p.row.assignedTo) ?? labels.assignedTo) : labels.unassigned}
+          </span>
+        ),
+    },
+    {
+      field: 'override',
+      headerName: labels.override,
+      flex: 1,
+      minWidth: 260,
+      sortable: false,
+      filterable: false,
+      renderCell: (p) => (
+        <div className="flex flex-wrap items-center gap-1.5">
+          {permissions.canOverridePriority && (
+            <Button size="sm" variant="secondary" onClick={() => setOverrideTarget(p.row)}>
+              <SlidersHorizontal size={12} /> {labels.override}
+            </Button>
+          )}
+          {canManage && (
+            <>
+              <Button size="sm" variant="ghost" title={labels.pin} onClick={() => applySimpleOverride(p.row, 'pin')}>
+                <Pin size={12} />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                title={labels.deprioritise}
+                onClick={() => applySimpleOverride(p.row, 'deprioritise')}
+              >
+                <TrendingDown size={12} />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                title={labels.markReviewed}
+                onClick={() => applySimpleOverride(p.row, 'reviewed')}
+              >
+                <CheckCircle2 size={12} />
+              </Button>
+            </>
+          )}
+          {!canOverride && !canManage && <span className="text-[11px] text-ink-400">{labels.staffOnly}</span>}
+        </div>
+      ),
+    },
+  ]
+
   return (
     <div className="space-y-4">
       <Card
@@ -205,128 +326,21 @@ export function PriorityQueueBoard({
         {error && <p className="px-5 py-2 text-xs text-rose-600">{error}</p>}
 
         {/* Rows */}
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[860px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-ink-200 bg-ink-50/70 text-[10px] uppercase tracking-[0.08em] text-ink-500">
-                <th className="px-5 py-2.5 font-bold">Patient</th>
-                <th className="px-3 py-2.5 font-bold">{labels.score}</th>
-                <th className="px-3 py-2.5 font-bold">{labels.waiting}</th>
-                <th className="px-3 py-2.5 font-bold">{labels.assignment}</th>
-                <th className="px-3 py-2.5 font-bold">{labels.override}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-100">
-              {entries.map((entry) => {
-                const active = entry.sessionId === selectedSessionId
-                return (
-                  <tr
-                    key={entry.sessionId}
-                    className={cx('align-top transition-colors', active ? 'bg-brand-50/60' : 'hover:bg-ink-50/60')}
-                  >
-                    <td className="px-5 py-3">
-                      <button
-                        type="button"
-                        onClick={() => onSelectSession?.(entry.sessionId)}
-                        className="text-left font-bold text-ink-800 hover:text-brand-700"
-                      >
-                        {entry.sessionId.slice(0, 10)}
-                      </button>
-                      <div className="mt-1">
-                        <PriorityMarks entry={entry} labelLang={labelLang} />
-                      </div>
-                    </td>
-                    <td className="px-3 py-3">
-                      <PriorityBadge band={entry.band} score={entry.score} />
-                      {entry.override?.kind === 'score' && entry.computedBand !== entry.band && (
-                        <p className="mt-1 text-[10px] text-ink-400">
-                          {labels.computedBand}: {PRIORITY_BAND_LABELS[entry.computedBand]}
-                        </p>
-                      )}
-                    </td>
-                    <td className="px-3 py-3">
-                      <SlaBadge entry={entry} labelLang={labelLang} />
-                    </td>
-                    <td className="px-3 py-3">
-                      {permissions.canAssignCase ? (
-                        <select
-                          value={entry.assignedTo ?? ''}
-                          onChange={(e) => {
-                            const value = e.target.value
-                            run(
-                              () =>
-                                (value ? assignCase(entry.sessionId, value) : unassignCase(entry.sessionId)).then(
-                                  (r) => r.entry,
-                                ),
-                              labels.saved,
-                            )
-                          }}
-                          className="rounded-lg border border-ink-200 bg-white px-2 py-1 text-[11px] text-ink-700"
-                        >
-                          <option value="">{labels.unassigned}</option>
-                          {staff.map((s) => (
-                            <option key={s.id} value={s.id}>
-                              {s.displayName}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span className="text-[11px] text-ink-500">
-                          {entry.assignedTo ? (staffName.get(entry.assignedTo) ?? labels.assignedTo) : labels.unassigned}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-3 py-3">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        {permissions.canOverridePriority && (
-                          <Button size="sm" variant="secondary" onClick={() => setOverrideTarget(entry)}>
-                            <SlidersHorizontal size={12} /> {labels.override}
-                          </Button>
-                        )}
-                        {canManage && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              title={labels.pin}
-                              onClick={() => applySimpleOverride(entry, 'pin')}
-                            >
-                              <Pin size={12} />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              title={labels.deprioritise}
-                              onClick={() => applySimpleOverride(entry, 'deprioritise')}
-                            >
-                              <TrendingDown size={12} />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              title={labels.markReviewed}
-                              onClick={() => applySimpleOverride(entry, 'reviewed')}
-                            >
-                              <CheckCircle2 size={12} />
-                            </Button>
-                          </>
-                        )}
-                        {!canOverride && !canManage && <span className="text-[11px] text-ink-400">{labels.staffOnly}</span>}
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-          {entries.length === 0 && !loading && (
-            <EmptyState
-              icon={<SlidersHorizontal size={20} />}
-              title={labels.title}
-              hint={error ?? labels.subtitle}
-            />
-          )}
-        </div>
+        {entries.length === 0 && !loading ? (
+          <EmptyState icon={<SlidersHorizontal size={20} />} title={labels.title} hint={error ?? labels.subtitle} />
+        ) : (
+          <AppDataGrid<PriorityScore>
+            rows={entries}
+            columns={columns}
+            ariaLabel={labels.title}
+            loading={loading}
+            getRowId={(entry) => entry.sessionId}
+            getRowClassName={(entry) => (entry.sessionId === selectedSessionId ? 'bg-brand-50/60' : '')}
+            hideToolbar
+            hideFooter
+            defaultDensity="compact"
+          />
+        )}
 
         <div className="border-t border-ink-100 px-5 py-2.5 text-[11px] leading-relaxed text-ink-400">
           {labels.disclaimer}

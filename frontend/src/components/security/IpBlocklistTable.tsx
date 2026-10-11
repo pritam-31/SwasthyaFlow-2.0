@@ -1,5 +1,7 @@
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { Ban, Globe, RefreshCw, ShieldOff } from 'lucide-react'
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { AppDataGrid } from '../AppDataGrid'
 import { Button, EmptyState } from '../ui'
 import { useApp } from '../../store/AppStore'
 import { SECURITY_SECTION_LABELS } from '../../services/safetyPolicy'
@@ -59,6 +61,54 @@ export function IpBlocklistTable({ lang = 'en' }: { lang?: Lang }) {
     }
   }
 
+  const columns: GridColDef<IpBlocklistEntry>[] = [
+    {
+      field: 'ip',
+      headerName: 'IP',
+      width: 170,
+      renderCell: (p) => <span className="font-mono text-[12px] font-semibold text-ink-800">{p.row.ip}</span>,
+    },
+    {
+      field: 'reason',
+      headerName: 'Reason',
+      flex: 1,
+      minWidth: 180,
+      renderCell: (p) => <span className="text-[12px] text-ink-500">{p.row.reason}</span>,
+    },
+    {
+      field: 'blockedAt',
+      headerName: 'Blocked at',
+      width: 160,
+      renderCell: (p) => {
+        const value = new Date(p.row.blockedAt).toLocaleString()
+        return <span className="text-[11px] text-ink-500">{value}</span>
+      },
+    },
+    {
+      field: 'expiresAt',
+      headerName: 'Expires',
+      width: 150,
+      renderCell: (p) => (
+        <span className="text-[11px] text-ink-500">{p.row.expiresAt ? new Date(p.row.expiresAt).toLocaleString() : 'permanent'}</span>
+      ),
+    },
+    {
+      field: 'unblock',
+      headerName: 'Action',
+      width: 90,
+      align: 'right',
+      headerAlign: 'right',
+      sortable: false,
+      filterable: false,
+      disableColumnMenu: true,
+      renderCell: (p) => (
+        <Button variant="ghost" size="sm" onClick={() => unblock(p.row.entryId)} aria-label={t.unblock}>
+          <ShieldOff size={14} />
+        </Button>
+      ),
+    },
+  ]
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -98,36 +148,15 @@ export function IpBlocklistTable({ lang = 'en' }: { lang?: Lang }) {
 
       {entries && entries.length === 0 && <EmptyState icon={<Globe size={18} />} title={t.noBlocked} />}
       {entries && entries.length > 0 && (
-        <div className="overflow-x-auto rounded-xl ring-1 ring-inset ring-ink-200">
-          <table className="w-full min-w-[560px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-ink-200 bg-ink-50/70 text-[10px] uppercase tracking-[0.08em] text-ink-500">
-                <th className="px-4 py-2.5 font-bold">IP</th>
-                <th className="px-3 py-2.5 font-bold">Reason</th>
-                <th className="px-3 py-2.5 font-bold">Blocked at</th>
-                <th className="px-3 py-2.5 font-bold">Expires</th>
-                <th className="px-3 py-2.5 text-right font-bold">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-100">
-              {entries.map((entry) => (
-                <tr key={entry.entryId} className="transition-colors hover:bg-ink-50/60">
-                  <td className="px-4 py-2.5 font-mono text-[12px] font-semibold text-ink-800">{entry.ip}</td>
-                  <td className="px-3 py-2.5 text-[12px] text-ink-500">{entry.reason}</td>
-                  <td className="px-3 py-2.5 text-[11px] text-ink-500">{new Date(entry.blockedAt).toLocaleString()}</td>
-                  <td className="px-3 py-2.5 text-[11px] text-ink-500">
-                    {entry.expiresAt ? new Date(entry.expiresAt).toLocaleString() : 'permanent'}
-                  </td>
-                  <td className="px-3 py-2.5 text-right">
-                    <Button variant="ghost" size="sm" onClick={() => unblock(entry.entryId)} aria-label={t.unblock}>
-                      <ShieldOff size={14} />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <AppDataGrid<IpBlocklistEntry>
+          rows={entries}
+          columns={columns}
+          ariaLabel="IP blocklist"
+          getRowId={(entry) => entry.entryId}
+          hideToolbar
+          hideFooter
+          defaultDensity="compact"
+        />
       )}
     </div>
   )
