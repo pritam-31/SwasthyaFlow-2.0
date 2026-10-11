@@ -1,0 +1,91 @@
+{
+  "version": "1.0.0",
+  "generatorVersion": "1.0.0",
+  "generateCommand": "npm run eval:generate",
+  "generatedAt": "2026-10-10T05:18:49.507Z",
+  "seed": 20261010,
+  "checksum": "cedf2610f2788460d5e2d2be6f8217638784c188b3577a5f9434336b1ae1e10d",
+  "files": [
+    {
+      "fileName": "triage-en.jsonl",
+      "count": 300,
+      "sha256": "81115b6bfef9d774135835a1796b2c058a62bd508a239941e0846d686b1841d4"
+    },
+    {
+      "fileName": "triage-hi.jsonl",
+      "count": 300,
+      "sha256": "81a65e0d3b1741b5a34207a65a7074064ca940324078a38a6a114f698b3db521"
+    },
+    {
+      "fileName": "triage-or.jsonl",
+      "count": 300,
+      "sha256": "33a91c0c3f45e4728d750ea289b13f8c28b10b50aa562ef5de025848a5b542a7"
+    },
+    {
+      "fileName": "reports.jsonl",
+      "count": 180,
+      "sha256": "2f7f10015de7b9420d9326f7633050568d80d4327ead35e6079563be170e5be6"
+    },
+    {
+      "fileName": "visuals.jsonl",
+      "count": 180,
+      "sha256": "61af727c30e5760f13ff5af1d3fd5f273fc20833352b91bee73a6a419ca72b49"
+    },
+    {
+      "fileName": "timelines.jsonl",
+      "count": 180,
+      "sha256": "2b7a9e2fa0944bbbe6baacca03a367e56b67e68eb0fe262200f41531b8c2fb47"
+    },
+    {
+      "fileName": "followups.jsonl",
+      "count": 180,
+      "sha256": "58a1386f1eb7f4e1eabc661b7bbb372c12e97de633bdcdae638836910251f47f"
+    },
+    {
+      "fileName": "anonymiser.jsonl",
+      "count": 180,
+      "sha256": "47d8498fad675dd25ae1d099d4632c26c89d49643d716647dd73da4f08238932"
+    },
+    {
+      "fileName": "priority.jsonl",
+      "count": 180,
+      "sha256": "165f4c0b8d181187213f10aefac926158307dc54e4566b145a01f64dcdbb063c"
+    }
+  ],
+  "sliceCounts": {
+    "language": {
+      "en": 660,
+      "hi": 660,
+      "or": 660
+    },
+    "ageBand": {
+      "40-59": 396,
+      "Unknown": 396,
+      "60+": 396,
+      "18-39": 396,
+      "0-17": 396
+    },
+    "sexMarker": {
+      "Not stated": 495,
+      "Other": 495,
+      "Male": 495,
+      "Female": 495
+    },
+    "facilityType": {
+      "other": 276,
+      "campus-health-centre": 279,
+      "government-hospital": 285,
+      "industrial-health-unit": 285,
+      "company-clinic": 285,
+      "phc": 285,
+      "health-camp": 285
+    },
+    "inputModality": {
+      "text": 396,
+      "visual": 396,
+      "mixed": 396,
+      "voice-transcript": 396,
+      "report": 396
+    }
+  }
+}

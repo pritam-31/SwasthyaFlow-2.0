@@ -1,0 +1,146 @@
+{
+  "version": "2.0.0",
+  "language": "hi",
+  "checks": [
+    {
+      "id": "CHK-HI-01",
+      "label": "महत्वपूर्ण संकेत (बीपी, नाड़ी, तापमान, ऑक्सीजन, वजन)",
+      "patterns": ["(?:बीपी|नाड़ी|तापमान|ऑक्सीजन|वजन)", "\\b(?:bp|nadi|tapman|oxygen|vajan)\\b[:\\-]?\\s*\\d", "\\b(?:bp|temperature|spo2|pulse)\\s*[:\\-]?\\s*\\d"],
+      "whyItMatters": "महत्वपूर्ण संकेत त्रैज प्राथमिकता निर्णयों को आधार देते हैं।",
+      "targetType": "staff"
+    },
+    {
+      "id": "CHK-HI-02",
+      "label": "लक्षण की शुरुआत / अवधि",
+      "patterns": ["(?:कब से|कितने दिन|कल से|आज|पहले)", "\\b(?:kab se|kitne din|kal se|aaj|pal|since|days)\\b"],
+      "whyItMatters": "शुरुआत और अवधि से जांच की तात्कालिकता बदलती है।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-03",
+      "label": "वर्तमान दवाएं और एलर्जी",
+      "patterns": ["(?:दवा|दवाई|एलर्जी|दवाएं)", "\\b(?:dawa|dawai|allergy|medicine|tablet)\\b"],
+      "whyItMatters": "किसी भी चिकित्सकीय निर्णय से पहले आवश्यक; यह प्रणाली कभी दवा की सलाह नहीं देती।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-04",
+      "label": "पिछली बीमारी का इतिहास",
+      "patterns": ["(?:पहले|इतिहास|पुरानी बीमारी|सर्जरी)", "\\b(?:pal|itihas|purani bimari|surgery|history)\\b"],
+      "whyItMatters": "मौजूदा स्थितियां तय करती हैं कि मरीज़ को कितनी शीघ्र देखा जाए।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-05",
+      "label": "मरीज़ की आयु",
+      "patterns": ["(?:आयु|उम्र|साल का|वर्ष)", "\\b(?:aayu|umar|saal ka|years old)\\b"],
+      "whyItMatters": "आयु वर्ग तय करता है कि मरीज़ की जांच कितनी शीघ्र होनी चाहिए।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-06",
+      "label": "लिंग",
+      "patterns": ["(?:पुरुष|महिला|लिंग)", "\\b(?:purush|mahila|ling|male|female|gender)\\b"],
+      "whyItMatters": "समीक्षक चिकित्सक के रिकॉर्ड के लिए; कभी नैदानिक निर्णय नहीं।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-07",
+      "label": "वजन",
+      "patterns": ["(?:वजन|किलो|किलोग्राम)", "\\b(?:vajan|kilo|kg|weight)\\b"],
+      "whyItMatters": "सटीक जीवन-संकेत मूल्यांकन के लिए वजन आवश्यक है।",
+      "targetType": "staff"
+    },
+    {
+      "id": "CHK-HI-08",
+      "label": "गर्भावस्था की स्थिति",
+      "patterns": ["(?:गर्भवती|गर्भावस्था|प्रेग्नेंट)", "\\b(?:garbhvati|pregnancy|pregnant|garbh)\\b"],
+      "whyItMatters": "यह बदलता है कि चिकित्सक कौन सा कार्यप्रवाह अपनाए।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-09",
+      "label": "दर्द की तीव्रता (स्वयं बताई)",
+      "patterns": ["(?:दर्द कितना|दर्द का स्तर|तीव्रता)", "\\b(?:dard kitna|pain score|severity|10 me se)\\b"],
+      "whyItMatters": "स्वयं बताई तीव्रता समीक्षक को तात्कालिकता आंकने में मदद करती है।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-10",
+      "label": "साथ के लक्षण",
+      "patterns": ["(?:साथ में|अन्य लक्षण|और भी)", "\\b(?:saath me|associated|other symptoms|also)\\b"],
+      "whyItMatters": "अतिरिक्त बताए गए लक्षण मामले की समीक्षा बदलते हैं।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-11",
+      "label": "हाल की यात्रा / संपर्क",
+      "patterns": ["(?:यात्रा|संपर्क|सफर)", "\\b(?:yatra|travel|contact|sampark)\\b"],
+      "whyItMatters": "संपर्क इतिहास समीक्षक चिकित्सक के लिए एक कार्यप्रवाह इनपुट है।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-12",
+      "label": "टीकाकरण की स्थिति",
+      "patterns": ["(?:टीका|टीकाकरण|वैक्सीन)", "\\b(?:tika|vaccine|immunis|tikakaran)\\b"],
+      "whyItMatters": "समीक्षक के रिकॉर्ड के लिए; यह प्रणाली कभी उपचार की सलाह नहीं देती।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-13",
+      "label": "धूम्रपान / शराब का सेवन",
+      "patterns": ["(?:धूम्रपान|शराब|तंबाकू)", "\\b(?:dhumrapan|sharab|tobacco|smok|alcohol)\\b"],
+      "whyItMatters": "जीवनशैली इतिहास पूर्ण समीक्षा रिकॉर्ड का हिस्सा है।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-14",
+      "label": "पारिवारिक इतिहास",
+      "patterns": ["(?:पारिवारिक|माता|पिता|भाई|बहन)", "\\b(?:parivarik|family history|maa|pita|bhai)\\b"],
+      "whyItMatters": "पारिवारिक इतिहास चिकित्सक को मामला समझने में मदद करता है।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-15",
+      "label": "वर्तमान स्थिति / स्थिरता",
+      "patterns": ["(?:स्थिति|स्थिर|सुधार|बिगड़)", "\\b(?:sthiti|stable|improving|worsening)\\b"],
+      "whyItMatters": "बताया गया बदलाव समीक्षक को प्राथमिकता तय करने में मदद करता है।",
+      "targetType": "staff"
+    },
+    {
+      "id": "CHK-HI-16",
+      "label": "खाना / भूख",
+      "patterns": ["(?:भूख|खाना|खा रहे|पानी पी)", "\\b(?:bhukh|appetite|khana|eating|drinking)\\b"],
+      "whyItMatters": "बताया गया भोजन/पानी समीक्षक चिकित्सक के लिए एक इनपुट है।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-17",
+      "label": "शौच / पेशाब की आदतें",
+      "patterns": ["(?:शौच|मल|पेशाब|दस्त|कब्ज)", "\\b(?:shauch|stool|urine|peshab|loose motion)\\b"],
+      "whyItMatters": "बताई गई आदतें समीक्षक के लिए रिकॉर्ड पूरा करती हैं।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-18",
+      "label": "त्वचा पर दाने / बदलाव",
+      "patterns": ["(?:दाने|चकत्ते|त्वचा|खुजली)", "\\b(?:dane|rash|skin|khujli|eruption)\\b"],
+      "whyItMatters": "बताया गया त्वचा परिवर्तन अवलोकन रिकॉर्ड का हिस्सा है।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-19",
+      "label": "चोट लगने का कारण",
+      "patterns": ["(?:चोट|गिर गए|दुर्घटना)", "\\b(?:chot|injury|fell|fall|accident)\\b"],
+      "whyItMatters": "चोट कैसे लगी यह समीक्षक को तात्कालिकता आंकने में मदद करता है।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-HI-20",
+      "label": "पहले का इलाज / परामर्श",
+      "patterns": ["(?:इलाज|परामर्श|अस्पताल|दिखाया)", "\\b(?:ilaj|treatment|consulted|hospital|dikhaya)\\b"],
+      "whyItMatters": "पूर्व देखभाल पूर्ण हैंडओवर रिकॉर्ड का हिस्सा है।",
+      "targetType": "patient"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "headerPatterns": ["Thyrocare", "Thyrocare Wellness"],
+  "tableDelimiters": "[\\r\\n]+",
+  "valueExtractionRules": [
+    {
+      "canonicalName": "Haemoglobin",
+      "aliases": ["hb", "hb%", "hb"],
+      "unitPattern": "g/dL",
+      "valuePattern": "[0-9.]+",
+      "rangePattern": "\\([0-9.-]+-[0-9.-]+\\)"
+    },
+    {
+      "canonicalName": "HbA1c",
+      "aliases": ["hba1c", "glycated haemoglobin"],
+      "unitPattern": "%",
+      "valuePattern": "[0-9.]+",
+      "rangePattern": "\\([0-9.-]+-[0-9.-]+\\)"
+    },
+    {
+      "canonicalName": "Fasting Blood Glucose",
+      "aliases": ["fbs", "fasting glucose"],
+      "unitPattern": "mg/dL",
+      "valuePattern": "[0-9.]+",
+      "rangePattern": "\\([0-9.-]+-[0-9.-]+\\)"
+    }
+  ],
+  "footerPatterns": ["^$", "^Report $"],
+  "notes": "Thyrocare pathology lab"
+}

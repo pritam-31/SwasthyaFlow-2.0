@@ -1,0 +1,258 @@
+{
+  "version": "2.0.0",
+  "language": "en",
+  "rules": [
+    {
+      "id": "URG-01",
+      "label": "Chest pain reported",
+      "severity": "red",
+      "patterns": ["\\b(?:chest pain|chest discomfort|chest tightness)\\b"],
+      "nonDiagnosticNote": "Reported chest discomfort needs immediate clinician assessment."
+    },
+    {
+      "id": "URG-02",
+      "label": "Breathing difficulty reported",
+      "severity": "red",
+      "patterns": ["\\b(?:breathless|breathing difficulty|shortness of breath|dyspnea|dyspnoea)\\b"],
+      "nonDiagnosticNote": "Reported breathing difficulty needs immediate clinician assessment."
+    },
+    {
+      "id": "URG-03",
+      "label": "Reduced consciousness / fits",
+      "severity": "red",
+      "patterns": ["\\b(?:unconscious|fainted|fainting|seizure|seizures|fits|convulsion)\\b"],
+      "nonDiagnosticNote": "Altered consciousness or seizures need emergency escalation."
+    },
+    {
+      "id": "URG-04",
+      "label": "Heavy bleeding reported",
+      "severity": "red",
+      "patterns": ["\\b(?:bleeding heavily|uncontrolled bleeding|haemorrhag|hemorrhag|excessive bleeding)\\b"],
+      "nonDiagnosticNote": "Uncontrolled bleeding needs emergency escalation."
+    },
+    {
+      "id": "URG-05",
+      "label": "High fever with stiffness",
+      "severity": "amber",
+      "patterns": ["\\b(?:high fever|fever)\\b.{0,40}\\b(?:stiff neck|rash)\\b|\\b(?:stiff neck|rash)\\b.{0,40}\\b(?:high fever|fever)\\b"],
+      "nonDiagnosticNote": "Fever combined with stiffness or rash warrants prompt review."
+    },
+    {
+      "id": "URG-06",
+      "label": "Persistent vomiting / dehydration",
+      "severity": "amber",
+      "patterns": ["\\b(?:vomit|vomiting|dehydration|dehydrated|not able to keep (?:food|water) down)\\b"],
+      "nonDiagnosticNote": "Risk of dehydration needs prompt assessment."
+    },
+    {
+      "id": "URG-07",
+      "label": "Reported high BP / sugar reading",
+      "severity": "amber",
+      "patterns": ["\\b(?:bp|blood pressure|sugar|glucose)\\b[^.]{0,40}\\b\\d{2,3}\\b"],
+      "nonDiagnosticNote": "A reported out-of-range reading needs clinician verification."
+    },
+    {
+      "id": "URG-08",
+      "label": "Symptoms in a young infant",
+      "severity": "amber",
+      "patterns": ["\\b(?:newborn|infant)\\b", "\\b\\d{1,2}\\s+(?:months?|weeks?)\\s+old\\b"],
+      "nonDiagnosticNote": "Young infants can deteriorate quickly — prompt review advised."
+    },
+    {
+      "id": "URG-09",
+      "label": "Fever with rash",
+      "severity": "amber",
+      "patterns": ["\\b(?:fever)\\b.{0,30}\\b(?:rash|eruption|spots)\\b|\\b(?:rash|eruption|spots)\\b.{0,30}\\b(?:fever)\\b"],
+      "nonDiagnosticNote": "Fever with rash requires clinical assessment to determine urgency."
+    },
+    {
+      "id": "URG-10",
+      "label": "Fever with joint pain",
+      "severity": "amber",
+      "patterns": ["\\b(?:fever)\\b.{0,30}\\b(?:joint pain|arthralgia|body ache)\\b|\\b(?:joint pain|arthralgia|body ache)\\b.{0,30}\\b(?:fever)\\b"],
+      "nonDiagnosticNote": "Fever with joint pain warrants prompt clinical review."
+    },
+    {
+      "id": "URG-11",
+      "label": "Severe headache with neck stiffness",
+      "severity": "red",
+      "patterns": ["\\b(?:severe headache|worst headache)\\b.{0,30}\\b(?:stiff neck|neck stiffness|nuchal rigidity)\\b"],
+      "nonDiagnosticNote": "Severe headache with neck stiffness needs emergency evaluation."
+    },
+    {
+      "id": "URG-12",
+      "label": "Severe headache with vision change",
+      "severity": "red",
+      "patterns": ["\\b(?:severe headache|worst headache)\\b.{0,30}\\b(?:vision change|blurred vision|double vision|visual disturbance)\\b"],
+      "nonDiagnosticNote": "Severe headache with vision changes needs urgent clinician assessment."
+    },
+    {
+      "id": "URG-13",
+      "label": "Sudden weakness on one side",
+      "severity": "red",
+      "patterns": ["\\b(?:sudden weakness|sudden numbness|hemiparesis|one.sided weakness)\\b"],
+      "nonDiagnosticNote": "Sudden one-sided weakness requires emergency evaluation."
+    },
+    {
+      "id": "URG-14",
+      "label": "Slurred speech",
+      "severity": "red",
+      "patterns": ["\\b(?:slurred speech|dysarthria|difficulty speaking|unclear speech)\\b"],
+      "nonDiagnosticNote": "Slurred speech requires emergency evaluation."
+    },
+    {
+      "id": "URG-15",
+      "label": "Seizure reported",
+      "severity": "red",
+      "patterns": ["\\b(?:seizure|seizures|fit|fits|convulsion|convulsions)\\b"],
+      "nonDiagnosticNote": "Reported seizure requires emergency evaluation."
+    },
+    {
+      "id": "URG-16",
+      "label": "Loss of consciousness reported",
+      "severity": "red",
+      "patterns": ["\\b(?:loss of consciousness|passed out|blacked out|unconscious|fainted)\\b"],
+      "nonDiagnosticNote": "Reported loss of consciousness needs emergency assessment."
+    },
+    {
+      "id": "URG-17",
+      "label": "Severe abdominal pain",
+      "severity": "red",
+      "patterns": ["\\b(?:severe abdominal pain|severe stomach pain|acute abdomen)\\b"],
+      "nonDiagnosticNote": "Severe abdominal pain requires urgent clinical evaluation."
+    },
+    {
+      "id": "URG-18",
+      "label": "Abdominal pain with vomiting blood",
+      "severity": "red",
+      "patterns": ["\\b(?:abdominal pain|stomach pain)\\b.{0,30}\\b(?:vomiting blood|haematemesis|hematemesis|blood in vomit)\\b"],
+      "nonDiagnosticNote": "Abdominal pain with vomiting blood requires emergency evaluation."
+    },
+    {
+      "id": "URG-19",
+      "label": "Black stools reported",
+      "severity": "red",
+      "patterns": ["\\b(?:black stool|black stools|melena|tarry stool|tarry stools)\\b"],
+      "nonDiagnosticNote": "Black or tarry stools require urgent clinical evaluation."
+    },
+    {
+      "id": "URG-20",
+      "label": "Blood in urine reported",
+      "severity": "red",
+      "patterns": ["\\b(?:blood in urine|haematuria|hematuria|bloody urine|red urine)\\b"],
+      "nonDiagnosticNote": "Blood in urine requires urgent clinical evaluation."
+    },
+    {
+      "id": "URG-21",
+      "label": "Severe back pain with numbness",
+      "severity": "red",
+      "patterns": ["\\b(?:severe back pain)\\b.{0,30}\\b(?:numbness|tingling|weakness in legs|leg weakness)\\b"],
+      "nonDiagnosticNote": "Severe back pain with neurological symptoms needs urgent evaluation."
+    },
+    {
+      "id": "URG-22",
+      "label": "Difficulty swallowing",
+      "severity": "amber",
+      "patterns": ["\\b(?:difficulty swallowing|dysphagia|can.t swallow|unable to swallow)\\b"],
+      "nonDiagnosticNote": "Difficulty swallowing warrants prompt clinical review."
+    },
+    {
+      "id": "URG-23",
+      "label": "Severe dehydration signs",
+      "severity": "red",
+      "patterns": ["\\b(?:severe dehydration|sunken eyes|no urine|no tears|very dry mouth|lethargic)\\b"],
+      "nonDiagnosticNote": "Signs of severe dehydration need urgent clinical assessment."
+    },
+    {
+      "id": "URG-24",
+      "label": "Pregnancy with bleeding",
+      "severity": "red",
+      "patterns": ["\\b(?:pregnant|pregnancy)\\b.{0,30}\\b(?:bleeding|spotting|blood loss)\\b"],
+      "nonDiagnosticNote": "Bleeding in pregnancy requires emergency evaluation."
+    },
+    {
+      "id": "URG-25",
+      "label": "Pregnancy with reduced fetal movement",
+      "severity": "red",
+      "patterns": ["\\b(?:pregnant|pregnancy)\\b.{0,30}\\b(?:reduced fetal movement|less movement|no movement|baby not moving)\\b"],
+      "nonDiagnosticNote": "Reduced fetal movement in pregnancy requires urgent evaluation."
+    },
+    {
+      "id": "URG-26",
+      "label": "Infant not feeding",
+      "severity": "red",
+      "patterns": ["\\b(?:infant|newborn|baby)\\b.{0,30}\\b(?:not feeding|refusing feed|won.t eat|not eating)\\b"],
+      "nonDiagnosticNote": "Infant refusing feeds requires urgent clinical evaluation."
+    },
+    {
+      "id": "URG-27",
+      "label": "Infant with grunting",
+      "severity": "red",
+      "patterns": ["\\b(?:infant|newborn|baby)\\b.{0,30}\\b(?:grunting|grunt)\\b"],
+      "nonDiagnosticNote": "Grunting in an infant requires urgent clinical evaluation."
+    },
+    {
+      "id": "URG-28",
+      "label": "Elderly fall with head injury",
+      "severity": "red",
+      "patterns": ["\\b(?:elderly|older|senior|aged)\\b.{0,30}\\b(?:fall|fell)\\b.{0,30}\\b(?:head injury|hit head|head trauma)\\b"],
+      "nonDiagnosticNote": "Elderly fall with head injury requires urgent evaluation."
+    },
+    {
+      "id": "URG-29",
+      "label": "Poisoning or overdose reported",
+      "severity": "red",
+      "patterns": ["\\b(?:poisoning|overdose|poisoned|took too much|accidental ingestion)\\b"],
+      "nonDiagnosticNote": "Suspected poisoning or overdose requires emergency evaluation."
+    },
+    {
+      "id": "URG-30",
+      "label": "Snake bite reported",
+      "severity": "red",
+      "patterns": ["\\b(?:snake bite|snakebit|bitten by snake)\\b"],
+      "nonDiagnosticNote": "Snake bite requires emergency evaluation."
+    },
+    {
+      "id": "URG-31",
+      "label": "Dog bite reported",
+      "severity": "amber",
+      "patterns": ["\\b(?:dog bite|dogbit|bitten by dog)\\b"],
+      "nonDiagnosticNote": "Dog bite requires prompt clinical evaluation for rabies prophylaxis."
+    },
+    {
+      "id": "URG-32",
+      "label": "Burns > 10% body surface",
+      "severity": "red",
+      "patterns": ["\\b(?:burn|burns|scald)\\b.{0,30}\\b(?:large|extensive|major|more than 10%|>10%)\\b"],
+      "nonDiagnosticNote": "Extensive burns require emergency evaluation."
+    },
+    {
+      "id": "URG-33",
+      "label": "Electric shock reported",
+      "severity": "red",
+      "patterns": ["\\b(?:electric shock|electrocution|electrical injury)\\b"],
+      "nonDiagnosticNote": "Electric shock requires emergency evaluation."
+    },
+    {
+      "id": "URG-34",
+      "label": "Drowning reported",
+      "severity": "red",
+      "patterns": ["\\b(?:drowning|near.drowning|submersion)\\b"],
+      "nonDiagnosticNote": "Drowning or near-drowning requires emergency evaluation."
+    },
+    {
+      "id": "URG-35",
+      "label": "Road traffic accident reported",
+      "severity": "red",
+      "patterns": ["\\b(?:road traffic accident|rta|car accident|vehicle accident|motor vehicle accident)\\b"],
+      "nonDiagnosticNote": "Road traffic accident requires emergency evaluation."
+    },
+    {
+      "id": "URG-36",
+      "label": "Severe allergic reaction reported",
+      "severity": "red",
+      "patterns": ["\\b(?:severe allergic reaction|anaphylaxis|anaphylactic|severe allergy|allergic shock)\\b"],
+      "nonDiagnosticNote": "Severe allergic reaction requires emergency evaluation."
+    }
+  ]
+}

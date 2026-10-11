@@ -1,0 +1,29 @@
+{
+  "headerPatterns": ["^Metropolis", "^Metropolis Healthcare"],
+  "tableDelimiters": "[\\t\\r\\n]+",
+  "valueExtractionRules": [
+    {
+      "canonicalName": "Ferritin",
+      "aliases": ["ferritin", "serum ferritin"],
+      "unitPattern": "ng/mL",
+      "valuePattern": "[0-9.]+",
+      "rangePattern": "\\([0-9.-]+-[0-9.-]+\\)"
+    },
+    {
+      "canonicalName": "Total Bilirubin",
+      "aliases": ["bilirubin", "total bilirubin"],
+      "unitPattern": "mg/dL",
+      "valuePattern": "[0-9.]+",
+      "rangePattern": "\\([0-9.-]+-[0-9.-]+\\)"
+    },
+    {
+      "canonicalName": "Blood Glucose",
+      "aliases": ["glucose", "blood sugar"],
+      "unitPattern": "mg/dL",
+      "valuePattern": "[0-9.]+",
+      "rangePattern": "\\([0-9.-]+-[0-9.-]+\\)"
+    }
+  ],
+  "footerPatterns": "^Report $|[\\s\\S]*Report$",
+  "notes": "Metropolis Healthcare - endocrine and renal panel"
+}

@@ -1,0 +1,146 @@
+{
+  "version": "2.0.0",
+  "language": "or",
+  "checks": [
+    {
+      "id": "CHK-OR-01",
+      "label": "ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ସଙ୍କେତ (ବିପି, ନାଡ଼ି, ତାପମାତ୍ରା, ଅମ୍ଳଜାନ, ଓଜନ)",
+      "patterns": ["(?:ବିପି|ନାଡ଼ି|ତାପମାତ୍ରା|ଅମ୍ଳଜାନ|ଓଜନ)", "\\b(?:bp|nada|tapmatra|amalajana|ojana)\\b[:\\-]?\\s*\\d", "\\b(?:bp|temperature|spo2|pulse)\\s*[:\\-]?\\s*\\d"],
+      "whyItMatters": "ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ସଙ୍କେତ ଟ୍ରାଏଜ ପ୍ରାଥମିକତା ନିର୍ଣ୍ଣୟର ଆଧାର।",
+      "targetType": "staff"
+    },
+    {
+      "id": "CHK-OR-02",
+      "label": "ଲକ୍ଷଣ ଆରମ୍ଭ / ଅବଧି",
+      "patterns": ["(?:କେବେ ଠାରୁ|କେତେ ଦିନ|କାଲି|ଆଜି|ପୂର୍ବରୁ)", "\\b(?:kebetharu|kete dina|kali|aji|purbaru|since|days)\\b"],
+      "whyItMatters": "ଆରମ୍ଭ ଓ ଅବଧି ଯାଞ୍ଚର ତୁରନ୍ତତା ବଦଳାଇଥାଏ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-03",
+      "label": "ଔଷଧ ଏବଂ ଆଲର୍ଜି",
+      "patterns": ["(?:ଔଷଧ|ଦବା|ଆଲର୍ଜି)", "\\b(?:ausadha|daba|allergy|medicine|tablet)\\b"],
+      "whyItMatters": "କୌଣସି ଚିକିତ୍ସକ ନିଷ୍ପତ୍ତି ପୂର୍ବରୁ ଆବଶ୍ୟକ; ଏହି ପ୍ରଣାଳୀ ଔଷଧ ସୁପାରିଶ କରେ ନାହିଁ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-04",
+      "label": "ପୂର୍ବ ରୋଗ ଇତିହାସ",
+      "patterns": ["(?:ପୂର୍ବରୁ|ଇତିହାସ|ପୁରୁଣା ରୋଗ|ଅସ୍ତ୍ରୋପଚାର)", "\\b(?:purbaru|itihasa|puruna roga|astraopacara|surgery|history)\\b"],
+      "whyItMatters": "ମଜୁଦା ରୋଗ ନିର୍ଣ୍ଣୟ କରେ ରୋଗୀକୁ କେତେ ଶୀଘ୍ର ଦେଖାଯିବ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-05",
+      "label": "ରୋଗୀର ବୟସ",
+      "patterns": ["(?:ବୟସ|ବର୍ଷ)", "\\b(?:bayasa|years old|umar)\\b"],
+      "whyItMatters": "ବୟସ ବର୍ଗ ନିର୍ଣ୍ଣୟ କରେ ରୋଗୀକୁ କେତେ ଶୀଘ୍ର ଯାଞ୍ଚ କରାଯିବ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-06",
+      "label": "ଲିଙ୍ଗ",
+      "patterns": ["(?:ପୁରୁଷ|ମହିଳା|ଲିଙ୍ଗ)", "\\b(?:purusha|mahila|ling|male|female|gender)\\b"],
+      "whyItMatters": "ସମୀକ୍ଷକ ଚିକିତ୍ସକଙ୍କ ରେକର୍ଡ ପାଇଁ; କେବେ ନିଦାନ ନୁହେଁ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-07",
+      "label": "ଓଜନ",
+      "patterns": ["(?:ଓଜନ|କିଲୋ)", "\\b(?:ojana|kilo|kg|weight)\\b"],
+      "whyItMatters": "ସଠିକ ଜୀବନ-ଚିହ୍ନ ମୂଲ୍ୟାଙ୍କନ ପାଇଁ ଓଜନ ଆବଶ୍ୟକ।",
+      "targetType": "staff"
+    },
+    {
+      "id": "CHK-OR-08",
+      "label": "ଗର୍ଭାବସ୍ଥା ସ୍ଥିତି",
+      "patterns": ["(?:ଗର୍ଭବତୀ|ଗର୍ଭାବସ୍ଥା|ପ୍ରେଗନାଣ୍ଟ)", "\\b(?:garbhabati|pregnancy|pregnant)\\b"],
+      "whyItMatters": "ଏହା ବଦଳାଏ ଯେ ଚିକିତ୍ସକ କେଉଁ କାର୍ଯ୍ୟପ୍ରବାହ ଅବଲମ୍ବନ କରିବେ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-09",
+      "label": "ଯନ୍ତ୍ରଣା ତୀବ୍ରତା (ନିଜେ କହିଥିବା)",
+      "patterns": ["(?:ଯନ୍ତ୍ରଣା କେତେ|ତୀବ୍ରତା)", "\\b(?:yantrana kete|pain score|severity)\\b"],
+      "whyItMatters": "ନିଜେ କହିଥିବା ତୀବ୍ରତା ସମୀକ୍ଷକଙ୍କୁ ତୁରନ୍ତତା ଆକଳନ କରିବାରେ ସାହାଯ୍ୟ କରେ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-10",
+      "label": "ସହିତ ଲକ୍ଷଣ",
+      "patterns": ["(?:ସହିତ|ଅନ୍ୟ ଲକ୍ଷଣ)", "\\b(?:sahita|associated|other symptoms|also)\\b"],
+      "whyItMatters": "ଅତିରିକ୍ତ କଥିତ ଲକ୍ଷଣ ମାମଲାର ସମୀକ୍ଷା ବଦଳାଏ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-11",
+      "label": "ସମ୍ପ୍ରତି ଯାତ୍ରା / ସମ୍ପର୍କ",
+      "patterns": ["(?:ଯାତ୍ରା|ସମ୍ପର୍କ)", "\\b(?:yatra|travel|contact|samparka)\\b"],
+      "whyItMatters": "ସମ୍ପର୍କ ଇତିହାସ ସମୀକ୍ଷକ ଚିକିତ୍ସକଙ୍କ ପାଇଁ ଏକ ଇନପୁଟ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-12",
+      "label": "ଟୀକାକରଣ ସ୍ଥିତି",
+      "patterns": ["(?:ଟୀକା|ଟୀକାକରଣ|ଭ୍ୟାକସିନ)", "\\b(?:tika|vaccine|immunis|tikakaran)\\b"],
+      "whyItMatters": "ସମୀକ୍ଷକଙ୍କ ରେକର୍ଡ ପାଇଁ; ଏହି ପ୍ରଣାଳୀ ଚିକିତ୍ସା ସୁପାରିଶ କରେ ନାହିଁ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-13",
+      "label": "ଧୂମପାନ / ମଦ ସେବନ",
+      "patterns": ["(?:ଧୂମପାନ|ମଦ|ତମାଖୁ)", "\\b(?:dhumapana|mada|tobacco|smok|alcohol)\\b"],
+      "whyItMatters": "ଜୀବନଶୈଳୀ ଇତିହାସ ସମ୍ପୂର୍ଣ୍ଣ ସମୀକ୍ଷା ରେକର୍ଡର ଅଂଶ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-14",
+      "label": "ପାରିବାରିକ ଇତିହାସ",
+      "patterns": ["(?:ପାରିବାରିକ|ମାତା|ପିତା|ଭାଇ|ଭଉଣୀ)", "\\b(?:paribarik|family history|maata|pita)\\b"],
+      "whyItMatters": "ପାରିବାରିକ ଇତିହାସ ଚିକିତ୍ସକଙ୍କୁ ମାମଲା ବୁଝିବାରେ ସାହାଯ୍ୟ କରେ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-15",
+      "label": "ବର୍ତ୍ତମାନ ସ୍ଥିତି / ସ୍ଥିରତା",
+      "patterns": ["(?:ସ୍ଥିତି|ସ୍ଥିର|ସୁଧାର|ଖରାପ)", "\\b(?:sthiti|stable|improving|worsening)\\b"],
+      "whyItMatters": "କଥିତ ପରିବର୍ତ୍ତନ ସମୀକ୍ଷକଙ୍କୁ ପ୍ରାଥମିକତା ନିର୍ଣ୍ଣୟରେ ସାହାଯ୍ୟ କରେ।",
+      "targetType": "staff"
+    },
+    {
+      "id": "CHK-OR-16",
+      "label": "ଖାଦ୍ୟ / ଭୋକ",
+      "patterns": ["(?:ଭୋକ|ଖାଦ୍ୟ|ଖାଉଛି|ପାଣି ପିଉଛି)", "\\b(?:bhoka|appetite|khady|eating|drinking)\\b"],
+      "whyItMatters": "କଥିତ ଖାଦ୍ୟ/ପାଣି ସମୀକ୍ଷକ ଚିକିତ୍ସକଙ୍କ ପାଇଁ ଏକ ଇନପୁଟ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-17",
+      "label": "ଝାଡ଼ା / ପରିସ୍ରା ଅଭ୍ୟାସ",
+      "patterns": ["(?:ଝାଡ଼ା|ମଳ|ପରିସ୍ରା|ଦସ୍ତ|କୋଷ୍ଠକାଠିନ୍ୟ)", "\\b(?:jhada|stool|urine|parisra|loose motion)\\b"],
+      "whyItMatters": "କଥିତ ଅଭ୍ୟାସ ସମୀକ୍ଷକଙ୍କ ପାଇଁ ରେକର୍ଡ ସମ୍ପୂର୍ଣ୍ଣ କରେ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-18",
+      "label": "ଚର୍ମରେ ଦାଗ / ପରିବର୍ତ୍ତନ",
+      "patterns": ["(?:ଦାଗ|ଚର୍ମ|ଚୁଲକ|ଦାନା)", "\\b(?:daga|rash|skin|chulak|eruption)\\b"],
+      "whyItMatters": "କଥିତ ଚର୍ମ ପରିବର୍ତ୍ତନ ପର୍ଯ୍ୟବେକ୍ଷଣ ରେକର୍ଡର ଅଂଶ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-19",
+      "label": "ଆଘାତର କାରଣ",
+      "patterns": ["(?:ଆଘାତ|ପଡ଼ି ଯିବା|ଦୁର୍ଘଟଣା)", "\\b(?:aghata|injury|fell|fall|accident)\\b"],
+      "whyItMatters": "ଆଘାତ କିପରି ହେଲା ତାହା ସମୀକ୍ଷକଙ୍କୁ ତୁରନ୍ତତା ଆକଳନରେ ସାହାଯ୍ୟ କରେ।",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-OR-20",
+      "label": "ପୂର୍ବ ଚିକିତ୍ସା / ପରାମର୍ଶ",
+      "patterns": ["(?:ଚିକିତ୍ସା|ପରାମର୍ଶ|ଡାକ୍ତରଖାନା|ଦେଖାଇଛନ୍ତି)", "\\b(?:chikitsa|treatment|consulted|hospital|dekha)\\b"],
+      "whyItMatters": "ପୂର୍ବ ଯତ୍ନ ସମ୍ପୂର୍ଣ୍ଣ ହ୍ୟାଣ୍ଡଓଭର ରେକର୍ଡର ଅଂଶ।",
+      "targetType": "patient"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "headerPatterns": ["^SRL", "^SRL Diagnostic"],
+  "tableDelimiters": "[\\r\\n]+",
+  "valueExtractionRules": [
+    {
+      "canonicalName": "eGFR",
+      "aliases": ["egfr", "estimated gfr"],
+      "unitPattern": "mL/min/1.73m²",
+      "valuePattern": "[0-9.]+",
+      "rangePattern": "\\([0-9.-]+-[0-9.-]+\\)"
+    },
+    {
+      "canonicalName": "C-Reactive Protein",
+      "aliases": ["crp", "c-reactive protein"],
+      "unitPattern": "mg/L",
+      "valuePattern": "[0-9.]+",
+      "rangePattern": "\\([0-9.-]+-[0-9.-]+\\)"
+    },
+    {
+      "canonicalName": "Uric Acid",
+      "aliases": ["uric", "serum uric acid"],
+      "unitPattern": "mg/dL",
+      "valuePattern": "[0-9.]+",
+      "rangePattern": "\\([0-9.-]+-[0-9.-]+\\)"
+    }
+  ],
+  "footerPatterns": "[\\s\\S]*Report$",
+  "notes": "SRL Diagnostics - renal and inflammatory panel"
+}

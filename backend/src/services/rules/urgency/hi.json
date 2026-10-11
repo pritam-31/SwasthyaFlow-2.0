@@ -1,0 +1,202 @@
+{
+  "version": "2.0.0",
+  "language": "hi",
+  "rules": [
+    {
+      "id": "URG-HI-01",
+      "label": "सीने में दर्द (chest pain)",
+      "severity": "red",
+      "patterns": ["(?:सीने में दर्द|छाती में दर्द|सीना जलना)", "\\b(?:seene me(?:n)? dard|chhati me(?:n)? dard|sina jalna)\\b"],
+      "nonDiagnosticNote": "छाती की तकलीफ के लिए तुरंत चिकित्सकीय जांच आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-02",
+      "label": "सांस लेने में तकलीफ (breathing difficulty)",
+      "severity": "red",
+      "patterns": ["(?:सांस लेने में तकलीफ|सांस फूलना|दम घुटना)", "\\b(?:saans lene me(?:n)? taklif|saans phoolna|dam ghutna|saans na aana)\\b"],
+      "nonDiagnosticNote": "सांस की तकलीफ के लिए तुरंत चिकित्सकीय जांच आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-03",
+      "label": "बेहोशी / मिर्गी / दौरा",
+      "severity": "red",
+      "patterns": ["(?:बेहोश|मिर्गी|दौरा|चक्कर)", "\\b(?:behosh|mirgi|daura|chakkar)\\b"],
+      "nonDiagnosticNote": "बेहोशी या दौरे के लिए आपातकालीन सहायता आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-04",
+      "label": "खून बहना (bleeding)",
+      "severity": "red",
+      "patterns": ["(?:खून बहना|खून बहुत|रक्तस्राव)", "\\b(?:khun bahna|khun bahut|raktstrav|bleeding)\\b"],
+      "nonDiagnosticNote": "अनियंत्रित रक्तस्राव के लिए आपातकालीन सहायता आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-05",
+      "label": "तेज़ बुखार के साथ अकड़न",
+      "severity": "amber",
+      "patterns": ["(?:तेज़ बुखार|बुखार और अकड़न|बुखार और गर्दन अकड़न|बुखार के साथ रूखापन)", "\\b(?:taiz bukhar|bukhar aur akad|bukhar aur gurudan akad|high fever)\\b"],
+      "nonDiagnosticNote": "अकड़न या चकत्ते के साथ बुखार का शीघ्र पुनरीक्षण आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-06",
+      "label": "लगातार उल्टी / पानी की कमी",
+      "severity": "amber",
+      "patterns": ["(?:उल्टी|बार-बार उल्टी|पानी की कमी|निर्जलीकरण)", "\\b(?:ulti|baar-baar ulti|pani ki kami|nirjalikaran|dehydration)\\b"],
+      "nonDiagnosticNote": "पानी की कमी (निर्जलीकरण) का जोखिम शीघ्र जांच की मांग करता है।"
+    },
+    {
+      "id": "URG-HI-07",
+      "label": "बीपी / शुगर अधिक",
+      "severity": "amber",
+      "patterns": ["(?:बीपी हाई|शुगर हाई|ब्लड प्रेशर|मधुमेह)", "\\b(?:bp high|sugar high|blood pressure|madhumay)\\b"],
+      "nonDiagnosticNote": "बताया गया असामान्य रीडिंग चिकित्सक सत्यापन की मांग करता है।"
+    },
+    {
+      "id": "URG-HI-08",
+      "label": "छोटे शिशु में लक्षण",
+      "severity": "amber",
+      "patterns": ["(?:नवजात|शिशु|बच्चा)", "\\b(?:navjaat|shishu|bachcha|bacha)\\b"],
+      "nonDiagnosticNote": "छोटे शिशुओं में लक्षण तेज़ी से बिगड़ सकते हैं — शीघ्र जांच सुझाई जाती है।"
+    },
+    {
+      "id": "URG-HI-09",
+      "label": "बुखार के साथ चकत्ते",
+      "severity": "amber",
+      "patterns": ["(?:बुखार के साथ चकत्ते|बुखार और दाने)", "\\b(?:bukhar aur dane|fever with rash|rash with fever)\\b"],
+      "nonDiagnosticNote": "बुखार के साथ चकत्ते के लिए शीघ्र चिकित्सकीय मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-10",
+      "label": "बुखार के साथ जोड़ों का दर्द",
+      "severity": "amber",
+      "patterns": ["(?:बुखार के साथ जोड़ों का दर्द|जोड़ों में दर्द और बुखार)", "\\b(?:bukhar aur jodon ka dard|fever with joint pain|joint pain with fever)\\b"],
+      "nonDiagnosticNote": "बुखार के साथ जोड़ों का दर्द शीघ्र चिकित्सकीय पुनरीक्षण का मांग करता है।"
+    },
+    {
+      "id": "URG-HI-11",
+      "label": "तेज़ सिरदर्द के साथ गर्दन अकड़न",
+      "severity": "red",
+      "patterns": ["(?:तेज़ सिरदर्द.{0,30}गर्दन अकड़न|गर्दन अकड़न.{0,30}तेज़ सिरदर्द)", "\\b(?:tez sirdard.{0,30}gurdan akad|severe headache.{0,30}stiff neck|worst headache.{0,30}neck stiffness)\\b"],
+      "nonDiagnosticNote": "गर्दन अकड़न के साथ तेज़ सिरदर्द के लिए आपातकालीन मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-12",
+      "label": "तेज़ सिरदर्द के साथ दृष्टि परिवर्तन",
+      "severity": "red",
+      "patterns": ["(?:तेज़ सिरदर्द.{0,30}धुंधली दृष्टि|धुंधली दृष्टि.{0,30}सिरदर्द)", "\\b(?:tez sirdard.{0,30}dhundhli drishti|severe headache.{0,30}blurred vision|headache.{0,30}vision change)\\b"],
+      "nonDiagnosticNote": "दृष्टि परिवर्तन के साथ तेज़ सिरदर्द के लिए तत्काल मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-13",
+      "label": "अचानक एक तरफ कमजोरी",
+      "severity": "red",
+      "patterns": ["(?:अचानक एक तरफ कमजोरी|एक तरफ सुन्नपन)", "\\b(?:achanak ek taraf kamzori|sudden one sided weakness|hemiparesis|one sided numbness)\\b"],
+      "nonDiagnosticNote": "अचानक एक तरफ कमजोरी के लिए आपातकालीन मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-14",
+      "label": "बोली लड़खड़ाना",
+      "severity": "red",
+      "patterns": ["(?:बोली लड़खड़ाना|स्पष्ट बोल न पाना)", "\\b(?:boli ladkhadana|slurred speech|dysarthria|difficulty speaking)\\b"],
+      "nonDiagnosticNote": "बोली लड़खड़ाने के लिए आपातकालीन मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-15",
+      "label": "दौरा पड़ना",
+      "severity": "red",
+      "patterns": ["(?:दौरा|मिर्गी का दौरा)", "\\b(?:daura|seizure|fit|convulsion)\\b"],
+      "nonDiagnosticNote": "बताए गए दौरे के लिए आपातकालीन मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-16",
+      "label": "अचेत हो जाना",
+      "severity": "red",
+      "patterns": ["(?:अचेत हो जाना|होश खोना|बेहोशी)", "\\b(?:loss of consciousness|passed out|behosh ho jaana|hosh khona)\\b"],
+      "nonDiagnosticNote": "होश खोने की सूचना के लिए आपातकालीन मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-17",
+      "label": "तेज़ पेट दर्द",
+      "severity": "red",
+      "patterns": ["(?:तेज़ पेट दर्द|पेट में तेज़ दर्द)", "\\b(?:tez pet dard|severe abdominal pain|severe stomach pain)\\b"],
+      "nonDiagnosticNote": "तेज़ पेट दर्द के लिए तत्काल चिकित्सकीय मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-18",
+      "label": "पेट दर्द के साथ खून की उल्टी",
+      "severity": "red",
+      "patterns": ["(?:पेट दर्द.{0,30}खून की उल्टी|खून की उल्टी)", "\\b(?:pet dard.{0,30}khoon ki ulti|abdominal pain.{0,30}vomiting blood|haematemesis)\\b"],
+      "nonDiagnosticNote": "खून की उल्टी के साथ पेट दर्द के लिए आपातकालीन मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-19",
+      "label": "काले मल",
+      "severity": "red",
+      "patterns": ["(?:काले मल|काला मल)", "\\b(?:kale mal|black stool|black stools|melena)\\b"],
+      "nonDiagnosticNote": "काले या टैरी मल के लिए तत्काल चिकित्सकीय मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-20",
+      "label": "पेशाब में खून",
+      "severity": "red",
+      "patterns": ["(?:पेशाब में खून|मूत्र में रक्त)", "\\b(?:peshab me khoon|blood in urine|haematuria|hematuria)\\b"],
+      "nonDiagnosticNote": "पेशाब में खून के लिए तत्काल चिकित्सकीय मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-21",
+      "label": "तेज़ कमर दर्द के साथ सुन्नपन",
+      "severity": "red",
+      "patterns": ["(?:तेज़ कमर दर्द.{0,30}सुन्नपन|कमर दर्द और सुन्नपन)", "\\b(?:tez kamar dard.{0,30}sunnpan|severe back pain.{0,30}numbness|back pain with tingling)\\b"],
+      "nonDiagnosticNote": "सुन्नपन के साथ तेज़ कमर दर्द के लिए तत्काल मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-22",
+      "label": "निगलने में कठिनाई",
+      "severity": "amber",
+      "patterns": ["(?:निगलने में कठिनाई|निगल न पाना)", "\\b(?:nigalne me mushkil|difficulty swallowing|dysphagia)\\b"],
+      "nonDiagnosticNote": "निगलने में कठिनाई शीघ्र चिकित्सकीय पुनरीक्षण का मांग करती है।"
+    },
+    {
+      "id": "URG-HI-23",
+      "label": "गंभीर निर्जलीकरण के संकेत",
+      "severity": "red",
+      "patterns": ["(?:गंभीर निर्जलीकरण|धंसी आंखें|पेशाब बंद)", "\\b(?:gambhir nirjalikaran|severe dehydration|sunken eyes|no urine|no tears)\\b"],
+      "nonDiagnosticNote": "गंभीर निर्जलीकरण के संकेतों के लिए तत्काल मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-24",
+      "label": "गर्भावस्था में रक्तस्राव",
+      "severity": "red",
+      "patterns": ["(?:गर्भावस्था.{0,30}रक्तस्राव|गर्भावस्था.{0,30}खून)", "\\b(?:garbhavastha.{0,30}khoon|pregnancy.{0,30}bleeding|spotting in pregnancy)\\b"],
+      "nonDiagnosticNote": "गर्भावस्था में रक्तस्राव के लिए आपातकालीन मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-25",
+      "label": "गर्भावस्था में भ्रूण की हलचल कम",
+      "severity": "red",
+      "patterns": ["(?:भ्रूण की हलचल कम|शिशु की हलचल कम|बच्चा हिल नहीं रहा)", "\\b(?:bhrun ki halchal kam|reduced fetal movement|baby not moving|fetal movement reduced)\\b"],
+      "nonDiagnosticNote": "गर्भावस्था में भ्रूण की हलचल कम होने पर आपातकालीन मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-26",
+      "label": "शिशु दूध नहीं पी रहा",
+      "severity": "red",
+      "patterns": ["(?:शिशु दूध नहीं पी रहा|बच्चा कुछ नहीं खा रहा|दूध नहीं ले रहा)", "\\b(?:shishu doodh nahi pi raha|infant not feeding|baby not feeding|refusing feed)\\b"],
+      "nonDiagnosticNote": "शिशु के दूध न पीने पर तत्काल चिकित्सकीय मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-27",
+      "label": "शिशु में कराह",
+      "severity": "red",
+      "patterns": ["(?:शिशु कराह रहा|नवजात में कराह|बच्चा कराह रहा)", "\\b(?:shishu karah|infant grunting|grunting in infant|newborn grunting)\\b"],
+      "nonDiagnosticNote": "शिशु में कराह के लिए तत्काल चिकित्सकीय मूल्यांकन आवश्यक है।"
+    },
+    {
+      "id": "URG-HI-28",
+      "label": "बुजुर्ग का गिरना सिर की चोट के साथ",
+      "severity": "red",
+      "patterns": ["(?:बुजुर्ग.{0,30}सिर की चोट|बुजुर्ग.{0,30}गिर.{0,30}सिर)", "\\b(?:buzurg.{0,30}head injury|elderly.{0,30}fall.{0,30}head injury|old age head trauma)\\b"],
+      "nonDiagnosticNote": "बुजुर्ग के सिर की चोट के साथ गिरने पर तत्काल मूल्यांकन आवश्यक है।"
+    }
+  ]
+}

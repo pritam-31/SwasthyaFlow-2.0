@@ -1,0 +1,146 @@
+{
+  "version": "2.0.0",
+  "language": "en",
+  "checks": [
+    {
+      "id": "CHK-01",
+      "label": "Vital signs (BP, pulse, temperature, SpO2)",
+      "patterns": ["\\b(?:bp|pulse|temperature|spo2|vital)\\s*[:\\-]?\\s*\\d"],
+      "whyItMatters": "Vitals anchor triage priority and escalation decisions.",
+      "targetType": "staff"
+    },
+    {
+      "id": "CHK-02",
+      "label": "Symptom duration / timeline",
+      "patterns": ["\\b(?:day|days|hour|hours|week|weeks|since|for)\\b"],
+      "whyItMatters": "Onset and duration change the urgency of the review.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-03",
+      "label": "Current medications and allergies",
+      "patterns": ["\\b(?:medicat|allerg|tablet|dose|dosage)\\b"],
+      "whyItMatters": "Needed before any clinician decision; this system never advises medication.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-04",
+      "label": "Relevant past history",
+      "patterns": ["\\b(?:history|diabet|hyperten|asthma|surgery|previous)\\b"],
+      "whyItMatters": "Existing conditions shape how urgently the patient should be seen.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-05",
+      "label": "Age of the patient",
+      "patterns": ["\\b(?:age|aged|years old|yrs|year old)\\b"],
+      "whyItMatters": "Age band influences how urgently the patient should be reviewed.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-06",
+      "label": "Sex / gender",
+      "patterns": ["\\b(?:male|female|sex|gender|man|woman)\\b"],
+      "whyItMatters": "Recorded for the reviewing clinician; never a clinical judgement.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-07",
+      "label": "Weight",
+      "patterns": ["\\b(?:weight|weighs|kg|kilograms|kgs)\\b"],
+      "whyItMatters": "Weight is needed for accurate vital assessment by the clinician.",
+      "targetType": "staff"
+    },
+    {
+      "id": "CHK-08",
+      "label": "Pregnancy status",
+      "patterns": ["\\b(?:pregnant|pregnancy|gravid|weeks pregnant)\\b"],
+      "whyItMatters": "Changes which workflow pathway a clinician should follow.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-09",
+      "label": "Pain severity (self-reported)",
+      "patterns": ["\\b(?:pain score|severity|rate the pain|\\d+\\s*/\\s*10)\\b"],
+      "whyItMatters": "A self-reported severity helps the reviewer judge urgency.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-10",
+      "label": "Associated symptoms",
+      "patterns": ["\\b(?:associated|along with|also has|accompanied by|with it)\\b"],
+      "whyItMatters": "Additional reported symptoms change how the case is reviewed.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-11",
+      "label": "Recent travel / exposure",
+      "patterns": ["\\b(?:travel|travelled|exposure|contact with|returned from)\\b"],
+      "whyItMatters": "Exposure history is a workflow input for the reviewing clinician.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-12",
+      "label": "Immunisation status",
+      "patterns": ["\\b(?:vaccin|immunis|immuniz|vaccinated|\\btt\\b)\\b"],
+      "whyItMatters": "Recorded for the reviewer; this system never advises treatment.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-13",
+      "label": "Smoking / alcohol use",
+      "patterns": ["\\b(?:smok|tobacco|alcohol|drinks?)\\b"],
+      "whyItMatters": "Lifestyle history is part of a complete review record.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-14",
+      "label": "Family history",
+      "patterns": ["\\b(?:family history|father|mother|sibling|runs in the family)\\b"],
+      "whyItMatters": "Family history helps the clinician contextualise the case.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-15",
+      "label": "Current condition / stability",
+      "patterns": ["\\b(?:stable|unstable|deteriorat|improving|worsening|getting worse|same)\\b"],
+      "whyItMatters": "A reported trend helps the reviewer prioritise the case.",
+      "targetType": "staff"
+    },
+    {
+      "id": "CHK-16",
+      "label": "Feeding / appetite",
+      "patterns": ["\\b(?:appetite|eating|feeding|drinking|oral intake|taken food)\\b"],
+      "whyItMatters": "Reported intake is a workflow input for the reviewing clinician.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-17",
+      "label": "Bowel / bladder habits",
+      "patterns": ["\\b(?:stool|bowel|urine|urination|motion|constipation|diarrh)\\b"],
+      "whyItMatters": "Reported habits complete the record for the reviewer.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-18",
+      "label": "Rash / skin changes",
+      "patterns": ["\\b(?:rash|skin|spots|itch|eruption)\\b"],
+      "whyItMatters": "A reported skin change is part of the observational record.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-19",
+      "label": "Injury mechanism",
+      "patterns": ["\\b(?:injury|fell|fall|accident|trauma|hit by)\\b"],
+      "whyItMatters": "How an injury happened helps the reviewer judge urgency.",
+      "targetType": "patient"
+    },
+    {
+      "id": "CHK-20",
+      "label": "Prior treatment / consultation",
+      "patterns": ["\\b(?:treated|consulted|visited|hospital|earlier treatment|seen by|took medicine)\\b"],
+      "whyItMatters": "Prior care is part of a complete handover record.",
+      "targetType": "patient"
+    }
+  ]
+}

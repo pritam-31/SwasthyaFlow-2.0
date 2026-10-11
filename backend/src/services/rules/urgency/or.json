@@ -1,0 +1,202 @@
+{
+  "version": "2.0.0",
+  "language": "or",
+  "rules": [
+    {
+      "id": "URG-OR-01",
+      "label": "ଛାତି ଯନ୍ତ୍ରଣା (chest pain)",
+      "severity": "red",
+      "patterns": ["(?:ଛାତି ଯନ୍ତ୍ରଣା|ଛାତିରେ ଦରଜ|ଛାତି ଜଳିବା)", "\\b(?:chhati yantrana|chhatire daraj|chhati jaliba)\\b"],
+      "nonDiagnosticNote": "ଛାତି ଯନ୍ତ୍ରଣା ପାଇଁ ତୁରନ୍ତ ଚିକିତ୍ସକ ଯାଞ୍ଚ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-02",
+      "label": "ନିଶ୍ୱାସ ନେବାରେ ଅସୁବିଧା",
+      "severity": "red",
+      "patterns": ["(?:ନିଶ୍ୱାସ ନେବାରେ ଅସୁବିଧା|ନିଶ୍ୱାସ ଫୁଲିବା|ଦମ୍ ଘୁଟିବା)", "\\b(?:niswas nebare asubidha|niswas fuliba|dam ghutiba)\\b"],
+      "nonDiagnosticNote": "ନିଶ୍ୱାସ ଅସୁବିଧା ପାଇଁ ତୁରନ୍ତ ଚିକିତ୍ସକ ଯାଞ୍ଚ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-03",
+      "label": "ଅଚେତା / ମୂର୍ଚ୍ଛା / ଝଟକା",
+      "severity": "red",
+      "patterns": ["(?:ଅଚେତ|ମୂର୍ଚ୍ଛା|ଝଟକା|ଚକ୍କର)", "\\b(?:achet|murchha|jhatka|chakkar)\\b"],
+      "nonDiagnosticNote": "ଅଚେତା କିମ୍ବା ଝଟକା ପାଇଁ ଜରୁରୀକାଳୀନ ସହାୟତା ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-04",
+      "label": "ରକ୍ତସ୍ରାବ / ଅଧିକ ରକ୍ତ",
+      "severity": "red",
+      "patterns": ["(?:ରକ୍ତସ୍ରାବ|ରକ୍ତ ବହିବା|ଅଧିକ ରକ୍ତ)", "\\b(?:raktrasraba|rakta bahiba|adhika rakta)\\b"],
+      "nonDiagnosticNote": "ଅନିୟନ୍ତ୍ରିତ ରକ୍ତସ୍ରାବ ପାଇଁ ଜରୁରୀକାଳୀନ ସହାୟତା ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-05",
+      "label": "ଅଧିକ ଜ୍ୱର ସହ କଠିନତା",
+      "severity": "amber",
+      "patterns": ["(?:ଅଧିକ ଜ୍ୱର|ଜ୍ୱର ଓ ଗର୍ଦ୍ଦନ କଠିନତା|ଜ୍ୱର ସହ ଚକ୍ତି)", "\\b(?:adhika jwara|jwara o gurdankathinta|high fever)\\b"],
+      "nonDiagnosticNote": "କଠିନତା କିମ୍ବା ଚକ୍ତି ସହ ଜ୍ୱର ଶୀଘ୍ର ପୁନଃଯାଞ୍ଚ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-06",
+      "label": "ବାରମ୍ବାର ବାନ୍ତି / ଜଳ ଅଭାବ",
+      "severity": "amber",
+      "patterns": ["(?:ବାନ୍ତି|ବାରମ୍ବାର ବାନ୍ତି|ଜଳ ଅଭାବ|ପାଣି ଅଭାବ)", "\\b(?:banti|barambara banti|jala abhawa|pani abhawa)\\b"],
+      "nonDiagnosticNote": "ଜଳ ଅଭାବ (ନିର୍ଜଳୀକରଣ) ର ବିପଦ ଶୀଘ୍ର ଯାଞ୍ଚ ମାଗିଥାଏ।"
+    },
+    {
+      "id": "URG-OR-07",
+      "label": "ବି.ପି. / ସୁଗାର ଅଧିକ",
+      "severity": "amber",
+      "patterns": ["(?:ବିପି ଅଧିକ|ସୁଗାର ଅଧିକ|ରକ୍ତଚାପ|ମଧୁମେହ)", "\\b(?:bp adhika|sugar adhika|raktachapa|madhumeha)\\b"],
+      "nonDiagnosticNote": "ରିପୋର୍ଟ ହୋଇଥିବା ଅସାଧାରଣ ରିଡିଂ ଚିକିତ୍ସକ ଯାଞ୍ଚ ମାଗିଥାଏ।"
+    },
+    {
+      "id": "URG-OR-08",
+      "label": "ନବଜାତ ଶିଶୁରେ ଲକ୍ଷଣ",
+      "severity": "amber",
+      "patterns": ["(?:ନବଜାତ|ଶିଶୁ|ଛୁଆ)", "\\b(?:nabajata|sisu|chhua)\\b"],
+      "nonDiagnosticNote": "ନବଜାତ ଶିଶୁଙ୍କ ଅବସ୍ଥା ଶୀଘ୍ର ବିଗିଡ଼ିପାରେ — ଶୀଘ୍ର ଯାଞ୍ଚ ସୁପାରିଶ।"
+    },
+    {
+      "id": "URG-OR-09",
+      "label": "ଜ୍ୱର ସହ ଚକ୍ତି",
+      "severity": "amber",
+      "patterns": ["(?:ଜ୍ୱର ସହ ଚକ୍ତି|ଜ୍ୱର ଓ ଦାଗ)", "\\b(?:jwara saha chakti|fever with rash|jwara with spots)\\b"],
+      "nonDiagnosticNote": "ଜ୍ୱର ସହ ଚକ୍ତି ପାଇଁ ଶୀଘ୍ର ଚିକିତ୍ସକ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-10",
+      "label": "ଜ୍ୱର ସହ ସନ୍ଧି ଯନ୍ତ୍ରଣା",
+      "severity": "amber",
+      "patterns": ["(?:ଜ୍ୱର ସହ ସନ୍ଧି ଯନ୍ତ୍ରଣା|ଜ୍ୱର ଓ ଗଣ୍ଠି ଦରଜ)", "\\b(?:jwara with sandhi yantrana|fever with joint pain|sandhi yantrana)\\b"],
+      "nonDiagnosticNote": "ଜ୍ୱର ସହ ସନ୍ଧି ଯନ୍ତ୍ରଣା ଶୀଘ୍ର ଚିକିତ୍ସକ ପୁନଃଯାଞ୍ଚ ମାଗିଥାଏ।"
+    },
+    {
+      "id": "URG-OR-11",
+      "label": "ପ୍ରବଳ ମୁଣ୍ଡବିନ୍ଧା ସହ ଗର୍ଦ୍ଦନ କଠିନତା",
+      "severity": "red",
+      "patterns": ["(?:ପ୍ରବଳ ମୁଣ୍ଡବିନ୍ଧା.{0,30}ଗର୍ଦ୍ଦନ କଠିନତା|ଗର୍ଦ୍ଦନ କଠିନତା.{0,30}ମୁଣ୍ଡବିନ୍ଧା)", "\\b(?:prabala mundabindha.{0,30}gurdana kathinata|severe headache.{0,30}stiff neck|worst headache.{0,30}neck stiffness)\\b"],
+      "nonDiagnosticNote": "ଗର୍ଦ୍ଦନ କଠିନତା ସହ ପ୍ରବଳ ମୁଣ୍ଡବିନ୍ଧା ପାଇଁ ଜରୁରୀ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-12",
+      "label": "ପ୍ରବଳ ମୁଣ୍ଡବିନ୍ଧା ସହ ଦୃଷ୍ଟି ପରିବର୍ତ୍ତନ",
+      "severity": "red",
+      "patterns": ["(?:ପ୍ରବଳ ମୁଣ୍ଡବିନ୍ଧା.{0,30}ଧୁମ୍ଭ ଦୃଷ୍ଟି|ଦୃଷ୍ଟି ପରିବର୍ତ୍ତନ.{0,30}ମୁଣ୍ଡବିନ୍ଧା)", "\\b(?:prabala mundabindha.{0,30}drusti paribartana|severe headache.{0,30}blurred vision|headache.{0,30}vision change)\\b"],
+      "nonDiagnosticNote": "ଦୃଷ୍ଟି ପରିବର୍ତ୍ତନ ସହ ପ୍ରବଳ ମୁଣ୍ଡବିନ୍ଧା ପାଇଁ ତୁରନ୍ତ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-13",
+      "label": "ହଠାତ୍ ଏକ ପାଖ ଦୁର୍ବଳତା",
+      "severity": "red",
+      "patterns": ["(?:ହଠାତ୍ ଏକ ପାଖ ଦୁର୍ବଳତା|ଏକ ପାଖ ଅବଶ)", "\\b(?:hathat eka pakha durbalata|sudden one sided weakness|hemiparesis|one sided numbness)\\b"],
+      "nonDiagnosticNote": "ହଠାତ୍ ଏକ ପାଖ ଦୁର୍ବଳତା ପାଇଁ ଜରୁରୀ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-14",
+      "label": "କଥା ଲଥପଥ",
+      "severity": "red",
+      "patterns": ["(?:କଥା ଲଥପଥ|ସ୍ପଷ୍ଟ କହି ନ ପାରିବା)", "\\b(?:katha lathapatha|slurred speech|dysarthria|difficulty speaking)\\b"],
+      "nonDiagnosticNote": "କଥା ଲଥପଥ ପାଇଁ ଜରୁରୀ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-15",
+      "label": "ଝଟକା ରୋଗ",
+      "severity": "red",
+      "patterns": ["(?:ଝଟକା|ମୂର୍ଚ୍ଛା ଝଟକା|ମିର୍ଗୀ)", "\\b(?:jhatka|seizure|fit|convulsion|mirgi)\\b"],
+      "nonDiagnosticNote": "ଲିପିବଦ୍ଧ ଝଟକା ପାଇଁ ଜରୁରୀ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-16",
+      "label": "ଅଚେତ ହେବା",
+      "severity": "red",
+      "patterns": ["(?:ଅଚେତ ହେବା|ଚେତନା ହରାଇବା)", "\\b(?:achet heba|loss of consciousness|passed out|chetana haraiba)\\b"],
+      "nonDiagnosticNote": "ଚେତନା ହରାଇବାର ରିପୋର୍ଟ ପାଇଁ ଜରୁରୀ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-17",
+      "label": "ପ୍ରବଳ ଉଦର ଯନ୍ତ୍ରଣା",
+      "severity": "red",
+      "patterns": ["(?:ପ୍ରବଳ ଉଦର ଯନ୍ତ୍ରଣା|ପେଟରେ ପ୍ରବଳ ଯନ୍ତ୍ରଣା)", "\\b(?:prabala udara yantrana|severe abdominal pain|severe stomach pain)\\b"],
+      "nonDiagnosticNote": "ପ୍ରବଳ ଉଦର ଯନ୍ତ୍ରଣା ପାଇଁ ତୁରନ୍ତ ଚିକିତ୍ସକ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-18",
+      "label": "ପେଟ ଯନ୍ତ୍ରଣା ସହ ରକ୍ତ ବାନ୍ତି",
+      "severity": "red",
+      "patterns": ["(?:ପେଟ ଯନ୍ତ୍ରଣା.{0,30}ରକ୍ତ ବାନ୍ତି|ରକ୍ତ ବାନ୍ତି)", "\\b(?:peta yantrana.{0,30}rakta banti|abdominal pain.{0,30}vomiting blood|haematemesis)\\b"],
+      "nonDiagnosticNote": "ରକ୍ତ ବାନ୍ତି ସହ ପେଟ ଯନ୍ତ୍ରଣା ପାଇଁ ଜରୁରୀ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-19",
+      "label": "କଳା ଝାଡ଼ା",
+      "severity": "red",
+      "patterns": ["(?:କଳା ଝାଡ଼ା|କଳା ମଳ)", "\\b(?:kala jhada|black stool|black stools|melena)\\b"],
+      "nonDiagnosticNote": "କଳା ଝାଡ଼ା ପାଇଁ ତୁରନ୍ତ ଚିକିତ୍ସକ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-20",
+      "label": "ପରିସ୍ରାରେ ରକ୍ତ",
+      "severity": "red",
+      "patterns": ["(?:ପରିସ୍ରାରେ ରକ୍ତ|ମୂତ୍ରରେ ରକ୍ତ)", "\\b(?:parisrare rakta|blood in urine|haematuria|hematuria)\\b"],
+      "nonDiagnosticNote": "ପରିସ୍ରାରେ ରକ୍ତ ପାଇଁ ତୁରନ୍ତ ଚିକିତ୍ସକ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-21",
+      "label": "ପ୍ରବଳ ପିଠି ଯନ୍ତ୍ରଣା ସହ ଅବଶତା",
+      "severity": "red",
+      "patterns": ["(?:ପ୍ରବଳ ପିଠି ଯନ୍ତ୍ରଣା.{0,30}ଅବଶ|ପିଠି ଯନ୍ତ୍ରଣା ଓ ଝିଁ)", "\\b(?:prabala pithi yantrana.{0,30}abasata|severe back pain.{0,30}numbness|back pain with tingling)\\b"],
+      "nonDiagnosticNote": "ଅବଶତା ସହ ପ୍ରବଳ ପିଠି ଯନ୍ତ୍ରଣା ପାଇଁ ତୁରନ୍ତ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-22",
+      "label": "ଗିଳିବାରେ ଅସୁବିଧା",
+      "severity": "amber",
+      "patterns": ["(?:ଗିଳିବାରେ ଅସୁବିଧା|ଗିଳି ନ ପାରିବା)", "\\b(?:gilibare asubidha|difficulty swallowing|dysphagia)\\b"],
+      "nonDiagnosticNote": "ଗିଳିବାରେ ଅସୁବିଧା ଶୀଘ୍ର ଚିକିତ୍ସକ ପୁନଃଯାଞ୍ଚ ମାଗିଥାଏ।"
+    },
+    {
+      "id": "URG-OR-23",
+      "label": "ଗମ୍ଭୀର ଜଳ ଅଭାବ ଚିହ୍ନ",
+      "severity": "red",
+      "patterns": ["(?:ଗମ୍ଭୀର ଜଳ ଅଭାବ|ବୁଡ଼ି ଆଖି|ପରିସ୍ରା ବନ୍ଦ)", "\\b(?:gambhira jala abhawa|severe dehydration|sunken eyes|no urine|no tears)\\b"],
+      "nonDiagnosticNote": "ଗମ୍ଭୀର ଜଳ ଅଭାବ ଚିହ୍ନ ପାଇଁ ତୁରନ୍ତ ଚିକିତ୍ସକ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-24",
+      "label": "ଗର୍ଭାବସ୍ଥାରେ ରକ୍ତସ୍ରାବ",
+      "severity": "red",
+      "patterns": ["(?:ଗର୍ଭାବସ୍ଥାରେ ରକ୍ତସ୍ରାବ|ଗର୍ଭ.{0,30}ରକ୍ତ)", "\\b(?:garbhabasthare raktasraba|pregnancy.{0,30}bleeding|spotting in pregnancy)\\b"],
+      "nonDiagnosticNote": "ଗର୍ଭାବସ୍ଥାରେ ରକ୍ତସ୍ରାବ ପାଇଁ ଜରୁରୀ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-25",
+      "label": "ଗର୍ଭାବସ୍ଥାରେ ଶିଶୁ ଗତି କମ",
+      "severity": "red",
+      "patterns": ["(?:ଶିଶୁ ଗତି କମ|ଭ୍ରୂଣ ଗତି କମ|ଶିଶୁ ଘୁଞ୍ଚୁ ନାହିଁ)", "\\b(?:sisu gati kama|reduced fetal movement|baby not moving|fetal movement reduced)\\b"],
+      "nonDiagnosticNote": "ଗର୍ଭାବସ୍ଥାରେ ଶିଶୁ ଗତି କମ ହେଲେ ଜରୁରୀ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-26",
+      "label": "ଶିଶୁ ଦୁଧ ନ ପିବା",
+      "severity": "red",
+      "patterns": ["(?:ଶିଶୁ ଦୁଧ ନ ପିବା|ଛୁଆ କିଛି ନ ଖାଇବା|ଦୁଧ ନେଉ ନାହିଁ)", "\\b(?:sisu dudha na piba|infant not feeding|baby not feeding|refusing feed)\\b"],
+      "nonDiagnosticNote": "ଶିଶୁ ଦୁଧ ନ ପିବା ପାଇଁ ତୁରନ୍ତ ଚିକିତ୍ସକ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-27",
+      "label": "ଶିଶୁ ଘୁର୍ଘୁର ଶବ୍ଦ",
+      "severity": "red",
+      "patterns": ["(?:ଶିଶୁ ଘୁର୍ଘୁର|ନବଜାତ ଘୁର୍ଘୁର|ଶିଶୁ ଘୁରୁ ଶବ୍ଦ)", "\\b(?:sisu ghurghura|infant grunting|grunting in infant|newborn grunting)\\b"],
+      "nonDiagnosticNote": "ଶିଶୁର ଘୁର୍ଘୁର ଶବ୍ଦ ପାଇଁ ତୁରନ୍ତ ଚିକିତ୍ସକ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    },
+    {
+      "id": "URG-OR-28",
+      "label": "ବୟସ୍କ ପଡ଼ିବା ସହ ମୁଣ୍ଡ ଆଘାତ",
+      "severity": "red",
+      "patterns": ["(?:ବୟସ୍କ.{0,30}ମୁଣ୍ଡ ଆଘାତ|ବୟସ୍କ.{0,30}ପଡ଼ି.{0,30}ମୁଣ୍ଡ)", "\\b(?:bayaska.{0,30}munda aghata|elderly.{0,30}fall.{0,30}head injury|old age head trauma)\\b"],
+      "nonDiagnosticNote": "ବୟସ୍କଙ୍କ ମୁଣ୍ଡ ଆଘାତ ସହ ପଡ଼ିବା ପାଇଁ ତୁରନ୍ତ ମୂଲ୍ୟାଙ୍କନ ଆବଶ୍ୟକ।"
+    }
+  ]
+}

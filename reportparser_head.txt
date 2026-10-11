@@ -1,0 +1,67 @@
+﻿import type {
+  ParsedLabValue,
+  ParsedReport,
+  ParsedVital,
+  ReportLanguage,
+  ReportOcrMeta,
+  ReportType,
+  SupportedLanguage,
+  ValueFlag,
+} from '../types'
+import { scoreFromNumeric } from './confidenceService'
+import { detectLabFormat } from './extendedFormats/loader'
+import { tryBrandFormat } from './extendedFormats/loader'
+
+/**
+ * Rule-based extraction of lab values / vitals / report metadata from the
+ * ANONYMISED report text (P0-1).
+ *
+ * Hard rules:
+ *  - Never infers, never estimates: a value is extracted only when the document
+ *    actually prints a number next to a known measurement label.
+ *  - Nothing produced here is a diagnosis, a prescription or a treatment plan ???
+ *    document wording that implies one is neutralised by the guard below.
+ *  - Every extraction carries a confidence so the reviewer knows which rows to
+ *    check first; it is an OCR/match confidence, never a clinical one.
+ */
+
+/* ------------------------------------------------------------------ */
+/*  Non-diagnostic policy (mirrors frontend/src/services/safetyPolicy) */
+/* ------------------------------------------------------------------ */
+
+export const NON_DIAGNOSTIC_DISCLAIMER =
+  'NON-DIAGNOSTIC EXTRACTION. An AI assistant extracted these values from the uploaded document for review by ' +
+  'a qualified healthcare worker. They are not a diagnosis, not a prescription and not a treatment plan. ' +
+  'Verify every value against the original document ??? nothing here replaces professional medical judgement.'
+
+export const NON_DIAGNOSTIC_SHORT =
+  'Non-diagnostic assistive system ??? AI drafts, a healthcare worker decides.'
+
+export const CONSENT_POLICY_VERSION = 'v1.0-2026'
+
+/** Language that must never reach the reviewer as generated output. */
+const BANNED_PHRASES: Array<{ pattern: RegExp; replacement: string }> = [
+  { pattern: /\bdiagnos(?:is|es|e|ed|ing)\b/gi, replacement: 'clinical summary' },
+  { pattern: /\bprescrib(?:e|es|ed|ing|ption)\b/gi, replacement: 'clinician decision' },
+  { pattern: /\btreat(?:ment|ments)\b/gi, replacement: 'clinical management' },
+  { pattern: /\byou have\b/gi, replacement: 'the patient reports' },
+  { pattern: /\bsuffers? from\b/gi, replacement: 'reports' },
+  { pattern: /\bindicative of\b/gi, replacement: 'recorded alongside' },
+  { pattern: /\bis likely (?:to be|a|an)\b/gi, replacement: 'was recorded alongside' },
+  { pattern: /\btake (?:this |these )?(?:tablet|medicine|drug)s?\b/gi, replacement: 'review current medicines with a healthcare worker' },
+]
+
+/** Returns every banned phrase still present in `text` (used for warnings). */
+export function findDiagnosticLanguage(text: string): string[] {
+  const hits: string[] = []
+  for (const { pattern } of BANNED_PHRASES) {
+    const re = new RegExp(pattern.source, pattern.flags.replace('g', ''))
+    if (re.test(text)) hits.push(pattern.source)
+  }
+  return hits
+}
+
+/** Strips/replaces diagnosis- or prescription-language in extracted text. */
+export function enforceNonDiagnostic(text: string): string {
+  return BANNED_PHRASES.reduce((acc, { pattern, replacement }) => acc.replace(pattern, replacement), text)
+}

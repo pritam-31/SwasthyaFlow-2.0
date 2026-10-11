@@ -1,0 +1,29 @@
+{
+  "headerPatterns": ["^Apollo", "^Apollo Hospitals"],
+  "tableDelimiters": "[\\r\\n]+",
+  "valueExtractionRules": [
+    {
+      "canonicalName": "SGPT (ALT)",
+      "aliases": ["sgpt", "alt", "alanine aminotransferase"],
+      "unitPattern": "U/L",
+      "valuePattern": "[0-9.]+",
+      "rangePattern": "\\([0-9.-]+-[0-9.-]+\\)"
+    },
+    {
+      "canonicalName": "SGOT (AST)",
+      "aliases": ["sgot", "ast", "aspartate aminotransferase"],
+      "unitPattern": "U/L",
+      "valuePattern": "[0-9.]+",
+      "rangePattern": "\\([0-9.-]+-[0-9.-]+\\)"
+    },
+    {
+      "canonicalName": "Alkaline Phosphatase",
+      "aliases": ["alp", "alkaline phosphatase"],
+      "unitPattern": "U/L",
+      "valuePattern": "[0-9.]+",
+      "rangePattern": "\\([0-9.-]+-[0-9.-]+\\)"
+    }
+  ],
+  "footerPatterns": "[\\s\\S]*",
+  "notes": "Apollo Hospitals - liver function panel"
+}
