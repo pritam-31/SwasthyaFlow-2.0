@@ -178,14 +178,7 @@ The Vite dev server proxies same‑origin `/api` and `/health` to `http://localh
 
 ## Demo Logins
 
-Seeded on backend start (`seedUsers()`), one account per role:
-
-| Username | Password | Role |
-|---|---|---|
-| `admin` | `Admin@123` | Facility Administrator |
-| `nurse` | `Nurse@123` | Nurse / Health Worker |
-| `doctor` | `Doctor@123` | Doctor / Medical Officer |
-| `patient` | `Patient@123` | Patient (self service) |
+Seeded for local development only (`seedUsers()`), with one account per role. Demo accounts are not available in production and production seeding is disabled unless explicitly configured. The login page only displays demo-account shortcuts in development and does not expose real credential values in the public deployment.
 
 - Self‑registration always creates a **patient** account; staff accounts are created by an admin.
 

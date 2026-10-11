@@ -5,12 +5,14 @@ import { Button, Card, cx } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
 import { ApiError } from '../services/api'
 
-const DEMO_ACCOUNTS = [
-  { label: 'Patient', username: 'patient', password: 'Patient@123' },
-  { label: 'Nurse', username: 'nurse', password: 'Nurse@123' },
-  { label: 'Doctor', username: 'doctor', password: 'Doctor@123' },
-  { label: 'Admin', username: 'admin', password: 'Admin@123' },
-]
+const DEMO_ACCOUNTS = import.meta.env.DEV
+  ? [
+      { label: 'Patient', username: 'patient', password: 'Patient@123' },
+      { label: 'Nurse', username: 'nurse', password: 'Nurse@123' },
+      { label: 'Doctor', username: 'doctor', password: 'Doctor@123' },
+      { label: 'Admin', username: 'admin', password: 'Admin@123' },
+    ]
+  : []
 
 const ROLE_CAPABILITIES = [
   { label: 'Patient', copy: 'Submit your own intake, answer follow-ups, read your own record.' },
@@ -229,23 +231,25 @@ export default function LoginPage() {
             </form>
           </Card>
 
-          <div className="mt-4 rounded-2xl border border-dashed border-ink-200 bg-white/70 p-3.5">
-            <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-ink-400">
-              <UserPlus size={12} /> Demo accounts — tap to fill
-            </p>
-            <div className="grid grid-cols-4 gap-1.5">
-              {DEMO_ACCOUNTS.map((d) => (
-                <button
-                  key={d.label}
-                  type="button"
-                  onClick={() => fillDemo(d)}
-                  className="rounded-xl bg-ink-100 px-2 py-2 text-[11px] font-bold text-ink-600 transition-colors hover:bg-ink-200/70 hover:text-ink-900"
-                >
-                  {d.label}
-                </button>
-              ))}
+          {DEMO_ACCOUNTS.length > 0 && (
+            <div className="mt-4 rounded-2xl border border-dashed border-ink-200 bg-white/70 p-3.5">
+              <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-ink-400">
+                <UserPlus size={12} /> Demo accounts — tap to fill
+              </p>
+              <div className="grid grid-cols-4 gap-1.5">
+                {DEMO_ACCOUNTS.map((d) => (
+                  <button
+                    key={d.label}
+                    type="button"
+                    onClick={() => fillDemo(d)}
+                    className="rounded-xl bg-ink-100 px-2 py-2 text-[11px] font-bold text-ink-600 transition-colors hover:bg-ink-200/70 hover:text-ink-900"
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
     </div>
