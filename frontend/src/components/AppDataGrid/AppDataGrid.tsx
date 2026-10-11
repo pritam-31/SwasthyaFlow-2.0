@@ -1,7 +1,7 @@
 import { Box, Skeleton, TextField, Typography, useMediaQuery } from '@mui/material'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
-  DataGridPro,
+  DataGrid,
   GridToolbarColumnsButton,
   GridToolbarContainer,
   GridToolbarDensitySelector,
@@ -18,15 +18,15 @@ import {
   type GridRowSelectionModel,
   type GridSortModel,
   type GridValidRowModel,
-} from '@mui/x-data-grid-pro'
+} from '@mui/x-data-grid'
 
 /**
  * ONE place for every table in the app.
  *
- * Wraps MUI X `DataGridPro` (Pro) with the product's look, responsive
+ * Wraps MUI X `DataGrid` (Pro) with the product's look, responsive
  * behaviour, persisted state, loading/empty/error handling and an optional
  * mobile card list. To move to the free Community build, change the import of
- * `DataGridPro` above to `'@mui/x-data-grid'` and drop the Pro-only flags
+ * `DataGrid` above to `'@mui/x-data-grid'` and drop the Pro-only flags
  * (`pinned` columns)  -  everything else is shared.
  */
 
@@ -269,7 +269,7 @@ export function AppDataGrid<Row extends GridValidRowModel>({
   return (
     <section aria-label={ariaLabel} className="w-full">
       <div style={{ width: '100%', minHeight: 0 }}>
-        <DataGridPro<Row>
+        <DataGrid<Row>
           apiRef={apiRef}
           rows={rows as Row[]}
           columns={columns}
