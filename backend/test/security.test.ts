@@ -3,13 +3,14 @@ import type { AddressInfo } from 'node:net'
 import type { Server } from 'node:http'
 import { after, before, describe, it } from 'node:test'
 import { createApp } from '../src/app'
-import { seedUsers } from '../src/services/authStore'
+import { listUsers, seedUsers, startSession } from '../src/services/authStore'
 import { seedGlobalSecurityPolicy } from '../src/services/passwordPolicyService'
 import { clearLockoutMemory } from '../src/services/lockoutService'
 import { clearSecurityEventsMemory } from '../src/services/securityEventService'
 import { clearRefreshTokensMemory } from '../src/services/refreshTokenService'
 import { clearDevicesMemory } from '../src/services/deviceService'
 import { clearIpBlocklistMemory } from '../src/services/ipBlocklistService'
+import { seedDefaultFacility } from '../src/services/facilityService'
 
 interface HttpResult {
   status: number
@@ -36,6 +37,7 @@ describe('security hardening API (HTTP)', () => {
 
   before(async () => {
     seedUsers()
+    seedDefaultFacility()
     clearSecurityEventsMemory()
     clearRefreshTokensMemory()
     clearDevicesMemory()
@@ -103,6 +105,59 @@ describe('security hardening API (HTTP)', () => {
     assert.ok(sid && /httponly/i.test(sid), 'session cookie must be httpOnly')
     assert.ok(rt && /httponly/i.test(rt), 'refresh cookie must be httpOnly')
     assert.ok(csrf && !/httponly/i.test(csrf), 'CSRF cookie must be readable by the SPA')
+    assert.ok(!sid?.includes('Domain=localhost'), 'session cookie must not be bound to localhost by default')
+    assert.ok(!rt?.includes('Domain=localhost'), 'refresh cookie must not be bound to localhost by default')
+  })
+
+  it('authenticates protected APIs with the login cookies and keeps the session after refresh', async () => {
+    const loggedIn = await request('POST', '/api/auth/login', { username: 'doctor', password: 'Doctor@123' })
+    assert.equal(loggedIn.status, 200, JSON.stringify(loggedIn.body))
+    const sid = cookieValue(loggedIn.setCookies, 'swasthyaflow.sid')
+    const refresh = cookieValue(loggedIn.setCookies, 'swasthyaflow.rt')
+    const csrf = cookieValue(loggedIn.setCookies, 'swasthyaflow.csrf')
+    assert.ok(sid && refresh && csrf)
+    const cookie = `swasthyaflow.sid=${sid}; swasthyaflow.rt=${refresh}; swasthyaflow.csrf=${csrf}`
+
+    for (const path of ['/api/audit', '/api/facilities', '/api/facilities/facility-default', '/api/sessions']) {
+      const result = await request('GET', path, undefined, { cookie })
+      assert.equal(result.status, 200, `${path}: ${JSON.stringify(result.body)}`)
+    }
+
+    const refreshed = await request('POST', '/api/auth/refresh', undefined, { cookie, csrf })
+    assert.equal(refreshed.status, 200, JSON.stringify(refreshed.body))
+    assert.ok(Date.parse(String(refreshed.body.expiresAt)) > Date.parse(String(loggedIn.body.expiresAt)))
+    const nextSid = cookieValue(refreshed.setCookies, 'swasthyaflow.sid')
+    const nextRefresh = cookieValue(refreshed.setCookies, 'swasthyaflow.rt')
+    assert.ok(nextSid && nextRefresh && nextRefresh !== refresh)
+
+    const afterRefresh = await request(
+      'GET',
+      '/api/sessions',
+      undefined,
+      { cookie: `swasthyaflow.sid=${nextSid}; swasthyaflow.rt=${nextRefresh}; swasthyaflow.csrf=${csrf}` },
+    )
+    assert.equal(afterRefresh.status, 200, JSON.stringify(afterRefresh.body))
+  })
+
+  it('rejects protected APIs without a valid session and preserves role restrictions', async () => {
+    const missing = await request('GET', '/api/sessions')
+    assert.equal(missing.status, 401)
+    const invalid = await request('GET', '/api/audit', undefined, { token: 'not-a-session-token' })
+    assert.equal(invalid.status, 401)
+
+    const patient = await login('patient', 'Patient@123')
+    const forbidden = await request('GET', '/api/audit/paged', undefined, { token: patient })
+    assert.equal(forbidden.status, 403)
+    const permitted = await request('GET', '/api/audit/paged', undefined, { token: nurse })
+    assert.equal(permitted.status, 200, JSON.stringify(permitted.body))
+  })
+
+  it('rejects expired access sessions even when a refresh token could remain valid', async () => {
+    const user = listUsers().find((candidate) => candidate.username === 'nurse')
+    assert.ok(user)
+    const expired = startSession({ userId: user.id, ttlMs: -1 })
+    const result = await request('GET', '/api/auth/me', undefined, { token: expired.token })
+    assert.equal(result.status, 401)
   })
 
   it('enforces CSRF for cookie auth but exempts bearer auth', async () => {
@@ -195,6 +250,20 @@ describe('security hardening API (HTTP)', () => {
 
     const reuse = await request('POST', '/api/auth/refresh', undefined, { cookie: `swasthyaflow.rt=${oldRefresh}` })
     assert.equal(reuse.status, 401, JSON.stringify(reuse.body))
+  })
+
+  it('rejects refresh tokens revoked during logout', async () => {
+    const loggedIn = await request('POST', '/api/auth/login', { username: 'doctor', password: 'Doctor@123' })
+    const sid = cookieValue(loggedIn.setCookies, 'swasthyaflow.sid')
+    const refresh = cookieValue(loggedIn.setCookies, 'swasthyaflow.rt')
+    const csrf = cookieValue(loggedIn.setCookies, 'swasthyaflow.csrf')
+    assert.ok(sid && refresh && csrf)
+    const cookie = `swasthyaflow.sid=${sid}; swasthyaflow.rt=${refresh}; swasthyaflow.csrf=${csrf}`
+
+    const logout = await request('POST', '/api/auth/logout', undefined, { cookie, csrf })
+    assert.equal(logout.status, 200, JSON.stringify(logout.body))
+    const reused = await request('POST', '/api/auth/refresh', undefined, { cookie: `swasthyaflow.rt=${refresh}` })
+    assert.equal(reused.status, 401, JSON.stringify(reused.body))
   })
 
   it('exposes the effective policy and records policy updates for an admin', async () => {

@@ -1,5 +1,6 @@
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { MonitorSmartphone, RefreshCw, XCircle } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { AppDataGrid } from '../AppDataGrid'
 import { Badge, Button, EmptyState } from '../ui'
 import { useApp } from '../../store/AppStore'
 import { SECURITY_SECTION_LABELS } from '../../services/safetyPolicy'
@@ -9,6 +10,8 @@ import { useSessionTimer } from '../../hooks/useSessionTimer'
 
 type Lang = 'en' | 'hi' | 'or'
 type T = (typeof SECURITY_SECTION_LABELS)[Lang]
+
+type SessionRow = AccountSession & { id: string }
 
 /** Live access sessions for the signed-in account. */
 export function SessionList({ lang = 'en' }: { lang?: Lang }) {
@@ -50,23 +53,57 @@ export function SessionList({ lang = 'en' }: { lang?: Lang }) {
       {error && <p className="rounded-xl bg-rose-50 px-3 py-2 text-[12px] font-semibold text-rose-700 ring-1 ring-inset ring-rose-200">{error}</p>}
       {sessions && sessions.length === 0 && <EmptyState icon={<MonitorSmartphone size={18} />} title={t.noSessions} />}
       {sessions && sessions.length > 0 && (
-        <div className="overflow-x-auto rounded-xl ring-1 ring-inset ring-ink-200">
-          <table className="w-full min-w-[560px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-ink-200 bg-ink-50/70 text-[10px] uppercase tracking-[0.08em] text-ink-500">
-                <th className="px-4 py-2.5 font-bold">Device / address</th>
-                <th className="px-3 py-2.5 font-bold">Created</th>
-                <th className="px-3 py-2.5 font-bold">Expires in</th>
-                <th className="px-3 py-2.5 text-right font-bold">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-100">
-              {sessions.map((s) => (
-                <SessionRow key={s.id} session={s} onRevoke={() => revoke(s.id)} t={t} />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <AppDataGrid<SessionRow>
+          rows={sessions}
+          ariaLabel="Access sessions"
+          getRowId={(s) => s.id}
+          hideToolbar
+          hideFooter
+          defaultDensity="compact"
+          columns={[
+            {
+              field: 'deviceAddress',
+              headerName: 'Device / address',
+              flex: 1,
+              minWidth: 200,
+              renderCell: (p) => (
+                <div className="truncate">
+                  {p.row.deviceAddress ?? '—'}
+                </div>
+              ),
+            },
+            {
+              field: 'createdAt',
+              headerName: 'Created',
+              width: 180,
+              renderCell: (p) => <span className="text-[11px] text-ink-500">{new Date(p.row.createdAt).toLocaleString()}</span>,
+            },
+            {
+              field: 'expiresIn',
+              headerName: 'Expires in',
+              width: 150,
+              renderCell: (p) => {
+                const minutes = Math.round((new Date(p.row.expiresAt).getTime() - new Date().getTime()) / 60000)
+                return minutes > 0 ? `${minutes} min remaining` : 'expired'
+              },
+            },
+            {
+              field: 'action',
+              headerName: 'Action',
+              width: 120,
+              sortable: false,
+              filterable: false,
+              disableColumnMenu: true,
+              align: 'right',
+              headerAlign: 'right',
+              renderCell: (p) => (
+                <Button variant="ghost" size="sm" onClick={() => revoke(p.row.id)} aria-label={t.sessionRevoked}>
+                  <XCircle size={14} />
+                </Button>
+              ),
+            },
+          ]}
+        />
       )}
     </div>
   )

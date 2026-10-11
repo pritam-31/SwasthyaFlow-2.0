@@ -13,7 +13,11 @@ existing endpoints.
 | `REFRESH_SECRET_V1` | Signs the rotating refresh cookie (`swasthyaflow.rt`). Chained naming supports key rotation (`_V2`, …). | random per boot |
 | `CSRF_SECRET_V1` | Signs the readable double-submit token cookie (`swasthyaflow.csrf`). | random per boot |
 | `TWO_FACTOR_ENC_KEY_V1` | Authenticated-encryption key for stored TOTP secrets. | random per boot |
-| `COOKIE_DOMAIN` | `Domain=` attribute for the session cookies. Leave empty on localhost. | (none) |
+| `COOKIE_SAME_SITE` | Optional cookie policy: `lax`, `strict`, or `none`. Defaults to `lax` outside production and `none` in production; `none` requires HTTPS and `Secure`. | environment default |
+| `MONGODB_URI` | MongoDB connection string (for Atlas, provide the Atlas URI; never commit credentials). Required in production. | `mongodb://localhost:27017/swasthyaflow` outside production |
+| `MONGODB_DB_NAME` | Database name used by the backend. | `swasthyaflow` |
+| `USE_IN_MEMORY_STORES` | Local/test-only opt-in for the in-memory prototype. Production always requires MongoDB. | enabled outside production |
+| `SEED_ON_BOOT` | Seeds demo accounts and reference data. Production seeds only when explicitly enabled. | enabled outside production |
 | `TRUST_PROXY` | Trusted proxy hops for `req.ip`. `false`/empty = none, `true` = 1 hop, or a comma list. Set behind Nginx/Cloudflare or sign-in IPs will be wrong and the IP allowlist will misbehave. | `false` |
 | `ENABLE_RATE_LIMIT` | Enables the in-process sliding-window rate limiter outside production. Rate limits are **always** on in production. | disabled outside prod |
 | `ENABLE_BODY_TOKEN` | The response body still carries `session.token`/`refreshToken` (dev/migration convenience). Production defaults reject body tokens. | enabled outside prod |
@@ -22,7 +26,13 @@ existing endpoints.
 | `SECURITY_LOG_LEVEL` | Console verbosity for the security event layer (`error`/`warn`/`info`). | `info` |
 
 Cookie flags: `swasthyaflow.sid` / `swasthyaflow.rt` are `HttpOnly`,
-`SameSite=Lax`, `Secure` in production, scoped by `COOKIE_DOMAIN`. The CSRF
+`SameSite=Lax` outside production and `SameSite=None; Secure` in production
+unless `COOKIE_SAME_SITE` overrides the policy. Cookies are always host-only.
+The production Vercel config proxies `/api` to Railway so cookies stay
+first-party. Direct cross-origin deployments must use an exact frontend origin
+in `CORS_ORIGIN` and a frontend `VITE_API_BASE_URL`; browsers that block
+third-party cookies may still require a same-origin proxy.
+The CSRF
 cookie is **readable by design** (double-submit pattern).
 
 Rotating any `_V1` secret signs the user out everywhere — do it as a planned
@@ -52,8 +62,8 @@ maintenance window.
 - The SPA request layer (`frontend/src/services/api.ts`) is migration-safe:
   a legacy bearer token, when present, is still sent; every request uses
   `credentials: 'include'`; a 401 triggers exactly one silent refresh via
-  `POST /auth/refresh` (cookie-only, so CSRF is skipped by design) before
-  surfacing the failure.
+  `POST /auth/refresh`. The refresh call includes the readable CSRF double-submit
+  value when present, and concurrent refresh attempts share one in-flight call.
 - After upgrading the browser session, users do not need to sign in again — the
   refresh cookie rotates transparently.
 

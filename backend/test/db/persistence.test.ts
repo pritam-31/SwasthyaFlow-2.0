@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { scrubRawMatch, scrubRawReport } from '../../src/db/serializers'
 import { enqueue, drainWrites } from '../../src/repositories/writeQueue'
-import { persistenceEnabled, storesInMemory } from '../../src/db/mongoose'
+import { mongoUri, persistenceEnabled, seedOnBoot, storesInMemory } from '../../src/db/mongoose'
 
 describe('persistence layer — pure helpers', () => {
   it('scrubRawMatch removes the raw PII span', () => {
@@ -51,7 +51,9 @@ describe('persistence layer — pure helpers', () => {
   })
 
   it('defaults to in-memory stores', () => {
+    const previousNodeEnv = process.env.NODE_ENV
     const previous = process.env.USE_IN_MEMORY_STORES
+    process.env.NODE_ENV = 'test'
     delete process.env.USE_IN_MEMORY_STORES
     assert.equal(storesInMemory(), true)
     assert.equal(persistenceEnabled(), false)
@@ -59,5 +61,31 @@ describe('persistence layer — pure helpers', () => {
     assert.equal(persistenceEnabled(), true)
     if (previous === undefined) delete process.env.USE_IN_MEMORY_STORES
     else process.env.USE_IN_MEMORY_STORES = previous
+    if (previousNodeEnv === undefined) delete process.env.NODE_ENV
+    else process.env.NODE_ENV = previousNodeEnv
+  })
+
+  it('requires persistent Mongo storage and disables demo seeding in production', () => {
+    const previousNodeEnv = process.env.NODE_ENV
+    const previousMemorySetting = process.env.USE_IN_MEMORY_STORES
+    const previousMongoUri = process.env.MONGODB_URI
+    process.env.NODE_ENV = 'production'
+    process.env.USE_IN_MEMORY_STORES = 'true'
+    delete process.env.MONGODB_URI
+    try {
+      assert.equal(storesInMemory(), false)
+      assert.equal(persistenceEnabled(), true)
+      assert.equal(seedOnBoot(), false)
+      assert.throws(() => mongoUri(), /MONGODB_URI is required/)
+      process.env.MONGODB_URI = 'mongodb+srv://<configured-at-deploy>'
+      assert.equal(mongoUri(), 'mongodb+srv://<configured-at-deploy>')
+    } finally {
+      if (previousNodeEnv === undefined) delete process.env.NODE_ENV
+      else process.env.NODE_ENV = previousNodeEnv
+      if (previousMemorySetting === undefined) delete process.env.USE_IN_MEMORY_STORES
+      else process.env.USE_IN_MEMORY_STORES = previousMemorySetting
+      if (previousMongoUri === undefined) delete process.env.MONGODB_URI
+      else process.env.MONGODB_URI = previousMongoUri
+    }
   })
 })

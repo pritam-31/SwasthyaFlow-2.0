@@ -19,6 +19,7 @@ import {
   markLoginSuccess,
   ROLES,
   revokeSessionById,
+  renewSession,
   sessionIdOf,
   sessionTokenForId,
   setUserRole,
@@ -244,11 +245,17 @@ authRouter.post('/refresh', ah(async (req, res) => {
   const accessMs = policy.session.accessTokenMinutes * 60_000
 
   try {
+    if (current.usedAt) {
+      await rotateRefresh(raw, policy.session.refreshTokenDays)
+      throw new HttpError(401, 'Session expired — please sign in again.')
+    }
     const liveToken = sessionTokenForId(current.sessionId)
     let session: StartedSession
     let rotated
     if (liveToken) {
-      session = { token: liveToken, sessionId: current.sessionId, expiresAt: new Date(Date.now() + accessMs).toISOString() }
+      const renewed = renewSession(liveToken, accessMs)
+      if (!renewed) throw new HttpError(401, 'Session expired — please sign in again.')
+      session = renewed
       rotated = await rotateRefresh(raw, policy.session.refreshTokenDays)
     } else {
       const fresh = startSession({ userId: current.userId, ip: ctx.ip, userAgent: ctx.userAgent, ttlMs: accessMs })

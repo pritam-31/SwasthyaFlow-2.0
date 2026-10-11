@@ -534,6 +534,31 @@ export function sessionTokenForId(sessionId: string): string | undefined {
   return undefined
 }
 
+/** Extends a live access session and persists its updated expiry. */
+export function renewSession(token: string, ttlMs: number): StartedSession | undefined {
+  const session = sessions.get(token)
+  if (!session || session.expiresAt <= Date.now()) return undefined
+  session.expiresAt = Date.now() + ttlMs
+  session.lastSeenAt = Date.now()
+  const expiresAt = session.expiresAt
+  const lastSeenAt = session.lastSeenAt
+  if (persistenceEnabled()) {
+    enqueue('login:' + token, () =>
+      upsertLoginSession({
+        id: session.id,
+        token,
+        userId: session.userId,
+        expiresAt: new Date(expiresAt).toISOString(),
+        ip: session.ip,
+        userAgent: session.userAgent,
+        deviceFingerprintHash: session.deviceFingerprintHash,
+        lastSeenAt: new Date(lastSeenAt).toISOString(),
+      }),
+    )
+  }
+  return { token, sessionId: session.id, expiresAt: new Date(expiresAt).toISOString() }
+}
+
 export function resolveSession(token: string): AuthUser | undefined {
   const session = sessions.get(token)
   if (!session) return undefined

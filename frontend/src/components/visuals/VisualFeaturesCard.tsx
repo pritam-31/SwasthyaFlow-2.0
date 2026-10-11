@@ -6,9 +6,11 @@
  * concerns are phrased as questions for a human to follow up.
  */
 
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { AlertTriangle, FileImage, ScanText, Sparkles } from 'lucide-react'
 import { VISUAL_TYPE_LABELS } from '../../services/safetyPolicy'
 import type { VisualRecord } from '../../types/visual.types'
+import { AppDataGrid } from '../AppDataGrid'
 import { Badge, cx } from '../ui'
 
 export default function VisualFeaturesCard({ visual }: { visual: VisualRecord }) {
@@ -43,28 +45,46 @@ export default function VisualFeaturesCard({ visual }: { visual: VisualRecord })
         </section>
       )}
 
-      <section>
-        <h4 className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-400">
-          <ScanText size={12} /> Descriptive rows
-        </h4>
-        <div className="mt-1 overflow-hidden rounded-lg border border-ink-200">
-          <table className="w-full text-left text-xs">
-            <tbody className="divide-y divide-ink-100">
-              {extraction.features.map((f) => (
-                <tr key={f.id}>
-                  <td className="px-3 py-2 font-semibold text-ink-700">{f.label}</td>
-                  <td className="px-3 py-2 text-ink-600">{f.value}</td>
-                  <td className="whitespace-nowrap px-3 py-2 text-right">
-                    <span className={cx('font-mono text-[11px] font-bold', f.confidence >= 0.8 ? 'text-emerald-700' : 'text-amber-700')}>
-                      {Math.round(f.confidence * 100)}%
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      {extraction.features.length > 0 && (
+        <AppDataGrid<{ id: string; label: string; value: string; confidence: number }>
+          rows={extraction.features}
+          ariaLabel="Descriptive rows"
+          getRowId={(f) => f.id}
+          hideToolbar
+          hideFooter
+          defaultDensity="compact"
+          columns={[
+            {
+              field: 'label',
+              headerName: 'Label',
+              flex: 1,
+              renderCell: (p) => <span className="font-semibold text-ink-700">{p.row.label}</span>,
+            },
+            {
+              field: 'value',
+              headerName: 'Value',
+              flex: 1,
+              renderCell: (p) => <span className="text-ink-600">{p.row.value}</span>,
+            },
+            {
+              field: 'confidence',
+              headerName: 'Confidence',
+              width: 140,
+              renderCell: (p) => {
+                const pct = Math.round(p.row.confidence * 100)
+                return (
+                  <span className={cx(
+                    'font-mono text-[11px] font-bold',
+                    p.row.confidence >= 0.8 ? 'text-emerald-700' : 'text-amber-700',
+                  )}>
+                    {pct}%
+                  </span>
+                )
+              },
+            },
+          ]}
+        />
+      )}
 
       <section>
         <h4 className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-amber-700">

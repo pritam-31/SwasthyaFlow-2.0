@@ -4,10 +4,8 @@ import mongoose from 'mongoose'
 /**
  * MongoDB connection lifecycle (P1-9).
  *
- * The application boots in-memory unless `USE_IN_MEMORY_STORES=false` — that
- * keeps the existing prototype (and every test) working without a database,
- * while the persistent deployment routes the same store module surfaces
- * through Mongo-backed repositories (see src/repositories).
+ * Development/tests may opt into the prototype's in-memory stores. Production
+ * always uses Mongo-backed repositories and fails startup if Mongo is absent.
  */
 
 export interface DbHealth {
@@ -21,8 +19,9 @@ export interface DbHealth {
 let connected = false
 let connecting: Promise<typeof mongoose> | null = null
 
-/** `false` routes through MongoDB + Cloudinary; anything else is in-memory. */
+/** Production always persists; local/test runs remain in-memory by default. */
 export function storesInMemory(): boolean {
+  if (process.env.NODE_ENV === 'production') return false
   return process.env.USE_IN_MEMORY_STORES !== 'false'
 }
 
@@ -32,10 +31,15 @@ export function persistenceEnabled(): boolean {
 }
 
 export function mongoUri(): string {
-  return process.env.MONGODB_URI ?? 'mongodb://localhost:27017/swasthyaflow'
+  const configured = process.env.MONGODB_URI?.trim()
+  if (process.env.NODE_ENV === 'production' && !configured) {
+    throw new Error('MONGODB_URI is required when running in production.')
+  }
+  return configured || 'mongodb://localhost:27017/swasthyaflow'
 }
 
 export function seedOnBoot(): boolean {
+  if (process.env.NODE_ENV === 'production') return process.env.SEED_ON_BOOT === 'true'
   return process.env.SEED_ON_BOOT !== 'false'
 }
 
@@ -48,6 +52,7 @@ export async function connectMongo(uri: string = mongoUri()): Promise<typeof mon
   if (connecting) return connecting
   mongoose.set('strictQuery', true)
   connecting = mongoose.connect(uri, {
+    dbName: process.env.MONGODB_DB_NAME?.trim() || 'swasthyaflow',
     serverSelectionTimeoutMS: 5000,
     autoIndex: process.env.NODE_ENV !== 'production',
   })

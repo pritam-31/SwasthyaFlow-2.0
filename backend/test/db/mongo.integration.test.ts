@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 import { after, before, describe, it } from 'node:test'
+import { SeedMarkerModel } from '../../src/db/models/SeedMarker'
 import { connectMongo, disconnectMongo } from '../../src/db/mongoose'
+import { drainWrites } from '../../src/repositories/writeQueue'
 import { getSeedMarker, setSeedMarker } from '../../src/repositories/seedRepository'
+import { createUser, deleteUser, hydrateAuth, listUsers, verifyCredentials } from '../../src/services/authStore'
 
 /**
  * Live-Mongo integration coverage. Self-skips unless a real database is wired
@@ -23,8 +26,31 @@ describe('mongo repositories — integration', { skip: enabled ? false : 'set MO
   })
 
   it('round-trips a seed marker', async () => {
+    const name = `__test__-${Date.now()}`
     const version = `test-${Date.now()}`
-    await setSeedMarker('__test__', version)
-    assert.equal(await getSeedMarker('__test__'), version)
+    try {
+      await setSeedMarker(name, version)
+      assert.equal(await getSeedMarker(name), version)
+    } finally {
+      await SeedMarkerModel.deleteOne({ name })
+    }
+  })
+
+  it('rehydrates a user record and verifies its password after reconnecting', async () => {
+    const username = `mongo-${Date.now()}`
+    const password = 'Persist9!Test'
+    const user = createUser({ username, displayName: 'Mongo Persistence Check', password, role: 'patient' })
+    try {
+      await drainWrites()
+      await disconnectMongo()
+      await connectMongo(mongoUri)
+      await hydrateAuth()
+
+      assert.ok(listUsers().some((record) => record.id === user.id))
+      assert.equal((await verifyCredentials(username, password)).id, user.id)
+    } finally {
+      if (listUsers().some((record) => record.id === user.id)) deleteUser(user.id)
+      await drainWrites()
+    }
   })
 })

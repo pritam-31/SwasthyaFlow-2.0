@@ -25,10 +25,11 @@ import type {
 import type { FollowUpQuestion } from '../types/followup.types'
 
 
-const API_ORIGIN = (
-  import.meta.env.VITE_API_BASE_URL?.trim() ||
-  'https://swasthyaflow-20-production.up.railway.app'
-).replace(/\/+$/, '')
+// Production always uses the same-origin deployment proxy for reliable cookie
+// auth. The optional origin override is only for local development.
+const API_ORIGIN = import.meta.env.DEV
+  ? (import.meta.env.VITE_API_BASE_URL?.trim() || '').replace(/\/+$/, '')
+  : ''
 
 const BASE = `${API_ORIGIN}/api`
 
@@ -69,27 +70,34 @@ function readCsrfToken(): string | undefined {
   return undefined
 }
 
-let refreshInFlight: Promise<AuthUser | null> | null = null
+interface RefreshResult {
+  user: AuthUser | null
+  invalid: boolean
+}
 
-async function refreshSessionOnce(): Promise<AuthUser | null> {
+let refreshInFlight: Promise<RefreshResult> | null = null
+
+async function refreshSessionOnce(): Promise<RefreshResult> {
   try {
     const res = await fetch(`${BASE}/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
       headers: {
+        ...(readCsrfToken() ? { 'x-csrf-token': readCsrfToken() } : {}),
         'content-type': 'application/json',
         ...(token ? { authorization: `Bearer ${token}` } : {}),
       },
     })
-    if (!res.ok) return null
+    if (res.status === 401) return { user: null, invalid: true }
+    if (!res.ok) return { user: null, invalid: false }
     const payload = (await res.json().catch(() => ({}))) as { user?: AuthUser; token?: string }
-    if (!payload.user) return null
+    if (!payload.user) return { user: null, invalid: false }
     // In the migration window the backend also returns a fresh token; in
     // production the browser keeps the rotated httpOnly cookies by itself.
     if (typeof payload.token === 'string' && payload.token) setAuthToken(payload.token)
-    return payload.user
+    return { user: payload.user, invalid: false }
   } catch {
-    return null
+    return { user: null, invalid: false }
   }
 }
 
@@ -98,6 +106,10 @@ async function refreshSessionOnce(): Promise<AuthUser | null> {
  * Safe to call from many places at once — only one request is in flight.
  */
 export function refreshSession(): Promise<AuthUser | null> {
+  return refreshSessionState().then((result) => result.user)
+}
+
+function refreshSessionState(): Promise<RefreshResult> {
   if (!refreshInFlight) {
     refreshInFlight = refreshSessionOnce().finally(() => {
       refreshInFlight = null
@@ -179,12 +191,11 @@ async function core<T>(path: string, init: RequestInit | undefined, meta: Reques
   const isAuthPath = path === '/auth/login' || path === '/auth/register' || path === '/auth/refresh'
 
   if (res.status === 401 && !isRetry && !isAuthPath) {
-    const refreshed = await refreshSession()
-    if (refreshed) return core<T>(path, init, meta, true)
+    const refreshed = await refreshSessionState()
+    if (refreshed.user) return core<T>(path, init, meta, true)
+    if (refreshed.invalid) expireSession()
   }
-  if (res.status === 401 && !isAuthPath) {
-    // Either the retry also failed, or the refresh attempt failed — the access
-    // session is gone. Login/register/refresh surface their own 401s directly.
+  if (res.status === 401 && isRetry && !isAuthPath) {
     expireSession()
   }
 
@@ -229,10 +240,11 @@ async function postMultipartCore<T>(path: string, form: FormData, retry: boolean
   }
   const payload = (await res.json().catch(() => ({}))) as Record<string, unknown>
   if (res.status === 401 && !retry) {
-    const refreshed = await refreshSession()
-    if (refreshed) return postMultipartCore<T>(path, form, true)
+    const refreshed = await refreshSessionState()
+    if (refreshed.user) return postMultipartCore<T>(path, form, true)
+    if (refreshed.invalid) expireSession()
   }
-  if (res.status === 401) expireSession()
+  if (res.status === 401 && retry) expireSession()
   const message =
     typeof payload.error === 'string' ? payload.error : `Request failed (${res.status})`
   const extra =
@@ -253,7 +265,7 @@ export { postMultipart }
  * Fetch a binary resource (e.g. the redacted photo bytes) with the auth token.
  * Returns an object URL the caller is responsible for revoking.
  */
-export async function fetchBlobUrl(path: string): Promise<string> {
+async function fetchBlobUrlCore(path: string, retry: boolean): Promise<string> {
   let res: Response
   try {
     res = await fetch(`${BASE}${path}`, {
@@ -264,16 +276,22 @@ export async function fetchBlobUrl(path: string): Promise<string> {
     throw new ApiError('Backend is not reachable — start it with `npm run dev:backend`.', 0)
   }
   if (res.status === 401) {
-    const refreshed = await refreshSession()
-    if (refreshed) {
-      return fetchBlobUrl(path)
+    if (!retry) {
+      const refreshed = await refreshSessionState()
+      if (refreshed.user) return fetchBlobUrlCore(path, true)
+      if (refreshed.invalid) expireSession()
+    } else {
+      expireSession()
     }
-    expireSession()
   }
   if (!res.ok) {
     throw new ApiError(`Could not load the image (${res.status})`, res.status)
   }
   return URL.createObjectURL(await res.blob())
+}
+
+export function fetchBlobUrl(path: string): Promise<string> {
+  return fetchBlobUrlCore(path, false)
 }
 
 /* ---------------- Wire types (mirror backend/src/types) ---------------- */

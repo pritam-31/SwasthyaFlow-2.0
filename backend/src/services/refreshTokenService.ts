@@ -76,7 +76,7 @@ export function issue(input: IssueInput): IssuedRefreshToken {
 /** Looks up a presented raw token. Returns undefined when unknown/expired. */
 export function peek(raw: string): RefreshTokenRecord | undefined {
   const recordValue = tokens.get(hashToken(raw))
-  if (!recordValue) return undefined
+  if (!recordValue || recordValue.revokedAt) return undefined
   if (Date.parse(recordValue.expiresAt) <= Date.now()) {
     tokens.delete(recordValue.tokenHash)
     return undefined
@@ -110,6 +110,7 @@ export interface RotationResult {
 export async function rotate(raw: string, ttlDays: number, sessionIdOverride?: string): Promise<RotationResult> {
   const current = tokens.get(hashToken(raw))
   if (!current) throw new RefreshTokenError(401, 'Refresh token is invalid.', 'invalid')
+  if (current.revokedAt) throw new RefreshTokenError(401, 'Refresh token is invalid.', 'invalid')
   if (Date.parse(current.expiresAt) <= Date.now()) {
     tokens.delete(current.tokenHash)
     throw new RefreshTokenError(401, 'Refresh token has expired.', 'expired')

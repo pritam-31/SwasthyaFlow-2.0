@@ -10,10 +10,10 @@ import { env, isProduction } from './env'
  *   - `swasthyaflow.rt`   — httpOnly refresh cookie (long-lived, rotating)
  *   - `swasthyaflow.csrf` — readable double-submit token (not a secret)
  *
- * The session/refresh cookies are `SameSite=Lax` so the same-site frontend can
- * send them on XHR, while cross-site POSTs are blocked by default. `Secure` is
- * forced in production. The CSRF cookie is intentionally NOT httpOnly because
- * the client must echo it back in the `X-CSRF-Token` header.
+ * Same-site deployments use `SameSite=Lax`; separate HTTPS frontend/API
+ * origins use `SameSite=None; Secure` so credentialed fetch requests can carry
+ * the cookies. The CSRF cookie is intentionally NOT httpOnly because the
+ * client must echo it back in the `X-CSRF-Token` header.
  */
 
 export const SESSION_COOKIE = 'swasthyaflow.sid'
@@ -26,12 +26,12 @@ export const DEFAULT_SESSION_COOKIE_MAX_AGE_MS = 15 * 60 * 1000
 export const DEFAULT_REFRESH_COOKIE_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
 
 function baseOptions(): CookieOptions {
+  const sameSite = env().COOKIE_SAME_SITE ?? (isProduction() ? 'none' : 'lax')
   return {
     httpOnly: true,
-    sameSite: 'lax',
-    secure: isProduction(),
+    sameSite,
+    secure: isProduction() || sameSite === 'none',
     path: '/',
-    domain: env().COOKIE_DOMAIN || undefined,
   }
 }
 

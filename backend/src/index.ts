@@ -28,7 +28,6 @@ async function main(): Promise<void> {
     console.log(`[api] SwasthyaFlow backend listening on http://localhost:${PORT}`)
     console.log('[api] non-diagnostic prototype — no diagnosis, no prescriptions.')
     console.log('[api] anonymisation: unified P0-7 pipeline active across all modalities (en/hi/or).')
-    console.log('[api] demo logins: admin/Admin@123 · nurse/Nurse@123 · doctor/Doctor@123 · patient/Patient@123')
     startRetentionScheduler()
     startPriorityScheduler()
     startAuditVerificationScheduler()

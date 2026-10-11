@@ -166,6 +166,10 @@ The Vite dev server proxies same‑origin `/api` and `/health` to `http://localh
 
 ### Configuration
 
+- Backend MongoDB settings are in `backend/.env.example`; production always requires `MONGODB_URI` and uses `MONGODB_DB_NAME` for durable storage. Local development remains in-memory unless `USE_IN_MEMORY_STORES=false`.
+- The frontend always uses same-origin `/api` requests in production. Its Vercel config proxies `/api` and `/health` to Railway, keeping authentication cookies first-party. For other hosting, configure an equivalent same-origin reverse proxy; direct cross-origin cookie auth may be blocked by browser third-party-cookie policy.
+- When deploying the frontend to Vercel, set the project root directory to `frontend` so `frontend/vercel.json` is applied.
+
 - API port defaults to `4000` and can be overridden with `PORT`.
 - CORS origins come from `CORS_ORIGIN` (default `http://localhost:5173,http://127.0.0.1:5173`).
 - Health check: `GET /health` (or `GET /api/health`).

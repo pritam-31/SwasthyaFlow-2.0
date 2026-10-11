@@ -61,7 +61,8 @@ export async function upsertUser(record: UserRecord): Promise<void> {
 }
 
 export async function listUsers(): Promise<Array<Record<string, unknown>>> {
-  return UserModel.find().sort({ username: 1 }).lean<Array<Record<string, unknown>>>().exec()
+  const rows = await UserModel.find().sort({ username: 1 }).lean<Array<Record<string, unknown>>>().exec()
+  return rows.map((row) => ({ ...row, id: row._id }))
 }
 
 export async function deleteUser(id: string): Promise<void> {
