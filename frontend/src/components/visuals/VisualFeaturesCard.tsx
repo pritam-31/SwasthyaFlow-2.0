@@ -6,8 +6,7 @@
  * concerns are phrased as questions for a human to follow up.
  */
 
-import type { GridColDef } from '@mui/x-data-grid-pro'
-import { AlertTriangle, FileImage, ScanText, Sparkles } from 'lucide-react'
+import { AlertTriangle, FileImage, Sparkles } from 'lucide-react'
 import { VISUAL_TYPE_LABELS } from '../../services/safetyPolicy'
 import type { VisualRecord } from '../../types/visual.types'
 import { AppDataGrid } from '../AppDataGrid'
