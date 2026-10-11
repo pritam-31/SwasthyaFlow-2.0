@@ -1,21 +1,65 @@
-import { Filter, ScrollText, Search, ShieldCheck } from 'lucide-react'
+import type { GridColDef } from '@mui/x-data-grid-pro'
+import { Filter, Search, ShieldCheck } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Badge, Card, cx, EmptyState, PageHeader } from '../components/ui'
+import { AppDataGrid, StatusPill, type ToneKey } from '../components/AppDataGrid'
 import { AuditChainPanel } from '../components/audit/AuditChainPanel'
+import { Badge, Card, cx, EmptyState, PageHeader } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
-import { permissionsFor } from '../services/rbacService'
 import { useTriage } from '../context/TriageContext'
 import { formatAuditTime } from '../lib/format'
+import { permissionsFor } from '../services/rbacService'
 import { useApp } from '../store/AppStore'
+import type { AuditEvent, CaseRecord } from '../types'
 
 type RoleFilter = 'all' | 'Patient' | 'Nurse' | 'Doctor' | 'System'
 
-const ROLE_CLASS: Record<string, string> = {
-  Patient: 'bg-sky-50 text-sky-700 ring-sky-200',
-  Nurse: 'bg-brand-50 text-brand-700 ring-brand-200',
-  Doctor: 'bg-violet-50 text-violet-700 ring-violet-200',
-  System: 'bg-ink-100 text-ink-600 ring-ink-200',
+const ROLE_TONE: Record<string, ToneKey> = {
+  Patient: 'sky',
+  Nurse: 'emerald',
+  Doctor: 'violet',
+  System: 'ink',
+}
+
+function auditColumns(cases: CaseRecord[]): GridColDef<AuditEvent>[] {
+  return [
+    {
+      field: 'time',
+      headerName: 'Timestamp',
+      width: 170,
+      renderCell: (p) => <span className="whitespace-nowrap font-semibold text-ink-700">{p.row.time}</span>,
+    },
+    {
+      field: 'caseId',
+      headerName: 'Case',
+      width: 150,
+      renderCell: (p) => (
+        <span className="inline-flex items-center gap-2 rounded-lg bg-brand-50 px-2 py-1 text-xs font-bold text-brand-700 ring-1 ring-inset ring-brand-200">
+          {cases.find((x) => x.id === p.row.caseId)?.patientId ?? p.row.caseId}
+        </span>
+      ),
+    },
+    {
+      field: 'actor',
+      headerName: 'Actor',
+      flex: 1,
+      minWidth: 160,
+      renderCell: (p) => <span className="font-medium text-ink-700">{p.row.actor}</span>,
+    },
+    {
+      field: 'role',
+      headerName: 'Role',
+      width: 130,
+      renderCell: (p) => <StatusPill tone={ROLE_TONE[p.row.role] ?? 'ink'}>{p.row.role}</StatusPill>,
+    },
+    {
+      field: 'action',
+      headerName: 'Action',
+      flex: 1.4,
+      minWidth: 220,
+      renderCell: (p) => <span className="text-xs text-ink-600">{p.row.action}</span>,
+    },
+  ]
 }
 
 const TRIAGE_ROLE_CLASS: Record<string, string> = {
@@ -103,42 +147,16 @@ export default function AuditLogs() {
       </div>
 
       <Card pad={false}>
-        <div className="overflow-x-auto">
-          <table className="sf-table min-w-[760px]">
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Case</th>
-                <th>Actor</th>
-                <th>Role</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {list.map((e) => {
-                const c = cases.find((x) => x.id === e.caseId)
-                return (
-                  <tr key={e.id} onClick={() => navigate(`/app/cases/${e.caseId}`)} className="cursor-pointer">
-                    <td className="whitespace-nowrap font-semibold text-ink-700">{e.time}</td>
-                    <td>
-                      <span className="inline-flex items-center gap-2 rounded-lg bg-brand-50 px-2 py-1 text-xs font-bold text-brand-700 ring-1 ring-inset ring-brand-200">
-                        {c?.patientId ?? e.caseId}
-                      </span>
-                    </td>
-                    <td className="font-medium text-ink-700">{e.actor}</td>
-                    <td>
-                      <Badge className={ROLE_CLASS[e.role] ?? 'bg-ink-100 text-ink-600 ring-ink-200'}>{e.role}</Badge>
-                    </td>
-                    <td className="text-xs text-ink-600">{e.action}</td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-          {list.length === 0 && (
-            <EmptyState icon={<ScrollText size={20} />} title="No audit events match the filters" />
-          )}
-        </div>
+        <AppDataGrid<AuditEvent>
+          rows={list}
+          columns={auditColumns(cases)}
+          ariaLabel="Audit log"
+          storageKey="audit-logs"
+          disableQuickFilter
+          onRowClick={(e) => navigate(`/app/cases/${e.caseId}`)}
+          emptyTitle="No audit events match the filters"
+          emptyBody="Try clearing the search or role filter."
+        />
       </Card>
 
       <Card

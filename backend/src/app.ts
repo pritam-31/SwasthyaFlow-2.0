@@ -37,10 +37,12 @@ import { sessionsRouter } from './routes/sessions.routes'
 import { triageRouter } from './routes/triage.routes'
 import { visualsRouter } from './routes/visuals.routes'
 
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGIN ?? 'http://localhost:5173,http://127.0.0.1:5173')
+
+const ALLOWED_ORIGINS = ( process.env.CORS_ORIGIN ?? 'http://localhost:5173,http://127.0.0.1:5173,https://swasthya-flow-2-0.vercel.app' )
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean)
+
 
 /**
  * Application wiring (P1-12 hardening).

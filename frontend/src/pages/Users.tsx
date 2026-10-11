@@ -1,6 +1,9 @@
+import { Box, Typography } from '@mui/material'
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { KeyRound, ShieldCheck, Trash2, UserPlus, Users as UsersIcon } from 'lucide-react'
 import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react'
-import { Badge, Button, Card, EmptyState, PageHeader } from '../components/ui'
+import { AppDataGrid } from '../components/AppDataGrid'
+import { Badge, Button, Card, PageHeader } from '../components/ui'
 import * as api from '../services/api'
 import type { AuthUser } from '../services/api'
 import { ROLE_DISPLAY } from '../services/rbacService'
@@ -79,6 +82,79 @@ export default function UsersPage() {
     }
   }
 
+  const columns: GridColDef<AuthUser>[] = [
+    {
+      field: 'displayName',
+      headerName: 'Account',
+      flex: 1,
+      minWidth: 200,
+      renderCell: (p) => (
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="body2" sx={{ fontWeight: 700 }}>
+            {p.row.displayName}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            since {new Date(p.row.createdAt).toLocaleDateString('en-IN')}
+          </Typography>
+        </Box>
+      ),
+    },
+    {
+      field: 'username',
+      headerName: 'Username',
+      width: 180,
+      renderCell: (p) => (
+        <Typography variant="body2" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
+          {p.row.username}
+        </Typography>
+      ),
+    },
+    {
+      field: 'role',
+      headerName: 'Role',
+      width: 220,
+      renderCell: (p) => (
+        <select
+          value={p.row.role}
+          onChange={(e) => changeRole(p.row, e.target.value as UserRole)}
+          className="inp"
+          aria-label={`Role for ${p.row.displayName}`}
+        >
+          {roleOptions.map((r) => (
+            <option key={r} value={r}>
+              {ROLE_DISPLAY[r]}
+            </option>
+          ))}
+        </select>
+      ),
+    },
+    {
+      field: 'actions',
+      headerName: '',
+      width: 130,
+      sortable: false,
+      filterable: false,
+      disableColumnMenu: true,
+      align: 'right',
+      headerAlign: 'right',
+      renderCell: (p) =>
+        pendingDelete === p.row.id ? (
+          <span className="inline-flex items-center gap-1.5">
+            <Button size="sm" variant="danger" onClick={() => removeUser(p.row)}>
+              Confirm
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setPendingDelete(null)}>
+              Cancel
+            </Button>
+          </span>
+        ) : (
+          <Button size="sm" variant="ghost" onClick={() => setPendingDelete(p.row.id)}>
+            <Trash2 size={13} />
+          </Button>
+        ),
+    },
+  ]
+
   return (
     <div className="space-y-5">
       <PageHeader
@@ -95,73 +171,20 @@ export default function UsersPage() {
 
       <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <Card title="Accounts" subtitle={`${users ? users.length : 0} account(s) on this facility`} pad={false}>
-          {error && (
-            <p className="m-4 rounded-xl bg-rose-50 px-3 py-2 text-[12px] font-semibold text-rose-700 ring-1 ring-inset ring-rose-200">
-              {error}
-            </p>
-          )}
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[560px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-ink-200 bg-ink-50/70 text-[10px] uppercase tracking-[0.08em] text-ink-500">
-                  <th className="px-5 py-3 font-bold">Account</th>
-                  <th className="px-3 py-3 font-bold">Username</th>
-                  <th className="px-3 py-3 font-bold">Role</th>
-                  <th className="px-3 py-3 text-right font-bold">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-ink-100">
-                {users?.map((u) => (
-                  <tr key={u.id} className="transition-colors hover:bg-ink-50/60">
-                    <td className="px-5 py-3">
-                      <p className="text-[13px] font-bold text-ink-900">{u.displayName}</p>
-                      <p className="text-[11px] text-ink-400">
-                        since {new Date(u.createdAt).toLocaleDateString('en-IN')}
-                      </p>
-                    </td>
-                    <td className="px-3 py-3 font-mono text-[12px] text-ink-600">{u.username}</td>
-                    <td className="px-3 py-3">
-                      <select
-                        value={u.role}
-                        onChange={(e) => changeRole(u, e.target.value as UserRole)}
-                        className="inp"
-                        aria-label={`Role for ${u.displayName}`}
-                      >
-                        {roleOptions.map((r) => (
-                          <option key={r} value={r}>
-                            {ROLE_DISPLAY[r]}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="px-3 py-3 text-right">
-                      {pendingDelete === u.id ? (
-                        <span className="inline-flex items-center gap-1.5">
-                          <Button size="sm" variant="danger" onClick={() => removeUser(u)}>
-                            Confirm
-                          </Button>
-                          <Button size="sm" variant="ghost" onClick={() => setPendingDelete(null)}>
-                            Cancel
-                          </Button>
-                        </span>
-                      ) : (
-                        <Button size="sm" variant="ghost" onClick={() => setPendingDelete(u.id)}>
-                          <Trash2 size={13} />
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-                {users && users.length === 0 && (
-                  <tr>
-                    <td colSpan={4}>
-                      <EmptyState icon={<UsersIcon size={20} />} title="No accounts yet" hint="Create the first account on the right." />
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <AppDataGrid<AuthUser>
+            rows={users ?? []}
+            columns={columns}
+            ariaLabel="Accounts"
+            storageKey="users"
+            loading={!users && !error}
+            error={error}
+            onRetry={refresh}
+            getRowId={(u) => u.id}
+            rowHeight={58}
+            quickFilterPlaceholder="Search accounts…"
+            emptyTitle="No accounts yet"
+            emptyBody="Create the first account on the right."
+          />
         </Card>
 
         <Card title="Create account" subtitle="Staff accounts you set up here can sign in immediately.">

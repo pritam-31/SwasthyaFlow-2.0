@@ -836,11 +836,6 @@ export function AppLayout() {
                   </div>
                 </div>
               </div>
-
-              {/* Single persistent non-diagnostic notice */}
-              <div className="mt-4">
-                <SafetyNotice />
-              </div>
             </header>
 
             {/* -------- Page content -------- */}

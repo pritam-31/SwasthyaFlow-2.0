@@ -1,8 +1,11 @@
 import { ArrowRight, CalendarClock, ChevronRight, FlaskConical } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { AppDataGrid } from '../components/AppDataGrid'
 import { Badge, Card, cx, InfoBanner, PageHeader, SourceRef, Stagger, StaggerItem } from '../components/ui'
 import { reviewMeta, urgencyOf, urgentMeta } from '../lib/format'
 import { useApp } from '../store/AppStore'
+
+type Comparison = { id: string; param: string; previous: string; current: string; delta: string }
 
 export default function FollowupsPage() {
   const { cases, reports } = useApp()
@@ -91,38 +94,56 @@ export default function FollowupsPage() {
             </div>
             <div>
               <p className="sf-eyebrow">Parameter-level comparison</p>
-              <div className="mt-2.5 overflow-hidden rounded-xl border border-ink-200">
-                <table className="sf-table w-full !text-xs">
-                  <thead>
-                    <tr>
-                      <th>Parameter</th>
-                      <th>Previous</th>
-                      <th />
-                      <th>Current</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {prev.fields.map((f, i) => (
-                      <tr key={f.param}>
-                        <td className="font-bold text-ink-800">{f.param}</td>
-                        <td>
-                          {f.value} {f.unit}
-                        </td>
-                        <td>
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-50 text-brand-600">
-                            <ArrowRight size={10} />
+              <div className="mt-2.5">
+                <AppDataGrid<Comparison>
+                  rows={prev.fields.map((f, i) => ({
+                    id: f.param,
+                    param: f.param,
+                    previous: `${f.value}${f.unit ? ` ${f.unit}` : ''}`,
+                    current: `${cur.fields[i]?.value ?? '—'}${cur.fields[i]?.unit ? ` ${cur.fields[i].unit}` : ''}`,
+                    delta: `${f.value} → ${cur.fields[i]?.value ?? '—'}`,
+                  }))}
+                  ariaLabel="Parameter-level comparison"
+                  getRowId={(r) => r.id}
+                  hideToolbar
+                  hideFooter
+                  defaultDensity="compact"
+                  columns={[
+                    {
+                      field: 'param',
+                      headerName: 'Parameter',
+                      flex: 1,
+                      renderCell: (p) => <span className="font-bold text-ink-800">{p.row.param}</span>,
+                    },
+                    { field: 'previous', headerName: 'Previous', width: 130 },
+                    {
+                      field: 'arrow',
+                      headerName: '',
+                      width: 44,
+                      sortable: false,
+                      filterable: false,
+                      disableColumnMenu: true,
+                      renderCell: () => (
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-50 text-brand-600">
+                          <ArrowRight size={10} />
+                        </span>
+                      ),
+                    },
+                    {
+                      field: 'current',
+                      headerName: 'Current',
+                      flex: 1.2,
+                      renderCell: (p) => (
+                        <span className="inline-flex items-center gap-1.5">
+                          {p.row.current}
+                          <span className="rounded bg-ink-50 px-1.5 py-0.5 text-[9px] font-semibold text-ink-400">
+                            {p.row.delta}
                           </span>
-                        </td>
-                        <td>
-                          {cur.fields[i]?.value} {cur.fields[i]?.unit}
-                          <span className="ml-1.5 rounded bg-ink-50 px-1.5 py-0.5 text-[9px] font-semibold text-ink-400">
-                            {f.value} → {cur.fields[i]?.value}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </span>
+                      ),
+                    },
+                  ]}
+                />
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <CalendarClock size={13} className="text-ink-400" />

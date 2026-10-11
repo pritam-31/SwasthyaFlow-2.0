@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Box, Typography } from '@mui/material'
 import {
   AlertTriangle,
   ArrowRight,
@@ -15,6 +16,7 @@ import {
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { DemoRunner } from '../components/DemoRunner'
+import { AppDataGrid, StatusPill, UrgencyPill, type ToneKey } from '../components/AppDataGrid'
 import { Badge, Button, Card, cx, EASE, EmptyState, KpiTile, PageHeader, ProgressBar } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
 import { getDisplayName } from '../lib/displayName'
@@ -125,49 +127,70 @@ function NeedsAttentionCard({ cases }: { cases: CaseRecord[] }) {
 function RecentCasesCard({ cases }: { cases: CaseRecord[] }) {
   const navigate = useNavigate()
   const recent = [...cases].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).slice(0, 6)
+  const reviewTone: Record<string, ToneKey> = {
+    'awaiting-nurse': 'amber',
+    'awaiting-doctor': 'violet',
+    reviewed: 'sky',
+    closed: 'emerald',
+  }
   return (
     <Card title="Recent cases" subtitle="Latest intake across all modes" className="lg:col-span-2" pad={false}>
-      <div className="overflow-x-auto">
-        <table className="sf-table min-w-[680px]">
-          <thead>
-            <tr>
-              <th>Case</th>
-              <th>Concern</th>
-              <th>Urgency</th>
-              <th>Status</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {recent.map((c) => {
-              const urg = urgencyOf(c)
-              return (
-                <tr key={c.id} onClick={() => navigate(`/app/cases/${c.id}`)} className="cursor-pointer">
-                  <td>
-                    <p className="text-[13px] font-bold text-ink-800">{c.patientId}</p>
-                    <p className="text-[11px] text-ink-400">{c.createdAt} · {c.language}</p>
-                  </td>
-                  <td className="max-w-[240px]">
-                    <p className="truncate text-[13px] text-ink-600">{c.chiefConcern}</p>
-                  </td>
-                  <td>
-                    <Badge className={urgentMeta[urg].classes}>
-                      <span className={cx('h-1.5 w-1.5 rounded-full', urgentMeta[urg].dot)} />
-                      {urgentMeta[urg].label}
-                    </Badge>
-                  </td>
-                  <td>
-                    <Badge className={reviewMeta[c.reviewStatus].classes}>{reviewMeta[c.reviewStatus].label}</Badge>
-                  </td>
-                  <td>
-                    <ArrowRight size={15} className="text-ink-300 transition-transform group-hover:translate-x-0.5" />
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+      <AppDataGrid<CaseRecord>
+        rows={recent}
+        ariaLabel="Recent cases"
+        storageKey="dashboard-recent-cases"
+        getRowId={(c) => c.id}
+        hideToolbar
+        defaultDensity="compact"
+        onRowClick={(c) => navigate(`/app/cases/${c.id}`)}
+        columns={[
+          {
+            field: 'patientId',
+            headerName: 'Case',
+            width: 150,
+            renderCell: (p) => (
+              <Box>
+                <Typography sx={{ fontSize: 13, fontWeight: 700, color: 'text.primary' }}>{p.row.patientId}</Typography>
+                <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>
+                  {p.row.createdAt} · {p.row.mode}
+                </Typography>
+              </Box>
+            ),
+          },
+          {
+            field: 'chiefConcern',
+            headerName: 'Concern',
+            flex: 1,
+            minWidth: 220,
+            renderCell: (p) => <span className="line-clamp-2 text-[13px] text-ink-600">{p.row.chiefConcern}</span>,
+          },
+          {
+            field: 'urgency',
+            headerName: 'Urgency',
+            width: 120,
+            renderCell: (p) => <UrgencyPill level={urgencyOf(p.row)} />,
+          },
+          {
+            field: 'reviewStatus',
+            headerName: 'Status',
+            width: 150,
+            renderCell: (p) => (
+              <StatusPill tone={reviewTone[p.row.reviewStatus] ?? 'ink'}>
+                {reviewMeta[p.row.reviewStatus].label}
+              </StatusPill>
+            ),
+          },
+          {
+            field: 'actions',
+            headerName: '',
+            width: 48,
+            sortable: false,
+            filterable: false,
+            disableColumnMenu: true,
+            renderCell: () => <ArrowRight size={15} className="text-ink-300" />,
+          },
+        ]}
+      />
       <div className="border-t border-ink-100 px-5 py-3">
         <button
           type="button"

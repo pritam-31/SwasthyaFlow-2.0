@@ -1,3 +1,5 @@
+@layer mui;
+
 @import "tailwindcss";
 
 @theme {

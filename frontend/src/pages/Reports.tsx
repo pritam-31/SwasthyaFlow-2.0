@@ -1,14 +1,127 @@
+import { Box, LinearProgress, Typography } from '@mui/material'
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { ArrowRight, FileText, Image as ImageIcon, ScanSearch, ShieldCheck, Upload } from 'lucide-react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Badge, Card, cx, InfoBanner, KpiTile, PageHeader, ProgressBar } from '../components/ui'
+import { AppDataGrid, StatusPill, type ToneKey } from '../components/AppDataGrid'
+import { Card, InfoBanner, KpiTile, PageHeader } from '../components/ui'
 import { useApp } from '../store/AppStore'
+import type { Report } from '../types'
 
-export default function ReportsPage() {
-  const { reports, cases } = useApp()
+const OCR_TONE: Record<Report['ocrStatus'], ToneKey> = {
+  done: 'emerald',
+  'low-quality': 'amber',
+  failed: 'rose',
+}
+
+const OCR_LABEL: Record<Report['ocrStatus'], string> = {
+  done: 'Completed',
+  'low-quality': 'Low quality',
+  failed: 'Failed',
+}
+
+export default function Reports() {
+  const { cases, reports } = useApp()
   const navigate = useNavigate()
+
   const ocrDone = reports.filter((r) => r.ocrStatus === 'done').length
   const ocrFailed = reports.filter((r) => r.ocrStatus !== 'done').length
-  const verified = reports.reduce((acc, r) => acc + r.fields.filter((f) => f.status === 'verified').length, 0)
+  const verified = reports.reduce((sum, r) => sum + r.fields.filter((f) => f.status === 'verified').length, 0)
+
+  const columns = useMemo<GridColDef<Report>[]>(
+    () => [
+      {
+        field: 'name',
+        headerName: 'Report',
+        width: 280,
+        renderCell: (p: { row: Report }) => (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, height: '100%' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 32,
+                height: 32,
+                borderRadius: 2,
+                bgcolor: p.row.type === 'pdf' ? '#fff1f2' : '#f5f3ff',
+                color: p.row.type === 'pdf' ? '#f43f5e' : '#8b5cf6',
+              }}
+            >
+              {p.row.type === 'pdf' ? <FileText size={15} /> : <ImageIcon size={15} />}
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography variant="body2" sx={{ fontWeight: 700 }} noWrap>
+                {p.row.name}
+              </Typography>
+              {p.row.date && (
+                <Typography variant="caption" color="text.secondary">
+                  {p.row.date}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+        ),
+      },
+      {
+        field: 'caseId',
+        headerName: 'Case',
+        width: 170,
+        valueGetter: (_value, row: Report) => cases.find((c) => c.id === row.caseId)?.patientId ?? row.caseId,
+        renderCell: (p: { row: Report }) => (
+          <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+            {cases.find((c) => c.id === p.row.caseId)?.patientId ?? p.row.caseId}
+          </Typography>
+        ),
+      },
+      {
+        field: 'kind',
+        headerName: 'Kind',
+        width: 140,
+        renderCell: (p: { row: Report }) => <StatusPill tone="ink">{p.row.kind}</StatusPill>,
+      },
+      {
+        field: 'ocrStatus',
+        headerName: 'OCR status',
+        width: 170,
+        renderCell: (p: { row: Report }) => <StatusPill tone={OCR_TONE[p.row.ocrStatus]}>{OCR_LABEL[p.row.ocrStatus]}</StatusPill>,
+      },
+      {
+        field: 'fields',
+        headerName: 'Fields',
+        width: 100,
+        type: 'number' as const,
+        valueGetter: (_value, row: Report) => row.fields.length,
+        renderCell: (p: { row: Report }) => <Typography variant="body2">{p.row.fields.length}</Typography>,
+      },
+      {
+        field: 'verified',
+        headerName: 'Verified',
+        width: 170,
+        sortable: false,
+        filterable: false,
+        renderCell: (p: { row: Report }) => (
+          <Box sx={{ width: 110 }}>
+            <LinearProgress
+              variant="determinate"
+              value={verifiedRatio(p.row)}
+              aria-label={`Verified ${p.row.fields.filter((f) => f.status === 'verified').length} of ${p.row.fields.length}`}
+              sx={{
+                height: 5,
+                borderRadius: 999,
+                backgroundColor: '#eef2f6',
+                '& .MuiLinearProgress-bar': { backgroundColor: '#059669', borderRadius: 999 },
+              }}
+            />
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+              {verifiedCount(p.row)}/{p.row.fields.length}
+            </Typography>
+          </Box>
+        ),
+      },
+    ],
+    [cases],
+  )
 
   const compareCase = cases.find((c) => c.id === 'case-0006')
   const compareReports = reports.filter((r) => r.id === 'rpt-0003' || r.id === 'rpt-0004')
@@ -16,9 +129,9 @@ export default function ReportsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Investigations"
+        eyebrow="Reports & documents"
         title="Reports"
-        subtitle="Every OCR value is source-backed and marked “needs verification” until a human checks it."
+        subtitle="OCR-extracted values stay marked for verification until a healthcare worker confirms them. No value is invented."
         action={
           <button
             onClick={() => navigate('/app/intake')}
@@ -42,74 +155,18 @@ export default function ReportsPage() {
       </div>
 
       <Card title="All reports" subtitle={`${reports.length} documents across the pilot`} pad={false}>
-        <div className="overflow-x-auto">
-          <table className="sf-table min-w-[760px]">
-            <thead>
-              <tr>
-                <th>Report</th>
-                <th>Case</th>
-                <th>Kind</th>
-                <th>OCR status</th>
-                <th>Fields</th>
-                <th>Verified</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reports.map((r, i) => {
-                const owner = cases.find((c) => c.id === r.caseId)
-                const ratio = r.fields.length ? (r.fields.filter((f) => f.status === 'verified').length / r.fields.length) * 100 : 0
-                return (
-                  <tr key={r.id} onClick={() => navigate(`/app/cases/${r.caseId}`)} className="cursor-pointer">
-                    <td>
-                      <div className="flex items-center gap-2.5">
-                        <span
-                          className={cx(
-                            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
-                            r.type === 'pdf' ? 'bg-rose-50 text-rose-500' : 'bg-violet-50 text-violet-500',
-                          )}
-                        >
-                          {r.type === 'pdf' ? <FileText size={15} /> : <ImageIcon size={15} />}
-                        </span>
-                        <div>
-                          <p className="text-[13px] font-bold text-ink-800">{r.name}</p>
-                          <p className="text-[11px] text-ink-400">{r.date}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <p className="text-xs font-bold text-brand-700">{owner?.patientId ?? r.caseId}</p>
-                      <p className="text-[11px] text-ink-400">{(i + 1).toString().padStart(2, '0')}</p>
-                    </td>
-                    <td>
-                      <Badge className="bg-white text-ink-500 ring-ink-200">{r.kind}</Badge>
-                    </td>
-                    <td>
-                      <Badge
-                        className={
-                          r.ocrStatus === 'done'
-                            ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                            : 'bg-rose-50 text-rose-700 ring-rose-200'
-                        }
-                      >
-                        <span className={cx('h-1.5 w-1.5 rounded-full', r.ocrStatus === 'done' ? 'bg-emerald-500' : 'bg-rose-500')} />
-                        {r.ocrStatus === 'done' ? 'Completed' : r.ocrStatus === 'low-quality' ? 'Low quality' : 'Failed'}
-                      </Badge>
-                    </td>
-                    <td className="text-xs font-semibold text-ink-600">{r.fields.length}</td>
-                    <td>
-                      <div className="w-24">
-                        <ProgressBar value={ratio} tone="emerald" />
-                        <p className="mt-1 text-[10px] font-semibold text-ink-500">
-                          {r.fields.filter((f) => f.status === 'verified').length}/{r.fields.length}
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+        <AppDataGrid<Report>
+          rows={reports}
+          columns={columns}
+          ariaLabel="All reports"
+          storageKey="reports"
+          rowHeight={60}
+          checkboxSelection={false}
+          onRowClick={(r) => navigate(`/app/cases/${r.caseId}`)}
+          quickFilterPlaceholder="Search reports…"
+          emptyTitle="No reports yet"
+          emptyBody="Upload a lab report or image to get started."
+        />
       </Card>
 
       {compareCase && compareReports.length === 2 && (
@@ -158,12 +215,11 @@ export default function ReportsPage() {
               r.fields.map((f) => (
                 <span
                   key={f.id}
-                  className={cx(
-                    'inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium',
+                  className={
                     f.status === 'verified'
-                      ? 'border-emerald-200 bg-emerald-50/60 text-emerald-800'
-                      : 'border-amber-200 bg-amber-50/60 text-amber-800',
-                  )}
+                      ? 'inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50/60 px-2.5 py-1.5 text-xs font-medium text-emerald-800'
+                      : 'inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50/60 px-2.5 py-1.5 text-xs font-medium text-amber-800'
+                  }
                 >
                   <span className="h-1.5 w-1.5 rounded-full bg-current" />
                   {f.param}: <strong>{f.status}</strong>
@@ -180,4 +236,13 @@ export default function ReportsPage() {
       )}
     </div>
   )
+}
+
+function verifiedCount(report: Report) {
+  return report.fields.filter((f) => f.status === 'verified').length
+}
+
+function verifiedRatio(report: Report) {
+  const total = report.fields.length
+  return total ? (verifiedCount(report) / total) * 100 : 0
 }

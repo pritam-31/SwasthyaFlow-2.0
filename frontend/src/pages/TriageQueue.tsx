@@ -1,10 +1,13 @@
-import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronRight, Filter, Search } from 'lucide-react'
+import { Box, Button, Typography } from '@mui/material'
+import { motion } from 'framer-motion'
+import { ChevronRight } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Badge, Card, cx, EASE, EmptyState, PageHeader } from '../components/ui'
-import { formatCompletenessLabel, reviewMeta, urgentMeta, urgencyOf } from '../lib/format'
+import { AppDataGrid, CompletenessCell, StatusPill, UrgencyPill, type ToneKey } from '../components/AppDataGrid'
+import { Card, cx, PageHeader } from '../components/ui'
+import { reviewMeta, urgencyOf } from '../lib/format'
 import { useApp } from '../store/AppStore'
+import type { CaseRecord, ReviewStatus } from '../types'
 
 type Tab = 'all' | 'awaiting-nurse' | 'awaiting-doctor' | 'reviewed' | 'urgent'
 
@@ -16,30 +19,128 @@ const TABS: Array<{ key: Tab; label: string }> = [
   { key: 'reviewed', label: 'Reviewed / closed' },
 ]
 
+const STATUS_TONE: Record<ReviewStatus, ToneKey> = {
+  'awaiting-nurse': 'sky',
+  'awaiting-doctor': 'violet',
+  reviewed: 'emerald',
+  closed: 'ink',
+}
+
 export default function TriageQueue() {
   const { cases, role } = useApp()
   const navigate = useNavigate()
   const [tab, setTab] = useState<Tab>('all')
-  const [q, setQ] = useState('')
 
-  const list = useMemo(() => {
-    let out = cases
-    if (tab === 'awaiting-nurse') out = out.filter((c) => c.reviewStatus === 'awaiting-nurse')
-    if (tab === 'awaiting-doctor') out = out.filter((c) => c.reviewStatus === 'awaiting-doctor')
-    if (tab === 'urgent') out = out.filter((c) => c.urgencySignals.length > 0)
-    if (tab === 'reviewed') out = out.filter((c) => c.reviewStatus === 'reviewed' || c.reviewStatus === 'closed')
-    if (q.trim()) {
-      const needle = q.toLowerCase()
-      out = out.filter(
-        (c) =>
-          c.patientId.toLowerCase().includes(needle) ||
-          c.chiefConcern.toLowerCase().includes(needle) ||
-          c.language.toLowerCase().includes(needle),
-      )
+  const counts = useMemo(() => {
+    const base: Record<Tab, number> = { all: cases.length, urgent: 0, reviewed: 0, 'awaiting-nurse': 0, 'awaiting-doctor': 0 }
+    for (const c of cases) {
+      if (c.reviewStatus === 'awaiting-nurse') base['awaiting-nurse'] += 1
+      if (c.reviewStatus === 'awaiting-doctor') base['awaiting-doctor'] += 1
+      if (c.reviewStatus === 'reviewed' || c.reviewStatus === 'closed') base.reviewed += 1
+      if (c.urgencySignals.length > 0) base.urgent += 1
     }
+    return base
+  }, [cases])
+
+  const rows = useMemo(() => {
     const rank = { urgent: 0, prompt: 1, routine: 2 }
-    return [...out].sort((a, b) => rank[urgencyOf(a)] - rank[urgencyOf(b)])
-  }, [cases, tab, q])
+    return cases.filter((c) => (tab === 'all' ? true : tab === 'urgent' ? c.urgencySignals.length > 0 : tab === 'reviewed' ? c.reviewStatus === 'reviewed' || c.reviewStatus === 'closed' : c.reviewStatus === tab)).sort((a, b) => rank[urgencyOf(a)] - rank[urgencyOf(b)])
+  }, [cases, tab])
+
+  const columns = useMemo<import('@mui/x-data-grid-pro').GridColDef<CaseRecord>[]>(
+    () => [
+      {
+        field: 'patientId',
+        headerName: 'Case',
+        width: 190,
+        renderCell: (p) => (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, height: '100%' }}>
+            <Box
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: '10px',
+                display: 'grid',
+                placeItems: 'center',
+                fontSize: 11,
+                fontWeight: 800,
+                flexShrink: 0,
+                bgcolor: 'brand.50',
+                color: 'brand.700',
+              }}
+            >
+              {p.row.patientId.slice(-3)}
+            </Box>
+            <Box sx={{ minWidth: 0 }}>
+              <Typography sx={{ fontWeight: 700, fontSize: 13, lineHeight: 1.2 }}>{p.row.patientId}</Typography>
+            </Box>
+          </Box>
+        ),
+      },
+      {
+        field: 'chiefConcern',
+        headerName: 'Concern',
+        flex: 1,
+        minWidth: 220,
+        renderCell: (p) => (
+          <Typography variant="body2" sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {p.row.chiefConcern}
+          </Typography>
+        ),
+      },
+      {
+        field: 'urgency',
+        headerName: 'Urgency',
+        width: 190,
+        valueGetter: (_value, row) => urgencyOf(row),
+        renderCell: (p) => <UrgencyPill level={urgencyOf(p.row)} />,
+      },
+      {
+        field: 'completeness',
+        headerName: 'Completeness',
+        width: 170,
+        type: 'number',
+        renderCell: (p) => <CompletenessCell value={p.row.completeness} />,
+      },
+      {
+        field: 'language',
+        headerName: 'Language',
+        width: 120,
+        renderCell: (p) => <StatusPill tone="ink">{p.row.language}</StatusPill>,
+      },
+      {
+        field: 'reportCount',
+        headerName: 'Reports',
+        width: 100,
+        type: 'number',
+        valueGetter: (_value, row) => row.reportIds.length,
+        renderCell: (p) => <Typography variant="body2">{p.row.reportIds.length}</Typography>,
+      },
+      {
+        field: 'reviewStatus',
+        headerName: 'Status',
+        width: 240,
+        valueGetter: (_value, row) => reviewMeta[row.reviewStatus].label,
+        renderCell: (p) => <StatusPill tone={STATUS_TONE[p.row.reviewStatus]}>{reviewMeta[p.row.reviewStatus].label}</StatusPill>,
+      },
+      {
+        field: 'actions',
+        headerName: '',
+        width: 56,
+        sortable: false,
+        filterable: false,
+        disableColumnMenu: true,
+        renderCell: () => (
+          <Box sx={{ display: 'flex', alignItems: 'center', height: '100%', color: 'text.disabled' }}>
+            <ChevronRight size={16} />
+          </Box>
+        ),
+      },
+    ],
+    [],
+  )
+
+  const openCase = (row: CaseRecord) => navigate(`/app/cases/${row.id}`)
 
   return (
     <div className="space-y-6">
@@ -49,161 +150,70 @@ export default function TriageQueue() {
         subtitle="AI-prepares each case; a qualified healthcare worker keeps control. Urgency labels are workflow signals, not diagnoses."
       />
       <Card pad={false}>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink-100 px-5 py-3">
-          <div className="flex flex-wrap gap-1.5">
-            {TABS.map((t) => {
-              const count =
-                t.key === 'all'
-                  ? cases.length
-                  : t.key === 'awaiting-nurse'
-                    ? cases.filter((c) => c.reviewStatus === 'awaiting-nurse').length
-                    : t.key === 'awaiting-doctor'
-                      ? cases.filter((c) => c.reviewStatus === 'awaiting-doctor').length
-                      : t.key === 'urgent'
-                        ? cases.filter((c) => c.urgencySignals.length > 0).length
-                        : cases.filter((c) => c.reviewStatus === 'reviewed' || c.reviewStatus === 'closed').length
-              return (
-                <button
-                  key={t.key}
-                  onClick={() => setTab(t.key)}
-                  className={cx(
-                    'relative rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors',
-                    tab === t.key ? 'text-white' : 'bg-ink-100 text-ink-600 hover:bg-ink-200',
-                  )}
-                >
-                  {tab === t.key && (
-                    <motion.span
-                      layoutId="triage-tab"
-                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                      className="absolute inset-0 rounded-lg bg-brand-700"
-                    />
-                  )}
-                  <span className="relative z-10">
-                    {t.label} <span className="opacity-70">({count})</span>
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-          <div className="flex w-full gap-2 sm:w-auto">
-            <div className="relative flex-1 sm:w-64">
-              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-400" />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Search case / language…"
-                className="w-full rounded-lg border border-ink-200 bg-white py-1.5 pl-8 pr-3 text-xs text-ink-700 outline-none focus:border-brand-500"
-              />
-            </div>
-            <button className="rounded-lg border border-ink-200 bg-white p-2 text-ink-500 hover:bg-ink-50" title="Filter">
-              <Filter size={15} />
+        <div className="flex flex-wrap gap-1.5 border-b border-ink-100 px-5 py-3">
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={cx(
+                'relative rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+                tab === t.key ? 'text-white' : 'text-ink-600 hover:bg-ink-100',
+              )}
+            >
+              {tab === t.key && (
+                <motion.span
+                  layoutId="triage-tab"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  className="absolute inset-0 rounded-lg bg-brand-700"
+                />
+              )}
+              <span className="relative z-10">
+                {t.label} <span className="opacity-70">({counts[t.key]})</span>
+              </span>
             </button>
-          </div>
+          ))}
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[860px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-ink-200 bg-ink-50/70 text-[10px] uppercase tracking-[0.08em] text-ink-500">
-                <th className="px-5 py-3 font-bold">Case</th>
-                <th className="px-3 py-3 font-bold">Concern</th>
-                <th className="px-3 py-3 font-bold">Urgency</th>
-                <th className="px-3 py-3 font-bold">Completeness</th>
-                <th className="px-3 py-3 font-bold">Language</th>
-                <th className="px-3 py-3 font-bold">Reports</th>
-                <th className="px-3 py-3 font-bold">Status</th>
-                <th className="px-3 py-3 font-bold" />
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-ink-100">
-              <AnimatePresence initial={false}>
-                {list.map((c, i) => {
-                  const urg = urgencyOf(c)
-                  return (
-                    <motion.tr
-                      key={c.id}
-                      layout
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -14 }}
-                      transition={{ duration: 0.28, delay: 0.02 * Math.min(i, 8), ease: EASE }}
-                      onClick={() => navigate(`/app/cases/${c.id}`)}
-                      className="group cursor-pointer transition-colors hover:bg-brand-50/40"
-                    >
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2.5">
-                        <div
-                          className={cx(
-                            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-extrabold',
-                            i % 4 === 0
-                              ? 'bg-brand-100 text-brand-700'
-                              : i % 4 === 1
-                                ? 'bg-sky-100 text-sky-700'
-                                : i % 4 === 2
-                                  ? 'bg-violet-100 text-violet-700'
-                                  : 'bg-amber-100 text-amber-700',
-                          )}
-                        >
-                          {c.patientId.slice(-3)}
-                        </div>
-                        <div>
-                          <p className="font-bold text-ink-800">{c.patientId}</p>
-                          <p className="text-[11px] text-ink-400">{c.createdAt} · {c.reporter}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="max-w-[260px] px-3 py-3.5">
-                      <p className="truncate text-[13px] text-ink-700">{c.chiefConcern}</p>
-                    </td>
-                    <td className="px-3 py-3.5">
-                      <Badge className={urgentMeta[urg].classes}>
-                        <span className={cx('h-1.5 w-1.5 rounded-full', urgentMeta[urg].dot)} />
-                        {urgentMeta[urg].label}
-                      </Badge>
-                    </td>
-                    <td className="px-3 py-3.5">
-                      <div className="w-24">
-                        <p className="text-xs font-semibold text-ink-700">
-                          {c.completeness}%{' '}
-                          <span className="font-normal text-ink-400">({formatCompletenessLabel(c.completeness)})</span>
-                        </p>
-                        <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-ink-100">
-                          <div
-                            className={cx(
-                              'h-full rounded-full',
-                              c.completeness >= 90 ? 'bg-emerald-500' : c.completeness >= 70 ? 'bg-brand-500' : 'bg-amber-400',
-                            )}
-                            style={{ width: `${c.completeness}%` }}
-                          />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-3.5">
-                      <Badge className="bg-white text-ink-600 ring-ink-200">{c.language}</Badge>
-                    </td>
-                    <td className="px-3 py-3.5 text-xs text-ink-600">{c.reportIds.length}</td>
-                    <td className="px-3 py-3.5">
-                      <Badge className={reviewMeta[c.reviewStatus].classes}>{reviewMeta[c.reviewStatus].label}</Badge>
-                    </td>
-                    <td className="px-3 py-3.5">
-                      <ChevronRight size={16} className="text-ink-300 transition-transform group-hover:translate-x-0.5" />
-                    </td>
-                    </motion.tr>
-                  )
-                })}
-              </AnimatePresence>
-            </tbody>
-          </table>
-          {list.length === 0 && (
-            <EmptyState
-              icon={<Search size={20} />}
-              title="No cases in this view"
-              hint="Try a different filter or create a new intake case."
-            />
+        <AppDataGrid<CaseRecord>
+          rows={rows}
+          columns={columns}
+          ariaLabel="Patient triage queue"
+          storageKey="triage-queue"
+          defaultDensity="compact"
+          rowHeight={60}
+          getRowId={(row) => row.id}
+          onRowClick={openCase}
+          checkboxSelection={role !== 'admin'}
+          quickFilterPlaceholder="Search case / language…"
+          bulkActions={(_ids, selected) => (
+            <Button size="small" variant="contained" disableElevation onClick={() => selected[0] && openCase(selected[0])}>
+              Open
+            </Button>
           )}
-        </div>
+          columnVisibilityModel={{ reportCount: role !== 'admin' }}
+          mobileCardRenderer={(c) => (
+            <button onClick={() => openCase(c)} className="w-full text-left">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-bold text-ink-900">{c.patientId}</span>
+                <UrgencyPill level={urgencyOf(c)} />
+              </div>
+              <p className="mt-1 line-clamp-2 text-sm text-ink-600">{c.chiefConcern}</p>
+              <div className="mt-2 flex items-center gap-2">
+                <StatusPill tone={STATUS_TONE[c.reviewStatus]}>{reviewMeta[c.reviewStatus].label}</StatusPill>
+                <span className="text-xs text-ink-500">{c.completeness}% complete</span>
+              </div>
+            </button>
+          )}
+          emptyTitle="No cases in this view"
+          emptyBody="Try a different filter or create a new intake case."
+        />
+
         <div className="border-t border-ink-100 px-5 py-2.5 text-[11px] text-ink-500">
-          {role === 'nurse' ? 'You can open a case, verify AI-extracted fields and escalate to the doctor.' : role === 'doctor' ? 'You can review source material, approve information and decide on referral. Referrals are only sent after your approval.' : 'Administrator view — read-only queue overview.'}
+          {role === 'nurse'
+            ? 'You can open a case, verify AI-extracted fields and escalate to the doctor.'
+            : role === 'doctor'
+              ? 'You can review source material, approve information and decide on referral. Referrals are only sent after your approval.'
+              : 'Administrator view - read-only queue overview.'}
         </div>
       </Card>
     </div>

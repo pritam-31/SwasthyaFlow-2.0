@@ -1,4 +1,6 @@
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { BarChart3, Gauge, PenLine, ScanSearch, ShieldCheck, Wrench } from 'lucide-react'
+import { AppDataGrid } from '../components/AppDataGrid'
 import { Card, cx, InfoBanner, KpiTile, PageHeader, ProgressBar } from '../components/ui'
 import { useApp } from '../store/AppStore'
 
@@ -63,39 +65,41 @@ export default function AnalyticsPage() {
       </div>
 
       <Card title="Metrics by language" subtitle="Transparent evaluation — acknowledges that AI performance varies across languages and input quality.">
-        <div className="overflow-x-auto">
-          <table className="sf-table min-w-[620px]">
-            <thead>
-              <tr>
-                <th>Metric</th>
-                {LANGS.map((l) => (
-                  <th key={l.key}>{l.label}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {liveRows.map((r) => (
-                <tr key={r.metric}>
-                  <td className="font-semibold text-ink-700">{r.metric}</td>
-                  {LANGS.map((l) => {
-                    const v = r[l.key]
-                    const max = Math.max(1, ...LANGS.map((ll) => r[ll.key]))
-                    return (
-                      <td key={l.key}>
-                        <div className="flex items-center gap-2">
-                          <span className="w-5 text-xs font-bold text-ink-800">{v}</span>
-                          <div className="w-24">
-                            <ProgressBar value={(v / max) * 100} tone={v === 0 ? 'brand' : 'violet'} />
-                          </div>
-                        </div>
-                      </td>
-                    )
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <AppDataGrid<LiveRow>
+          rows={liveRows}
+          ariaLabel="Metrics by language"
+          getRowId={(r) => r.metric}
+          hideToolbar
+          hideFooter
+          defaultDensity="compact"
+          columns={[
+            {
+              field: 'metric',
+              headerName: 'Metric',
+              flex: 1.4,
+              minWidth: 220,
+              renderCell: (p) => <span className="font-semibold text-ink-700">{p.row.metric}</span>,
+            },
+            ...LANGS.map<GridColDef<LiveRow>>((l) => ({
+              field: l.key,
+              headerName: l.label,
+              flex: 1,
+              minWidth: 140,
+              renderCell: (p) => {
+                const v = p.row[l.key]
+                const max = Math.max(1, ...LANGS.map((ll) => p.row[ll.key]))
+                return (
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 text-xs font-bold text-ink-800">{v}</span>
+                    <div className="w-24">
+                      <ProgressBar value={(v / max) * 100} tone={v === 0 ? 'brand' : 'violet'} />
+                    </div>
+                  </div>
+                )
+              },
+            })),
+          ]}
+        />
         <p className="mt-3 flex items-center gap-1.5 text-[11px] text-ink-400">
           <ShieldCheck size={13} className="text-brand-600" />
           No automatic training on patient information. Metrics are used for evaluation and responsible-AI review only.
