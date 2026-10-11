@@ -16,6 +16,7 @@ import {
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTriage } from '../context/TriageContext'
+import { AppDataGrid } from '../components/AppDataGrid'
 import { Badge, Button, Card, cx, InfoBanner, Modal, ProgressBar, SourceRef, Stagger, StaggerItem } from '../components/ui'
 import TimelineSummaryCard from '../components/timeline/TimelineSummaryCard'
 import FollowUpList from '../components/followups/FollowUpList'
@@ -375,47 +376,65 @@ function ReportsSection({ c }: { c: CaseRecord }) {
           </div>
           <p className="mt-1.5 rounded-lg bg-ink-50 px-3 py-2 text-[11px] leading-relaxed text-ink-600">{r.aiNote}</p>
           {r.fields.length > 0 && (
-            <div className="mt-2 overflow-x-auto rounded-lg border border-ink-200">
-              <table className="w-full min-w-[560px] text-left text-xs">
-                <thead>
-                  <tr className="border-b border-ink-200 bg-ink-50 text-[10px] uppercase tracking-wide text-ink-400">
-                    <th className="px-3 py-2 font-semibold">Parameter</th>
-                    <th className="px-3 py-2 font-semibold">Value</th>
-                    <th className="px-3 py-2 font-semibold">Reference range</th>
-                    <th className="px-3 py-2 font-semibold">Status</th>
-                    <th className="px-3 py-2 font-semibold">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-ink-100">
-                  {r.fields.map((f) => (
-                    <tr key={f.id}>
-                      <td className="px-3 py-2 font-medium text-ink-800">{f.param}</td>
-                      <td className="px-3 py-2">
-                        {f.value} {f.unit}
-                      </td>
-                      <td className="px-3 py-2 text-ink-500">{f.referenceRange}</td>
-                      <td className="px-3 py-2">
-                        <Badge
-                          className={
-                            f.status === 'verified'
-                              ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                              : 'bg-amber-50 text-amber-700 ring-amber-200'
-                          }
-                        >
-                          {f.status === 'verified' ? 'Verified' : 'Needs verification'}
-                        </Badge>
-                      </td>
-                      <td className="px-3 py-2">
-                        {f.status !== 'verified' && (
-                          <Button variant="secondary" size="sm" onClick={() => verifyReportField(r.id, f.id)}>
-                            <CheckCircle2 size={12} /> Verify
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="mt-2">
+              <AppDataGrid<Report['fields'][number]>
+                rows={r.fields}
+                ariaLabel={`Extracted values for ${r.name}`}
+                getRowId={(f) => f.id}
+                hideToolbar
+                hideFooter
+                defaultDensity="compact"
+                columns={[
+                  {
+                    field: 'param',
+                    headerName: 'Parameter',
+                    flex: 1,
+                    renderCell: (p) => <span className="font-medium text-ink-800">{p.row.param}</span>,
+                  },
+                  {
+                    field: 'value',
+                    headerName: 'Value',
+                    flex: 1,
+                    renderCell: (p) => (
+                      <span>
+                        {p.row.value}
+                        {p.row.unit ? ` ${p.row.unit}` : ''}
+                      </span>
+                    ),
+                  },
+                  { field: 'referenceRange', headerName: 'Reference range', flex: 1.2, renderCell: (p) => <span className="text-ink-500">{p.row.referenceRange}</span> },
+                  {
+                    field: 'status',
+                    headerName: 'Status',
+                    width: 160,
+                    renderCell: (p) => (
+                      <Badge
+                        className={
+                          p.row.status === 'verified'
+                            ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                            : 'bg-amber-50 text-amber-700 ring-amber-200'
+                        }
+                      >
+                        {p.row.status === 'verified' ? 'Verified' : 'Needs verification'}
+                      </Badge>
+                    ),
+                  },
+                  {
+                    field: 'actions',
+                    headerName: 'Action',
+                    width: 130,
+                    sortable: false,
+                    filterable: false,
+                    disableColumnMenu: true,
+                    renderCell: (p) =>
+                      p.row.status !== 'verified' ? (
+                        <Button variant="secondary" size="sm" onClick={() => verifyReportField(r.id, p.row.id)}>
+                          <CheckCircle2 size={12} /> Verify
+                        </Button>
+                      ) : null,
+                  },
+                ]}
+              />
             </div>
           )}
           <p className="mt-1.5 text-[10px] text-ink-400">

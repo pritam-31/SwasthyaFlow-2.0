@@ -1,5 +1,7 @@
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { Activity, AlertTriangle, Play, RefreshCw, ShieldCheck } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { AppDataGrid } from '../AppDataGrid'
 import { Badge, Button, Card, EmptyState, InfoBanner, KpiTile, cx } from '../ui'
 import { FairnessFlagBadge } from './FairnessFlagBadge'
 import { BiasMetricsTable } from './BiasMetricsTable'
@@ -14,6 +16,7 @@ import type {
   DatasetManifest,
   EvaluationRun,
   EvaluationRunStatus,
+  FairnessReportRow,
 } from '../../types/modelcard.types'
 
 type Lang = 'en' | 'hi' | 'or'
@@ -124,6 +127,56 @@ export function BiasDashboard({
           : status === 'partial'
             ? t.statusPartial
             : t.statusFailed
+
+  const runColumns: GridColDef<EvaluationRun>[] = [
+    {
+      field: 'status',
+      headerName: t.status,
+      width: 140,
+      renderCell: (p) => (
+        <Badge
+          className={cx(
+            p.row.status === 'completed' && 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+            p.row.status === 'partial' && 'bg-amber-50 text-amber-700 ring-amber-200',
+            p.row.status === 'failed' && 'bg-rose-50 text-rose-700 ring-rose-200',
+            (p.row.status === 'queued' || p.row.status === 'running') && 'bg-sky-50 text-sky-700 ring-sky-200',
+          )}
+        >
+          {statusLabel(p.row.status)}
+        </Badge>
+      ),
+    },
+    {
+      field: 'startedAt',
+      headerName: t.runAt,
+      flex: 1,
+      minWidth: 170,
+      renderCell: (p) => <span className="text-[11px] text-ink-500">{formatDate(p.row.startedAt)}</span>,
+    },
+    {
+      field: 'createdBy',
+      headerName: t.createdBy,
+      flex: 1,
+      minWidth: 140,
+      valueGetter: (_value, row) => row.createdBy.username,
+      renderCell: (p) => <span className="text-[11px] text-ink-500">{p.row.createdBy.username}</span>,
+    },
+    {
+      field: 'layersCompleted',
+      headerName: t.layer,
+      width: 100,
+      align: 'right',
+      headerAlign: 'right',
+      valueGetter: (_value, row) => row.layersCompleted.length,
+      renderCell: (p) => <span className="text-[12px] tabular-nums text-ink-600">{p.row.layersCompleted.length}</span>,
+    },
+    {
+      field: 'reportId',
+      headerName: t.reportId,
+      width: 170,
+      renderCell: (p) => <span className="font-mono text-[10px] text-ink-400">{p.row.reportId ?? '—'}</span>,
+    },
+  ]
 
   return (
     <div className="space-y-5">
@@ -237,41 +290,15 @@ export function BiasDashboard({
         {runs.length === 0 ? (
           <EmptyState icon={<Activity size={18} />} title={t.noRuns} />
         ) : (
-          <div className="overflow-x-auto rounded-xl ring-1 ring-inset ring-ink-200">
-            <table className="w-full min-w-[560px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-ink-200 bg-ink-50/70 text-[10px] uppercase tracking-[0.08em] text-ink-500">
-                  <th className="px-3 py-2.5 font-bold">{t.status}</th>
-                  <th className="px-3 py-2.5 font-bold">{t.runAt}</th>
-                  <th className="px-3 py-2.5 font-bold">{t.createdBy}</th>
-                  <th className="px-3 py-2.5 text-right font-bold">{t.layer}</th>
-                  <th className="px-3 py-2.5 font-bold">{t.reportId}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-ink-100">
-                {runs.map((run) => (
-                  <tr key={run.runId} className="transition-colors hover:bg-ink-50/60">
-                    <td className="px-3 py-2.5">
-                      <Badge
-                        className={cx(
-                          run.status === 'completed' && 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-                          run.status === 'partial' && 'bg-amber-50 text-amber-700 ring-amber-200',
-                          run.status === 'failed' && 'bg-rose-50 text-rose-700 ring-rose-200',
-                          (run.status === 'queued' || run.status === 'running') && 'bg-sky-50 text-sky-700 ring-sky-200',
-                        )}
-                      >
-                        {statusLabel(run.status)}
-                      </Badge>
-                    </td>
-                    <td className="px-3 py-2.5 text-[11px] text-ink-500">{formatDate(run.startedAt)}</td>
-                    <td className="px-3 py-2.5 text-[11px] text-ink-500">{run.createdBy.username}</td>
-                    <td className="px-3 py-2.5 text-right text-[12px] tabular-nums text-ink-600">{run.layersCompleted.length}</td>
-                    <td className="px-3 py-2.5 font-mono text-[10px] text-ink-400">{run.reportId ?? '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <AppDataGrid<EvaluationRun>
+            rows={runs}
+            columns={runColumns}
+            ariaLabel={t.runsTitle}
+            getRowId={(run) => run.runId}
+            hideToolbar
+            hideFooter
+            defaultDensity="compact"
+          />
         )}
       </Card>
     </div>
@@ -280,44 +307,68 @@ export function BiasDashboard({
 
 function FairnessTable({ report, lang }: { report: BiasReport; lang: Lang }) {
   const t = BIAS_SECTION_LABELS[lang]
+  const columns: GridColDef<FairnessReportRow>[] = [
+    {
+      field: 'dimension',
+      headerName: t.dimension,
+      flex: 1,
+      minWidth: 160,
+      valueGetter: (_value, row) => BIAS_DIMENSION_LABELS[row.slice.dimension],
+      renderCell: (p) => <span className="text-[12px] font-medium text-ink-700">{BIAS_DIMENSION_LABELS[p.row.slice.dimension]}</span>,
+    },
+    {
+      field: 'metric',
+      headerName: t.metric,
+      flex: 1,
+      minWidth: 130,
+      valueGetter: (_value, row) => row.evaluatedMetric,
+      renderCell: (p) => <span className="text-[12px] text-ink-600">{BIAS_METRIC_LABELS[p.row.evaluatedMetric]}</span>,
+    },
+    {
+      field: 'maxMin',
+      headerName: t.spread,
+      width: 110,
+      align: 'right',
+      headerAlign: 'right',
+      renderCell: (p) => <span className="text-[12px] tabular-nums text-ink-600">{p.row.maxMin.toFixed(3)}</span>,
+    },
+    {
+      field: 'flag',
+      headerName: t.flag,
+      width: 120,
+      renderCell: (p) => <FairnessFlagBadge flag={p.row.flag} lang={lang} />,
+    },
+    {
+      field: 'slice',
+      headerName: t.slice,
+      flex: 1.4,
+      minWidth: 260,
+      renderCell: (p) => (
+        <div>
+          <div className="flex flex-wrap gap-1">
+            {p.row.individualSlices.map((s) => (
+              <span key={s.value} className="rounded bg-ink-100 px-1.5 py-0.5 text-[10px] text-ink-600">
+                {s.value}: <span className="tabular-nums">{pct(s.metric)}</span>
+              </span>
+            ))}
+          </div>
+          <p className="mt-1 text-[10px] text-ink-400">{p.row.interpretation}</p>
+        </div>
+      ),
+    },
+  ]
   return (
     <div className="space-y-3">
       <p className="text-[11px] leading-relaxed text-ink-500">{t.fairnessNote}</p>
-      <div className="overflow-x-auto rounded-xl ring-1 ring-inset ring-ink-200">
-        <table className="w-full min-w-[640px] text-left text-sm">
-          <thead>
-            <tr className="border-b border-ink-200 bg-ink-50/70 text-[10px] uppercase tracking-[0.08em] text-ink-500">
-              <th className="px-3 py-2.5 font-bold">{t.dimension}</th>
-              <th className="px-3 py-2.5 font-bold">{t.metric}</th>
-              <th className="px-3 py-2.5 text-right font-bold">{t.spread}</th>
-              <th className="px-3 py-2.5 font-bold">{t.flag}</th>
-              <th className="px-3 py-2.5 font-bold">{t.slice}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-ink-100">
-            {report.fairness.map((row) => (
-              <tr key={`${row.dimension}-${row.evaluatedMetric}`} className="align-top transition-colors hover:bg-ink-50/60">
-                <td className="px-3 py-2.5 text-[12px] font-medium text-ink-700">{BIAS_DIMENSION_LABELS[row.slice.dimension]}</td>
-                <td className="px-3 py-2.5 text-[12px] text-ink-600">{BIAS_METRIC_LABELS[row.evaluatedMetric]}</td>
-                <td className="px-3 py-2.5 text-right text-[12px] tabular-nums text-ink-600">{row.maxMin.toFixed(3)}</td>
-                <td className="px-3 py-2.5">
-                  <FairnessFlagBadge flag={row.flag} lang={lang} />
-                </td>
-                <td className="px-3 py-2.5">
-                  <div className="flex flex-wrap gap-1">
-                    {row.individualSlices.map((s) => (
-                      <span key={s.value} className="rounded bg-ink-100 px-1.5 py-0.5 text-[10px] text-ink-600">
-                        {s.value}: <span className="tabular-nums">{pct(s.metric)}</span>
-                      </span>
-                    ))}
-                  </div>
-                  <p className="mt-1 text-[10px] text-ink-400">{row.interpretation}</p>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <AppDataGrid<FairnessReportRow>
+        rows={report.fairness}
+        columns={columns}
+        ariaLabel={t.fairness}
+        getRowId={(row) => `${row.dimension}-${row.evaluatedMetric}`}
+        hideToolbar
+        hideFooter
+        defaultDensity="compact"
+      />
     </div>
   )
 }

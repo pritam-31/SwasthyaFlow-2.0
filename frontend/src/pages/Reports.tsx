@@ -174,42 +174,57 @@ export default function Reports() {
           title="Report comparison"
           subtitle='Neutral language only — "value changed from X to Y". A human interprets clinical meaning.'
         >
-          <div className="overflow-hidden rounded-xl border border-ink-200">
-            <table className="sf-table min-w-[560px] !text-xs">
-              <thead>
-                <tr>
-                  <th>Parameter</th>
-                  <th>Previous ({compareReports[0]?.name ?? '—'})</th>
-                  <th />
-                  <th>Current ({compareReports[1]?.name ?? '—'})</th>
-                </tr>
-              </thead>
-              <tbody>
-                {compareReports[0]?.fields.map((f, i) => {
-                  const cur = compareReports[1]?.fields[i]
-                  return (
-                    <tr key={f.param}>
-                      <td className="font-bold text-ink-800">{f.param}</td>
-                      <td>
-                        {f.value} {f.unit}
-                      </td>
-                      <td>
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-50 text-brand-600">
-                          <ArrowRight size={12} />
-                        </span>
-                      </td>
-                      <td>
-                        {cur?.value} {cur?.unit}
-                        <span className="ml-2 rounded bg-ink-50 px-1.5 py-0.5 text-[10px] text-ink-400">
-                          {f.value} → {cur?.value}
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+          <AppDataGrid<{ id: string; param: string; previous: string; current: string; delta: string }>
+            rows={(compareReports[0]?.fields ?? []).map((f, i) => {
+              const cur = compareReports[1]?.fields[i]
+              return {
+                id: f.id,
+                param: f.param,
+                previous: `${f.value}${f.unit ? ` ${f.unit}` : ''}`,
+                current: `${cur?.value ?? '—'}${cur?.unit ? ` ${cur.unit}` : ''}`,
+                delta: `${f.value} → ${cur?.value ?? '—'}`,
+              }
+            })}
+            ariaLabel="Report comparison"
+            getRowId={(r) => r.id}
+            hideToolbar
+            hideFooter
+            defaultDensity="compact"
+            columns={[
+              {
+                field: 'param',
+                headerName: 'Parameter',
+                flex: 1,
+                renderCell: (p) => <span className="font-bold text-ink-800">{p.row.param}</span>,
+              },
+              { field: 'previous', headerName: `Previous (${compareReports[0]?.name ?? '—'})`, flex: 1.2, minWidth: 150 },
+              {
+                field: 'arrow',
+                headerName: '',
+                width: 46,
+                sortable: false,
+                filterable: false,
+                disableColumnMenu: true,
+                renderCell: () => (
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-50 text-brand-600">
+                    <ArrowRight size={12} />
+                  </span>
+                ),
+              },
+              {
+                field: 'current',
+                headerName: `Current (${compareReports[1]?.name ?? '—'})`,
+                flex: 1.2,
+                minWidth: 150,
+                renderCell: (p) => (
+                  <span className="inline-flex items-center gap-2">
+                    {p.row.current}
+                    <span className="rounded bg-ink-50 px-1.5 py-0.5 text-[10px] text-ink-400">{p.row.delta}</span>
+                  </span>
+                ),
+              },
+            ]}
+          />
           <div className="mt-3 flex flex-wrap gap-2">
             {compareReports.flatMap((r) =>
               r.fields.map((f) => (

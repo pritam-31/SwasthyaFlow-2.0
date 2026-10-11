@@ -1,4 +1,6 @@
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { ScrollText } from 'lucide-react'
+import { AppDataGrid } from '../AppDataGrid'
 import { Badge, EmptyState } from '../ui'
 import { PrunedEntryBadge } from './PrunedEntryBadge'
 import { formatAuditTime } from '../../lib/format'
@@ -26,52 +28,81 @@ export function AuditTable({ labels, entries, selectedId, onSelect }: Props) {
   if (entries.length === 0) {
     return <EmptyState icon={<ScrollText size={20} />} title={labels.noEntries} />
   }
+
+  const columns: GridColDef<AuditChainEntry>[] = [
+    {
+      field: 'sequenceNumber',
+      headerName: labels.sequence,
+      width: 90,
+      renderCell: (p) => <span className="font-mono text-xs font-semibold text-ink-500">#{p.row.sequenceNumber}</span>,
+    },
+    {
+      field: 'at',
+      headerName: labels.when,
+      width: 190,
+      renderCell: (p) => <span className="whitespace-nowrap font-semibold text-ink-700">{formatAuditTime(p.row.at)}</span>,
+    },
+    {
+      field: 'actor',
+      headerName: labels.actorRole,
+      width: 170,
+      renderCell: (p) => (
+        <div className="text-xs text-ink-600">
+          <div className="font-medium text-ink-700">{p.row.actor}</div>
+          <div className="text-[10px] text-ink-400">{p.row.role}</div>
+        </div>
+      ),
+    },
+    {
+      field: 'action',
+      headerName: labels.action,
+      flex: 1,
+      minWidth: 160,
+      renderCell: (p) => <span className="text-xs font-medium text-ink-700">{p.row.action}</span>,
+    },
+    {
+      field: 'category',
+      headerName: labels.category,
+      width: 150,
+      renderCell: (p) => (
+        <Badge className={CATEGORY_CLASS[p.row.category] ?? 'bg-ink-100 text-ink-600 ring-ink-200'}>{p.row.category}</Badge>
+      ),
+    },
+    {
+      field: 'detail',
+      headerName: labels.detail,
+      flex: 1.2,
+      minWidth: 220,
+      renderCell: (p) => (
+        <div className="flex items-center gap-2">
+          {p.row.pruned && <PrunedEntryBadge labels={labels} />}
+          <span className="truncate">{p.row.detail}</span>
+        </div>
+      ),
+    },
+    {
+      field: 'hash',
+      headerName: labels.hash,
+      width: 150,
+      renderCell: (p) => (
+        <span className="font-mono text-[10px] text-ink-400" title={`${p.row.hash} · prev ${p.row.previousHash}`}>
+          {p.row.hash.slice(0, 12)}…
+        </span>
+      ),
+    },
+  ]
+
   return (
-    <div className="overflow-x-auto">
-      <table className="sf-table">
-        <thead>
-          <tr>
-            <th className="w-12">{labels.sequence}</th>
-            <th>{labels.when}</th>
-            <th>{labels.actorRole}</th>
-            <th>{labels.action}</th>
-            <th>{labels.category}</th>
-            <th>{labels.detail}</th>
-            <th>{labels.hash}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {entries.map((entry) => (
-            <tr
-              key={entry.id}
-              onClick={() => onSelect(entry)}
-              className={entry.id === selectedId ? 'cursor-pointer bg-brand-50/40' : 'cursor-pointer'}
-            >
-              <td className="font-mono text-xs font-semibold text-ink-500">#{entry.sequenceNumber}</td>
-              <td className="whitespace-nowrap font-semibold text-ink-700">{formatAuditTime(entry.at)}</td>
-              <td className="text-xs text-ink-600">
-                <div className="font-medium text-ink-700">{entry.actor}</div>
-                <div className="text-[10px] text-ink-400">{entry.role}</div>
-              </td>
-              <td className="text-xs font-medium text-ink-700">{entry.action}</td>
-              <td>
-                <Badge className={CATEGORY_CLASS[entry.category] ?? 'bg-ink-100 text-ink-600 ring-ink-200'}>
-                  {entry.category}
-                </Badge>
-              </td>
-              <td className="max-w-[260px] text-xs text-ink-600">
-                <div className="flex items-center gap-2">
-                  {entry.pruned && <PrunedEntryBadge labels={labels} />}
-                  <span className="truncate">{entry.detail}</span>
-                </div>
-              </td>
-              <td className="font-mono text-[10px] text-ink-400" title={`${entry.hash} · prev ${entry.previousHash}`}>
-                {entry.hash.slice(0, 12)}…
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <AppDataGrid<AuditChainEntry>
+      rows={entries}
+      columns={columns}
+      ariaLabel={labels.tableTitle}
+      getRowId={(entry) => entry.id}
+      onRowClick={onSelect}
+      getRowClassName={(entry) => (entry.id === selectedId ? 'bg-brand-50/40' : '')}
+      hideToolbar
+      hideFooter
+      defaultDensity="compact"
+    />
   )
 }

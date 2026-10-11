@@ -2,9 +2,12 @@ import { AlertTriangle, CheckCircle2, FileText, Image as ImageIcon, Keyboard, Lo
 import { motion } from 'framer-motion'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { AppDataGrid } from '../components/AppDataGrid'
 import { Badge, Button, Card, cx, InfoBanner, Modal, PageHeader, ProgressBar } from '../components/ui'
 import { useApp } from '../store/AppStore'
 import type { CaseRecord, Report, ReportField, ReportKind, Symptom } from '../types'
+
+type SampleField = Pick<ReportField, 'param' | 'value' | 'unit' | 'referenceRange'>
 
 interface SampleReport {
   id: string
@@ -13,7 +16,7 @@ interface SampleReport {
   descriptor: string
   failure?: boolean
   note: string
-  fields: Pick<ReportField, 'param' | 'value' | 'unit' | 'referenceRange'>[]
+  fields: SampleField[]
 }
 
 const SAMPLES: SampleReport[] = [
@@ -489,28 +492,42 @@ const parsedSymptoms = useMemo(() => {
               </p>
             )}
             {selectedSample.fields.length > 0 && (
-              <div className="overflow-hidden rounded-lg border border-ink-200">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-ink-200 bg-ink-50 text-[10px] uppercase text-ink-400">
-                      <th className="px-3 py-2 font-semibold">Parameter</th>
-                      <th className="px-3 py-2 font-semibold">Value</th>
-                      <th className="px-3 py-2 font-semibold">Range</th>
-                      <th className="px-3 py-2 font-semibold">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-ink-100">
-                    {selectedSample.fields.map((f) => (
-                      <tr key={f.param}>
-                        <td className="px-3 py-2 font-medium text-ink-800">{f.param}</td>
-                        <td className="px-3 py-2">{f.value} {f.unit}</td>
-                        <td className="px-3 py-2 text-ink-500">{f.referenceRange}</td>
-                        <td className="px-3 py-2"><Badge className="bg-amber-50 text-amber-700 ring-amber-200">Needs verification</Badge></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <AppDataGrid<SampleField>
+                rows={selectedSample.fields}
+                ariaLabel="Extracted values"
+                getRowId={(f) => f.param}
+                hideToolbar
+                hideFooter
+                defaultDensity="compact"
+                columns={[
+                  {
+                    field: 'param',
+                    headerName: 'Parameter',
+                    flex: 1,
+                    renderCell: (p) => <span className="font-medium text-ink-800">{p.row.param}</span>,
+                  },
+                  {
+                    field: 'value',
+                    headerName: 'Value',
+                    flex: 1,
+                    renderCell: (p) => (
+                      <span>
+                        {p.row.value}
+                        {p.row.unit ? ` ${p.row.unit}` : ''}
+                      </span>
+                    ),
+                  },
+                  { field: 'referenceRange', headerName: 'Range', flex: 1, renderCell: (p) => <span className="text-ink-500">{p.row.referenceRange}</span> },
+                  {
+                    field: 'status',
+                    headerName: 'Status',
+                    width: 160,
+                    sortable: false,
+                    filterable: false,
+                    renderCell: () => <Badge className="bg-amber-50 text-amber-700 ring-amber-200">Needs verification</Badge>,
+                  },
+                ]}
+              />
             )}
             <p className="text-[10px] text-ink-400">Source: {selectedSample.name} · OCR values are never converted into a diagnosis.</p>
           </div>

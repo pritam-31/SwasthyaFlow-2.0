@@ -24,7 +24,14 @@ import type {
 } from '../types/triage'
 import type { FollowUpQuestion } from '../types/followup.types'
 
-const BASE = '/api'
+
+const API_ORIGIN = (
+  import.meta.env.VITE_API_BASE_URL?.trim() ||
+  'https://swasthyaflow-20-production.up.railway.app'
+).replace(/\/+$/, '')
+
+const BASE = `${API_ORIGIN}/api`
+
 const TOKEN_KEY = 'swasthyaflow.token'
 
 /** Fired globally when the backend rejects the current login session (401). */

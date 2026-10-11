@@ -1,12 +1,23 @@
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { BookOpen, FlaskConical, Languages, Save, ScrollText, Scale, ShieldCheck, Timer } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { AppDataGrid } from '../components/AppDataGrid'
 import { Button, Card, cx, PageHeader } from '../components/ui'
 import RetentionAdminSection from '../components/retention/RetentionAdminSection'
 import { SlaConfigEditor } from '../components/queue/SlaConfigEditor'
 import AnonymisationAdminSection from '../components/anonymisation/AnonymisationAdminSection'
 import ConfidencePolicyForm from '../components/confidence/ConfidencePolicyForm'
 import { DEFAULT_SETTINGS, useApp } from '../store/AppStore'
+
+interface RbacRow {
+  id: string
+  capability: string
+  patient: boolean
+  nurse: boolean
+  doctor: boolean
+  admin: boolean
+}
 
 export default function SettingsPage() {
   const { pushToast, offlineMode, setOfflineMode } = useApp()
@@ -168,47 +179,57 @@ export default function SettingsPage() {
       </div>
 
       <Card title="Role-based access control" subtitle="Static reference for the demo — a patient must never access another patient's case.">
-        <div className="overflow-x-auto">
-          <table className="sf-table min-w-[560px]">
-            <thead>
-              <tr>
-                <th>Capability</th>
-                <th>Patient</th>
-                <th>Nurse / Worker</th>
-                <th>Doctor / MO</th>
-                <th>Admin</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ['Submit intake & consent', true, true, true, true],
-                ['View triage queue', false, true, true, true],
-                ['Verify / edit AI fields', false, true, true, false],
-                ['Escalate to doctor', false, true, true, false],
-                ['Approve referral', false, false, true, false],
-                ['Read audit logs', false, false, false, true],
-                ['Configure facility', false, false, false, true],
-                ['View other patients', false, false, false, false],
-              ].map(([label, ...vals]) => (
-                <tr key={label as string}>
-                  <td className="font-semibold text-ink-700">{label as string}</td>
-                  {vals.map((v, i) => (
-                    <td key={i}>
-                      <span
-                        className={cx(
-                          'inline-flex h-6 w-6 items-center justify-center rounded-lg text-[11px] font-extrabold',
-                          v ? 'bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-200' : 'bg-ink-100 text-ink-400 ring-1 ring-inset ring-ink-200',
-                        )}
-                      >
-                        {(v as boolean) ? '✓' : '✕'}
-                      </span>
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <AppDataGrid<RbacRow>
+          rows={[
+            ['Submit intake & consent', true, true, true, true],
+            ['View triage queue', false, true, true, true],
+            ['Verify / edit AI fields', false, true, true, false],
+            ['Escalate to doctor', false, true, true, false],
+            ['Approve referral', false, false, true, false],
+            ['Read audit logs', false, false, false, true],
+            ['Configure facility', false, false, false, true],
+            ['View other patients', false, false, false, false],
+          ].map(([capability, patient, nurse, doctor, admin]) => ({
+            id: capability as string,
+            capability: capability as string,
+            patient: patient as boolean,
+            nurse: nurse as boolean,
+            doctor: doctor as boolean,
+            admin: admin as boolean,
+          }))}
+          ariaLabel="Role-based access control"
+          getRowId={(r) => r.id}
+          hideToolbar
+          hideFooter
+          defaultDensity="compact"
+          columns={[
+            {
+              field: 'capability',
+              headerName: 'Capability',
+              flex: 1.4,
+              minWidth: 200,
+              renderCell: (p) => <span className="font-semibold text-ink-700">{p.row.capability}</span>,
+            },
+            ...(['patient', 'nurse', 'doctor', 'admin'] as const).map<GridColDef<RbacRow>>((field) => ({
+              field,
+              headerName: { patient: 'Patient', nurse: 'Nurse / Worker', doctor: 'Doctor / MO', admin: 'Admin' }[field],
+              flex: 1,
+              minWidth: 110,
+              renderCell: (p) => (
+                <span
+                  className={cx(
+                    'inline-flex h-6 w-6 items-center justify-center rounded-lg text-[11px] font-extrabold',
+                    p.row[field]
+                      ? 'bg-emerald-100 text-emerald-700 ring-1 ring-inset ring-emerald-200'
+                      : 'bg-ink-100 text-ink-400 ring-1 ring-inset ring-ink-200',
+                  )}
+                >
+                  {p.row[field] ? '✓' : '✕'}
+                </span>
+              ),
+            })),
+          ]}
+        />
       </Card>
 
       <div className="flex items-center gap-2 text-[11px] text-ink-400">

@@ -46,6 +46,8 @@ export interface AppDataGridProps<Row extends GridValidRowModel> {
   onRetry?: () => void
   /** Row click handler (typically navigate to detail). */
   onRowClick?: (row: Row) => void
+  /** Per-row class name (e.g. highlight the selected/active row). */
+  getRowClassName?: (row: Row) => string
   pageSizeOptions?: number[]
   defaultPageSize?: number
   defaultDensity?: GridDensity
@@ -93,6 +95,7 @@ export function AppDataGrid<Row extends GridValidRowModel>({
   error = null,
   onRetry,
   onRowClick,
+  getRowClassName,
   pageSizeOptions = [10, 20, 50, 100],
   defaultPageSize = 20,
   defaultDensity = 'standard',
@@ -289,6 +292,7 @@ export function AppDataGrid<Row extends GridValidRowModel>({
           density={density}
           onDensityChange={setDensity}
           onRowClick={onRowClick ? (params) => onRowClick(params.row) : undefined}
+          getRowClassName={getRowClassName ? (params) => getRowClassName(params.row) : undefined}
           onStateChange={handleStateChange}
           rowHeight={rowHeight}
           autoHeight={autoHeight}

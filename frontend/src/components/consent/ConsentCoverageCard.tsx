@@ -1,14 +1,60 @@
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import { BadgeCheck, ShieldAlert, ShieldQuestion } from 'lucide-react'
+import { AppDataGrid } from '../AppDataGrid'
 import { Badge, Card } from '../ui'
 import { useTriage } from '../../context/TriageContext'
 import { CODE_BY_INTAKE_LANGUAGE } from '../../types/language.types'
 import { CONSENT_SECTION_LABELS } from '../../services/safetyPolicy'
 import { formatAuditTime } from '../../lib/format'
-import type { ConsentCoverage } from '../../types/consent.types'
+import type { ConsentCoverage, ConsentCoverageRow } from '../../types/consent.types'
 
 export function ConsentCoverageCard({ coverage }: { coverage: ConsentCoverage }) {
   const { language } = useTriage()
   const labels = CONSENT_SECTION_LABELS[CODE_BY_INTAKE_LANGUAGE[language]]
+
+  const columns: GridColDef<ConsentCoverageRow>[] = [
+    {
+      field: 'sessionId',
+      headerName: 'Case',
+      flex: 1,
+      minWidth: 120,
+      renderCell: (p) => <span className="font-mono text-ink-600">{p.row.sessionId}</span>,
+    },
+    {
+      field: 'state',
+      headerName: labels.statusHeading,
+      width: 150,
+      renderCell: (p) => (
+        <Badge
+          className={
+            p.row.state === 'granted'
+              ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+              : p.row.state === 'revoked'
+                ? 'bg-rose-50 text-rose-700 ring-rose-200'
+                : 'bg-ink-100 text-ink-500 ring-ink-200'
+          }
+          icon={
+            p.row.state === 'granted' ? (
+              <BadgeCheck size={11} />
+            ) : p.row.state === 'revoked' ? (
+              <ShieldAlert size={11} />
+            ) : (
+              <ShieldQuestion size={11} />
+            )
+          }
+        >
+          {p.row.state === 'granted' ? labels.active : p.row.state === 'revoked' ? labels.withdrawn : labels.none}
+        </Badge>
+      ),
+    },
+    {
+      field: 'grantedAt',
+      headerName: labels.grantedAt,
+      flex: 1,
+      minWidth: 150,
+      renderCell: (p) => <span className="text-ink-500">{p.row.grantedAt ? formatAuditTime(p.row.grantedAt) : '—'}</span>,
+    },
+  ]
 
   return (
     <Card
@@ -34,47 +80,16 @@ export function ConsentCoverageCard({ coverage }: { coverage: ConsentCoverage })
         </div>
       </div>
 
-      <div className="max-h-72 overflow-auto">
-        <table className="w-full text-left text-[11px]">
-          <thead className="sticky top-0 bg-white text-ink-400">
-            <tr>
-              <th className="py-1.5 pr-2 font-semibold">Case</th>
-              <th className="py-1.5 pr-2 font-semibold">{labels.statusHeading}</th>
-              <th className="py-1.5 pr-2 font-semibold">{labels.grantedAt}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {coverage.rows.map((row) => (
-              <tr key={row.sessionId} className="border-t border-ink-100">
-                <td className="py-1.5 pr-2 font-mono text-ink-600">{row.sessionId}</td>
-                <td className="py-1.5 pr-2">
-                  <Badge
-                    className={
-                      row.state === 'granted'
-                        ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                        : row.state === 'revoked'
-                          ? 'bg-rose-50 text-rose-700 ring-rose-200'
-                          : 'bg-ink-100 text-ink-500 ring-ink-200'
-                    }
-                    icon={
-                      row.state === 'granted' ? (
-                        <BadgeCheck size={11} />
-                      ) : row.state === 'revoked' ? (
-                        <ShieldAlert size={11} />
-                      ) : (
-                        <ShieldQuestion size={11} />
-                      )
-                    }
-                  >
-                    {row.state === 'granted' ? labels.active : row.state === 'revoked' ? labels.withdrawn : labels.none}
-                  </Badge>
-                </td>
-                <td className="py-1.5 pr-2 text-ink-500">{row.grantedAt ? formatAuditTime(row.grantedAt) : '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <AppDataGrid<ConsentCoverageRow>
+        rows={coverage.rows}
+        columns={columns}
+        ariaLabel={labels.coverageHeading}
+        getRowId={(row) => row.sessionId}
+        hideToolbar
+        hideFooter
+        defaultDensity="compact"
+        maxHeight={288}
+      />
     </Card>
   )
 }

@@ -1,6 +1,5 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import type { GridColDef } from '@mui/x-data-grid-pro'
 import {
-  ArrowDownUp,
   CheckCircle2,
   ChevronRight,
   ClipboardCheck,
@@ -30,6 +29,7 @@ import type {
   RiskScore,
   StructuredTriageNote,
 } from '../../types/triage'
+import { AppDataGrid } from '../AppDataGrid'
 import { ReferralGenerator } from '../referral/ReferralNote'
 import ReportList from '../reports/ReportList'
 import { PriorityQueueBoard } from '../queue/PriorityQueueBoard'
@@ -47,7 +47,6 @@ import {
   Button,
   Card,
   cx,
-  EASE,
   EmptyState,
   Modal,
   PageHeader,
@@ -67,37 +66,113 @@ const NOTE_META: Record<NoteStatus, { label: string; classes: string }> = {
   escalated: { label: 'Escalated for referral', classes: 'bg-rose-50 text-rose-700 ring-rose-200' },
 }
 
-type SortKey = 'risk' | 'time' | 'status'
+const QUEUE_COLUMNS: GridColDef<PatientSession>[] = [
+  {
+    field: 'patientId',
+    headerName: 'Patient',
+    flex: 1.2,
+    minWidth: 220,
+    renderCell: (p) => (
+      <div className="flex flex-col">
+        <span className="flex items-center gap-2.5 text-left">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-ink-900 text-[11px] font-extrabold text-white">
+            {p.row.patientId.slice(-3)}
+          </span>
+          <span>
+            <span className="block font-bold text-ink-800">{p.row.patientId}</span>
+            <span className="block text-[11px] text-ink-400">
+              {p.row.demographics.ageBand} · {p.row.demographics.sex} · {p.row.raw.language}
+            </span>
+          </span>
+        </span>
+        <TimelineMiniBar events={p.row.triageNote?.timeline ?? []} />
+      </div>
+    ),
+  },
+  {
+    field: 'risk',
+    headerName: 'Review priority',
+    width: 170,
+    valueGetter: (_value, row) => RISK_META[row.triageNote?.riskScore ?? 'Low'].rank,
+    renderCell: (p) => {
+      const meta = RISK_META[p.row.triageNote?.riskScore ?? 'Low']
+      return (
+        <Badge className={meta.classes}>
+          <span className={cx('h-1.5 w-1.5 rounded-full', meta.dot)} />
+          {meta.label}
+        </Badge>
+      )
+    },
+  },
+  {
+    field: 'rationale',
+    headerName: 'Rationale',
+    width: 220,
+    sortable: false,
+    filterable: false,
+    renderCell: (p) => (
+      <QueueRowRationale
+        risk={p.row.triageNote?.riskScore ?? 'Low'}
+        overrides={p.row.overrides ?? []}
+        slaBreached={p.row.triageNote?.slaBreached ?? false}
+      />
+    ),
+  },
+  {
+    field: 'chiefComplaint',
+    headerName: 'Chief complaint (AI draft)',
+    flex: 1,
+    minWidth: 200,
+    valueGetter: (_value, row) => row.triageNote?.structuredNote.chiefComplaint ?? '',
+    renderCell: (p) => <p className="truncate text-[13px] text-ink-700">{p.row.triageNote?.structuredNote.chiefComplaint ?? '—'}</p>,
+  },
+  {
+    field: 'flags',
+    headerName: 'Flags',
+    width: 90,
+    align: 'left',
+    headerAlign: 'left',
+    valueGetter: (_value, row) => row.triageNote?.urgencyFlags.length ?? 0,
+    renderCell: (p) => <span className="text-xs font-semibold text-ink-600">{p.row.triageNote?.urgencyFlags.length ?? 0}</span>,
+  },
+  {
+    field: 'missing',
+    headerName: 'Missing',
+    width: 100,
+    valueGetter: (_value, row) => row.triageNote?.missingInformation.length ?? 0,
+    renderCell: (p) => <span className="text-xs font-semibold text-ink-600">{p.row.triageNote?.missingInformation.length ?? 0}</span>,
+  },
+  {
+    field: 'status',
+    headerName: 'Status',
+    width: 220,
+    valueGetter: (_value, row) => row.status,
+    renderCell: (p) => {
+      const meta = NOTE_META[p.row.triageNote?.status ?? 'ai-draft']
+      return <Badge className={meta.classes}>{meta.label}</Badge>
+    },
+  },
+  {
+    field: 'updatedAt',
+    headerName: 'Updated',
+    width: 160,
+    renderCell: (p) => <span className="whitespace-nowrap text-[11px] text-ink-500">{formatAuditTime(p.row.updatedAt)}</span>,
+  },
+  {
+    field: 'open',
+    headerName: 'Open',
+    width: 60,
+    sortable: false,
+    filterable: false,
+    disableColumnMenu: true,
+    renderHeader: () => <span className="sr-only">Open</span>,
+    renderCell: () => <ChevronRight size={16} className="text-ink-300" />,
+  },
+]
 
 export default function TriageDashboard() {
   const { sessions, activeSession, activeId, selectSession, clearSelection, permissions, role } = useTriage()
   const navigate = useNavigate()
-  const [sortKey, setSortKey] = useState<SortKey>('risk')
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
-
-  const sorted = useMemo(() => {
-    const dir = sortDir === 'asc' ? 1 : -1
-    return [...sessions].sort((a, b) => {
-      if (sortKey === 'risk') {
-        return (
-          (RISK_META[a.triageNote?.riskScore ?? 'Low'].rank - RISK_META[b.triageNote?.riskScore ?? 'Low'].rank) * dir
-        )
-      }
-      if (sortKey === 'status') return a.status.localeCompare(b.status) * dir
-      return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * dir
-    })
-  }, [sessions, sortKey, sortDir])
-
-  const toggleSort = (key: SortKey) => {
-    if (key === sortKey) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
-    else {
-      setSortKey(key)
-      setSortDir('desc')
-    }
-  }
-
-  const ariaSort = (key: SortKey): 'ascending' | 'descending' | undefined =>
-    sortKey === key ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined
 
   return (
     <div className="space-y-5">
