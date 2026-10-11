@@ -25,11 +25,14 @@ import type {
 import type { FollowUpQuestion } from '../types/followup.types'
 
 
-// Production always uses the same-origin deployment proxy for reliable cookie
-// auth. The optional origin override is only for local development.
-const API_ORIGIN = import.meta.env.DEV
-  ? (import.meta.env.VITE_API_BASE_URL?.trim() || '').replace(/\/+$/, '')
-  : ''
+// The frontend API base URL. Set this (e.g. via Vite env vars) to your backend
+// deployment URL when the frontend and backend are on different origins
+// (e.g. Vercel + Railway). Falls back to the previous behaviour.
+const API_ORIGIN = import.meta.env.VITE_API_BASE_URL
+  ? import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '')
+  : (import.meta.env.DEV
+      ? (import.meta.env.VITE_API_BASE_URL?.trim() || '').replace(/\/+$/, '')
+      : '')
 
 const BASE = `${API_ORIGIN}/api`
 
