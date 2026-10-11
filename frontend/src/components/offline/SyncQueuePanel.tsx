@@ -42,10 +42,12 @@ export function SyncQueuePanel({
   onClose: () => void
   lang?: OfflineLang
 }) {
-  const { online, syncing, queue, failedCount, conflicts, syncNow, resolveConflict, removeItem } = useOffline()
+  const { online, syncing, queue, failedCount, pendingCount, conflicts, syncNow, resolveConflict, removeItem } = useOffline()
   const copy = OFFLINE_SECTION_LABELS[lang]
   const visible = queue.filter((i) => i.status !== 'synced')
   const retryable = queue.filter((i) => i.status === 'failed')
+
+  const syncLabel = retryable.length > 0 ? copy.retryAll : syncing ? copy.syncing : pendingCount > 0 ? copy.syncNow : copy.allSynced
 
   return (
     <AnimatePresence>
@@ -89,12 +91,12 @@ export function SyncQueuePanel({
               </span>
               <button
                 type="button"
-                disabled={!online || syncing}
+                disabled={!online || syncing || (pendingCount === 0 && retryable.length === 0)}
                 onClick={() => void syncNow()}
                 className="flex items-center gap-1.5 rounded-lg bg-brand-600 px-2.5 py-1.5 text-[11px] font-bold text-white disabled:opacity-40"
               >
                 <RefreshCw size={12} className={syncing ? 'animate-spin' : ''} />
-                {retryable.length > 0 ? copy.retryAll : copy.syncing}
+                {syncLabel}
               </button>
             </div>
 

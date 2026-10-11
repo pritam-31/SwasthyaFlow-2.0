@@ -60,7 +60,7 @@ function BottomSlot({ item }: { item: NavItem }) {
   return (
     <NavLink
       to={item.to}
-      end={item.to === '/'}
+      end={item.to === '/app'}
       aria-label={item.label}
       title={item.label}
       className={({ isActive }) =>

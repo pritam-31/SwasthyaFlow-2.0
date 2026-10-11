@@ -66,9 +66,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 
   const pushToast = useCallback((kind: Toast['kind'], text: string) => {
-    const id = uid('toast')
-    setToasts((t) => [...t, { id, kind, text }])
-    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 4600)
+    // Dedupe consecutive identical toasts and keep a maximum of three on
+    // screen. Auto-dismiss is owned by ToastStack so it can pause on hover.
+    setToasts((t) => {
+      const deduped = t.filter((x) => x.text !== text || x.kind !== kind)
+      const trimmed = deduped.length >= 3 ? deduped.slice(deduped.length - 2) : deduped
+      return [...trimmed, { id: uid('toast'), kind, text }]
+    })
   }, [])
 
   const dismissToast = useCallback((id: string) => {

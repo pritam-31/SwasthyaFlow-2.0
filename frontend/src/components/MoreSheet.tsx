@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { LogOut, ShieldCheck, X } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useApp } from '../store/AppStore'
@@ -17,6 +18,7 @@ export function MoreSheet({ open, onClose }: { open: boolean; onClose: () => voi
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const sheetRef = useRef<HTMLDivElement>(null)
 
   const items = NAV_ITEMS.filter((n) => !n.bottom && !n.center && n.roles.includes(role))
 
@@ -30,6 +32,45 @@ export function MoreSheet({ open, onClose }: { open: boolean; onClose: () => voi
     void logout()
   }
 
+  // Lock background scroll, close on Escape and keep Tab focus inside the sheet.
+  useEffect(() => {
+    if (!open) return
+    const previouslyFocused = document.activeElement as HTMLElement | null
+    const { overflow } = document.body.style
+    document.body.style.overflow = 'hidden'
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const focusables = sheetRef.current?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      )
+      if (!focusables || focusables.length === 0) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+
+    document.addEventListener('keydown', onKey)
+    const focusTimer = window.setTimeout(() => sheetRef.current?.querySelector<HTMLElement>('button')?.focus(), 40)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = overflow
+      window.clearTimeout(focusTimer)
+      previouslyFocused?.focus?.()
+    }
+  }, [open, onClose])
+
   return (
     <AnimatePresence>
       {open && (
@@ -42,6 +83,7 @@ export function MoreSheet({ open, onClose }: { open: boolean; onClose: () => voi
             onClick={onClose}
           />
           <motion.div
+            ref={sheetRef}
             role="dialog"
             aria-modal="true"
             aria-label="More sections"

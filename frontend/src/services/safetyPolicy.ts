@@ -680,8 +680,9 @@ export const OFFLINE_SECTION_LABELS: Record<
   {
     offlineBanner: string
     backOnline: string
-    queuedForSync: (n: number) => string
+queuedForSync: (n: number) => string
     syncing: string
+    syncNow: string
     allSynced: string
     pending: string
     failed: string
@@ -716,6 +717,7 @@ export const OFFLINE_SECTION_LABELS: Record<
     backOnline: 'Back online — syncing your queued entries.',
     queuedForSync: (n) => `${n} ${n === 1 ? 'entry is' : 'entries are'} queued to sync.`,
     syncing: 'Syncing…',
+    syncNow: 'Sync now',
     allSynced: 'All queued entries synced.',
     pending: 'Pending',
     failed: 'Failed',
@@ -750,6 +752,7 @@ export const OFFLINE_SECTION_LABELS: Record<
     backOnline: 'फिर ऑनलाइन — आपकी कतारबद्ध प्रविष्टियाँ सिंक हो रही हैं।',
     queuedForSync: (n) => `${n} प्रविष्टि(याँ) सिंक के लिए कतार में।`,
     syncing: 'सिंक हो रहा है…',
+    syncNow: 'अभी सिंक करें',
     allSynced: 'सभी कतारबद्ध प्रविष्टियाँ सिंक हो गईं।',
     pending: 'प्रतीक्षारत',
     failed: 'विफल',
@@ -784,6 +787,7 @@ export const OFFLINE_SECTION_LABELS: Record<
     backOnline: 'ପୁଣି ଅନଲାଇନ — ଆପଣଙ୍କ ଧାଡ଼ିରେ ଥିବା ପ୍ରବେଶ ସିଙ୍କ ହେଉଛି।',
     queuedForSync: (n) => `${n} ଟି ପ୍ରବେଶ ସିଙ୍କ ପାଇଁ ଧାଡ଼ିରେ ଅଛି।`,
     syncing: 'ସିଙ୍କ ହେଉଛି…',
+    syncNow: 'ବର୍ତ୍ତମାନ ସିଙ୍କ କରନ୍ତୁ',
     allSynced: 'ସମସ୍ତ ଧାଡ଼ି ପ୍ରବେଶ ସିଙ୍କ ହୋଇଗଲା।',
     pending: 'ଅପେକ୍ଷାରତ',
     failed: 'ବିଫଳ',

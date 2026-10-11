@@ -19,9 +19,10 @@ import {
   Users,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { APP_ROUTES } from '../app/routes'
 import type { Role } from '../types'
 
-/** Every clinical/operational role — patients get an explicit, smaller set below. */
+/** Every clinical/operational role — patients get an explicit, smaller set. */
 export const ALL_ROLES: Role[] = ['nurse', 'doctor', 'admin', 'facility-admin', 'system-admin']
 
 /** Roles allowed into the facility-management / admin-only sections. */
@@ -41,7 +42,8 @@ export const ROLE_LABEL: Record<Role, string> = {
 
 /**
  * Single source of truth for navigation. Consumed by the desktop sidebar,
- * the mobile bottom bar and the mobile "More" sheet.
+ * the mobile bottom bar and the mobile "More" sheet. Labels, roles and paths
+ * come from the shared route table so nav and guards can never drift apart.
  */
 export interface NavItem {
   id: string
@@ -59,24 +61,49 @@ export interface NavItem {
   center?: boolean
 }
 
-export const NAV_ITEMS: NavItem[] = [
-  { id: 'dashboard', to: '/app', label: 'Dashboard', icon: LayoutDashboard, roles: [...ALL_ROLES, ...PATIENT_ROLES], order: 0, sidebar: 'primary', bottom: true },
-  { id: 'triage', to: '/app/triage', label: 'Triage Queue', icon: ListTodo, roles: [...ALL_ROLES, ...PATIENT_ROLES], order: 1, sidebar: 'primary', bottom: false },
-  { id: 'review', to: '/app/review', label: 'Reviewer', icon: ClipboardCheck, roles: ALL_ROLES, order: 2, sidebar: 'primary', bottom: false },
-  { id: 'cases', to: '/app/cases', label: 'Patients', icon: Users, roles: ALL_ROLES, order: 3, sidebar: 'primary', bottom: true },
-  { id: 'intake', to: '/app/new-intake', label: 'New Intake', icon: PlusCircle, roles: [...ALL_ROLES, ...PATIENT_ROLES], order: 4, sidebar: 'primary', bottom: true, center: true },
-  { id: 'reports', to: '/app/reports', label: 'Reports', icon: FileText, roles: ALL_ROLES, order: 5, sidebar: 'primary', bottom: false },
-  { id: 'referrals', to: '/app/referrals', label: 'Referrals', icon: ClipboardList, roles: ALL_ROLES, order: 6, sidebar: 'primary', bottom: false },
-  { id: 'followups', to: '/app/followups', label: 'Follow-ups', icon: CalendarClock, roles: ALL_ROLES, order: 7, sidebar: 'primary', bottom: true },
-  { id: 'camps', to: '/app/camps', label: 'Health Camps', icon: HeartPulse, roles: ALL_ROLES, order: 8, sidebar: 'overflow', bottom: false },
-  { id: 'analytics', to: '/app/analytics', label: 'Analytics', icon: ScrollText, roles: ['admin', 'system-admin'], order: 9, sidebar: 'overflow', bottom: false },
-  { id: 'audit', to: '/app/audit', label: 'Audit Logs', icon: ScrollText, roles: ADMIN_ROLES, order: 10, sidebar: 'overflow', bottom: false },
-  { id: 'users', to: '/app/users', label: 'Users', icon: UserCog, roles: ADMIN_ROLES, order: 11, sidebar: 'overflow', bottom: false },
-  { id: 'facilities', to: '/app/facilities', label: 'Facilities', icon: Building2, roles: ADMIN_ROLES, order: 12, sidebar: 'overflow', bottom: false },
-  { id: 'settings', to: '/app/settings', label: 'Settings', icon: Settings, roles: ADMIN_ROLES, order: 13, sidebar: 'overflow', bottom: false },
-  { id: 'security', to: '/app/security', label: 'Security', icon: Shield, roles: [...ALL_ROLES, ...PATIENT_ROLES], order: 14, sidebar: 'overflow', bottom: false },
-  { id: 'model-card', to: '/app/model-card', label: 'Model Cards', icon: BookOpen, roles: [...ALL_ROLES, ...PATIENT_ROLES], order: 15, sidebar: 'overflow', bottom: false },
-  { id: 'bias', to: '/app/bias', label: 'Bias Evaluation', icon: Scale, roles: ['admin', 'system-admin'], order: 16, sidebar: 'overflow', bottom: false },
-  { id: 'feedback', to: '/app/feedback', label: 'Feedback', icon: MessagesSquare, roles: ALL_ROLES, order: 17, sidebar: 'overflow', bottom: false },
-  { id: 'data-privacy', to: '/app/data-privacy', label: 'Data & Privacy', icon: ShieldCheck, roles: [...ALL_ROLES, ...PATIENT_ROLES], order: 18, sidebar: 'overflow', bottom: false },
-]
+interface NavMeta {
+  id: string
+  icon: LucideIcon
+  order: number
+  sidebar: 'primary' | 'overflow'
+  bottom: boolean
+  center?: boolean
+}
+
+/** Presentation-only metadata keyed by absolute route. */
+const NAV_META: Record<string, NavMeta> = {
+  '/app': { id: 'dashboard', icon: LayoutDashboard, order: 0, sidebar: 'primary', bottom: true },
+  '/app/triage': { id: 'triage', icon: ListTodo, order: 1, sidebar: 'primary', bottom: false },
+  '/app/review': { id: 'review', icon: ClipboardCheck, order: 2, sidebar: 'primary', bottom: false },
+  '/app/cases': { id: 'cases', icon: Users, order: 3, sidebar: 'primary', bottom: true },
+  '/app/new-intake': { id: 'intake', icon: PlusCircle, order: 4, sidebar: 'primary', bottom: true, center: true },
+  '/app/reports': { id: 'reports', icon: FileText, order: 5, sidebar: 'primary', bottom: false },
+  '/app/referrals': { id: 'referrals', icon: ClipboardList, order: 6, sidebar: 'primary', bottom: false },
+  '/app/followups': { id: 'followups', icon: CalendarClock, order: 7, sidebar: 'primary', bottom: true },
+  '/app/camps': { id: 'camps', icon: HeartPulse, order: 8, sidebar: 'overflow', bottom: false },
+  '/app/analytics': { id: 'analytics', icon: ScrollText, order: 9, sidebar: 'overflow', bottom: false },
+  '/app/audit': { id: 'audit', icon: ScrollText, order: 10, sidebar: 'overflow', bottom: false },
+  '/app/users': { id: 'users', icon: UserCog, order: 11, sidebar: 'overflow', bottom: false },
+  '/app/facilities': { id: 'facilities', icon: Building2, order: 12, sidebar: 'overflow', bottom: false },
+  '/app/settings': { id: 'settings', icon: Settings, order: 13, sidebar: 'overflow', bottom: false },
+  '/app/security': { id: 'security', icon: Shield, order: 14, sidebar: 'overflow', bottom: false },
+  '/app/model-card': { id: 'model-card', icon: BookOpen, order: 15, sidebar: 'overflow', bottom: false },
+  '/app/bias': { id: 'bias', icon: Scale, order: 16, sidebar: 'overflow', bottom: false },
+  '/app/feedback': { id: 'feedback', icon: MessagesSquare, order: 17, sidebar: 'overflow', bottom: false },
+  '/app/data-privacy': { id: 'data-privacy', icon: ShieldCheck, order: 18, sidebar: 'overflow', bottom: false },
+}
+
+export const NAV_ITEMS: NavItem[] = APP_ROUTES.filter((r) => r.nav && NAV_META[r.to]).map((r) => {
+  const meta = NAV_META[r.to]
+  return {
+    id: meta.id,
+    to: r.to,
+    label: r.label,
+    icon: meta.icon,
+    roles: r.roles,
+    order: meta.order,
+    sidebar: meta.sidebar,
+    bottom: meta.bottom,
+    center: meta.center,
+  }
+})
