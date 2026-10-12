@@ -32,3 +32,11 @@ screenshots/
 # Operating system files
 .DS_Store
 Thumbs.db
+
+# Python (ai-service)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
