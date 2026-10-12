@@ -137,7 +137,7 @@ export default function LandingPage() {
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-3 py-2 text-[11px] font-bold uppercase tracking-[0.14em] text-lime-200 backdrop-blur">
               <Sparkles size={13} /> Non-diagnostic clinical workflow AI
             </div>
-            <h1 className="max-w-[12ch] text-[52px] font-black leading-[0.95] tracking-normal text-white sm:text-[76px] lg:text-[88px]">
+            <h1 className="max-w-[12ch] text-[42px] font-black leading-[0.98] tracking-normal text-white sm:text-[60px] lg:text-[70px]">
               Every case, seen sooner.
             </h1>
             <p className="mt-6 max-w-[58ch] text-[15px] leading-7 text-white/68 sm:text-[17px]">
