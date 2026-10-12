@@ -1,0 +1,13 @@
+# Lightweight ML stack for memory-constrained hosts (e.g. Render free tier,
+# ~512 MB). Enables the Isolation Forest vitals anomaly detector and the
+# joblib-backed history model while skipping the heavy xgboost/lightgbm/shap/
+# transformers/torch stack.
+#
+#   pip install -r requirements.txt -r requirements-ml-lite.txt
+#
+# Anything not installed still degrades gracefully to the deterministic
+# analyzers (see app/analyzers/*.py).
+
+numpy>=1.26,<3
+scikit-learn>=1.4
+joblib>=1.3

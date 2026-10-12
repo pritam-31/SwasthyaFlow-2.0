@@ -18,7 +18,8 @@ services:
       AI_SERVICE_TOKEN: "${AI_SERVICE_TOKEN:-}"
       AI_ENABLE_FEEDBACK: "true"
     volumes:
-      - ai-models:/app/models
+      # Trained models are baked into the image. Only the feedback store is
+      # persisted so training artifacts are never shadowed by an empty volume.
       - ai-data:/app/data
     restart: unless-stopped
     healthcheck:
@@ -28,5 +29,4 @@ services:
       retries: 3
 
 volumes:
-  ai-models:
   ai-data:

@@ -1,0 +1,45 @@
+# Render Blueprint for the SwasthyaFlow AI triage service.
+#
+# Deploy: push this file to GitHub, then in Render → "New +" → "Blueprint",
+# pick this repo. Render reads this file and creates the service below.
+#
+# The service is a Docker web service built from ai-service/Dockerfile. Trained
+# model artifacts are baked into the image (ai-service/models), so no separate
+# training step is required at deploy time.
+services:
+  - type: web
+    name: swasthyaflow-ai
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./ai-service/Dockerfile
+    dockerContext: ./ai-service
+    healthCheckPath: /health
+    autoDeploy: true
+    # Only rebuild when the AI service changes.
+    buildFilter:
+      paths:
+        - ai-service/**
+    envVars:
+      # Render forwards these as Docker build args AND runtime env vars.
+      # none | lite | full  (lite = numpy + scikit-learn + joblib, fits the
+      # 512 MB free plan; full pulls torch/transformers and needs a paid plan).
+      - key: INSTALL_ML
+        value: lite
+      # Salt used to pseudonymise patient IDs before logging. Generated once and
+      # kept secret by Render. Change it before any real-world use.
+      - key: AI_PII_SALT
+        generateValue: true
+      # Shared secret the Node backend sends as "Authorization: Bearer ...".
+      # Set the same value in the backend's AI_SERVICE_TOKEN. Leave blank to
+      # disable the gate (not recommended for public deployments).
+      - key: AI_SERVICE_TOKEN
+        sync: false
+      - key: AI_LOG_LEVEL
+        value: info
+      - key: AI_ENABLE_FEEDBACK
+        value: "true"
+      # Comma-separated browser origins allowed to call the service directly.
+      # Usually leave empty — the Node backend is the only caller.
+      - key: AI_CORS_ORIGINS
+        sync: false

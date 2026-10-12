@@ -199,13 +199,46 @@ override persistence, the HTTP API and malformed/partial input.
 ## Docker
 
 ```bash
-# core image
-docker build -t swasthyaflow-ai .
-# full ML image
-docker build --build-arg INSTALL_ML=true -t swasthyaflow-ai:ml .
+docker build -t swasthyaflow-ai .                                  # core (smallest)
+docker build --build-arg INSTALL_ML=lite -t swasthyaflow-ai:lite . # numpy + scikit-learn + joblib
+docker build --build-arg INSTALL_ML=full -t swasthyaflow-ai:ml .   # full stack
 
 docker compose up --build          # http://localhost:8000
 ```
+
+Trained artifacts (`models/fusion_weights.json`, `models/history_risk.joblib`)
+and the reference cohort (`data/`) are baked into the image, so learned weights
+are used without a training step. The container listens on `${PORT}` (default
+`8000`), which makes it portable across hosts.
+
+## Deploy to Render
+
+A Blueprint is included at the repo root (`render.yaml`). Steps:
+
+1. Push the repo to GitHub.
+2. In Render: **New + → Blueprint**, select the repo (branch `main`).
+3. Render creates one Docker web service from `ai-service/Dockerfile` and asks
+   for the `sync: false` secrets:
+   - `AI_PII_SALT` is auto-generated — keep it.
+   - `AI_SERVICE_TOKEN` — set a random string; copy the same value into the
+     backend's `AI_SERVICE_TOKEN`.
+4. After deploy, note the URL (e.g. `https://swasthyaflow-ai.onrender.com`) and
+   set it in the backend: `AI_SERVICE_URL=https://swasthyaflow-ai.onrender.com`.
+
+Notes:
+
+- **ML flavor** is controlled by the `INSTALL_ML` env var (`none` | `lite` |
+  `full`). The Blueprint sets `lite`, which fits the 512 MB free plan. `full`
+  (torch/transformers) needs a paid plan (≥ 2 GB).
+- The free plan sleeps after ~15 min idle; the first request after that has a
+  cold-start delay. The Node backend's timeout falls back to `computePriority`
+  and the UI shows a "Local fallback" badge, so triage never breaks.
+- The feedback SQLite store is ephemeral on the free plan (reset on each
+  deploy). Attach a **Render Disk** at `/app/data` if you need it to persist.
+- Set `AI_CORS_ORIGINS` only if a browser calls the service directly (normally
+  it doesn't — the Node backend is the sole caller).
+
+To run locally as a container instead: `docker compose up --build`.
 
 ---
 

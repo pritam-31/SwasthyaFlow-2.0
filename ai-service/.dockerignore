@@ -1,0 +1,25 @@
+# Keep the Docker build context small and reproducible.
+.venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv*/
+venv/
+
+# Editor / OS noise
+.git/
+.gitignore
+.DS_Store
+Thumbs.db
+*.log
+
+# Tests are not needed at runtime.
+tests/
+
+# Never ship a stale predictions database; the service recreates it on boot.
+data/*.sqlite3
+data/*.sqlite3-*
+data/feedback/*.sqlite3
