@@ -87,7 +87,7 @@ export default function LoginPage() {
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-lime-400 text-ink-900">
             <HeartPulse size={19} strokeWidth={2.4} />
           </span>
-          <span className="text-[15px] font-extrabold tracking-tight">SwasthyaFlow</span>
+          <span className="text-[15px] font-extrabold tracking-tight">आरोग्य Sathi</span>
         </div>
 
         <div className="relative space-y-5">
@@ -125,7 +125,7 @@ export default function LoginPage() {
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-lime-400 text-ink-900">
               <HeartPulse size={19} strokeWidth={2.4} />
             </span>
-            <span className="text-[15px] font-extrabold tracking-tight text-ink-900">SwasthyaFlow</span>
+            <span className="text-[15px] font-extrabold tracking-tight text-ink-900">आरोग्य Sathi</span>
           </div>
 
           <div className="mb-5 flex gap-1 rounded-2xl bg-ink-100/80 p-1">
@@ -201,30 +201,30 @@ export default function LoginPage() {
                 )}
               </div>
 
-{mode === 'login' && requireCode && (
-                  <div>
-                    <label className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
-                      <Smartphone size={12} /> Two-factor code
-                    </label>
-                    <input
-                      className="inp"
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      placeholder="6-digit code"
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      maxLength={6}
-                      autoFocus
-                      required
-                    />
-                  </div>
-                )}
+              {mode === 'login' && requireCode && (
+                <div>
+                  <label className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-400">
+                    <Smartphone size={12} /> Two-factor code
+                  </label>
+                  <input
+                    className="inp"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    placeholder="6-digit code"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    autoFocus
+                    required
+                  />
+                </div>
+              )}
 
-                {error && (
-                  <p className="rounded-xl bg-rose-50 px-3 py-2 text-[12px] font-semibold text-rose-700 ring-1 ring-inset ring-rose-200">
-                    {error}
-                  </p>
-                )}
+              {error && (
+                <p className="rounded-xl bg-rose-50 px-3 py-2 text-[12px] font-semibold text-rose-700 ring-1 ring-inset ring-rose-200">
+                  {error}
+                </p>
+              )}
 
               <Button type="submit" disabled={busy} className="w-full">
                 {busy ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
