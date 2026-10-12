@@ -29,9 +29,9 @@ Cookie flags: `swasthyaflow.sid` / `swasthyaflow.rt` are `HttpOnly`,
 `SameSite=Lax` outside production and `SameSite=None; Secure` in production
 unless `COOKIE_SAME_SITE` overrides the policy. Cookies are always host-only.
 The production Vercel config proxies `/api` to Railway so cookies stay
-first-party. Direct cross-origin deployments must use an exact frontend origin
-in `CORS_ORIGIN` and a frontend `VITE_API_BASE_URL`; browsers that block
-third-party cookies may still require a same-origin proxy.
+first-party. The frontend uses `VITE_API_BASE_URL` only during local
+development; production must use a same-origin proxy. Configure MongoDB
+credentials only on the backend host, never in frontend environment variables.
 The CSRF
 cookie is **readable by design** (double-submit pattern).
 

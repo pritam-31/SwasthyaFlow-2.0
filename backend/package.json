@@ -7,7 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "test": "tsx --test test/reports.test.ts test/visuals.test.ts test/multilingual.test.ts test/timeline.test.ts test/followups.test.ts test/retention.test.ts test/anonymisation.test.ts test/sync.test.ts test/facilities.test.ts test/priority.test.ts test/security.test.ts test/modelcard.test.ts test/bias.test.ts test/confidence.test.ts test/feedback.test.ts test/auditChain.test.ts test/consent.test.ts test/retentionUi.test.ts test/richCoverage.test.ts",
+    "test": "tsx --test --import ./test/setup-env.ts test/reports.test.ts test/visuals.test.ts test/multilingual.test.ts test/timeline.test.ts test/followups.test.ts test/retention.test.ts test/anonymisation.test.ts test/sync.test.ts test/facilities.test.ts test/priority.test.ts test/security.test.ts test/modelcard.test.ts test/bias.test.ts test/confidence.test.ts test/feedback.test.ts test/auditChain.test.ts test/consent.test.ts test/retentionUi.test.ts test/richCoverage.test.ts test/appointments.test.ts",
     "test:db": "tsx --test test/db/*.test.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:test": "tsc --noEmit -p tsconfig.test.json",

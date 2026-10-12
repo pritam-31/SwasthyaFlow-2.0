@@ -47,13 +47,13 @@ export function FacilitySwitcher() {
         aria-haspopup="menu"
         aria-expanded={open}
         className={cx(
-          'flex items-center gap-2 rounded-2xl border border-ink-100 bg-white px-3 py-1.5 text-[12px] font-semibold text-ink-700',
+          'flex items-center gap-1.5 rounded-lg border border-ink-100 bg-white px-2 py-1.5 text-[12px] font-semibold text-ink-700 sm:rounded-2xl sm:px-3',
           isSystemAdmin && 'hover:bg-ink-100/70',
         )}
         title={active?.name ?? 'Facility in scope'}
       >
         <Building2 size={14} className="text-brand-600" />
-        <span className="max-w-[150px] truncate">{label}</span>
+        <span className="max-w-[96px] truncate sm:max-w-[150px]">{label}</span>
         {isSystemAdmin && <ChevronDown size={13} className="text-ink-400" />}
       </button>
 

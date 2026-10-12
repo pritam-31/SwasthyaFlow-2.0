@@ -5,6 +5,9 @@ import { useApp } from '../store/AppStore'
 import type { Role } from '../types'
 
 import AnalyticsPage from '../pages/Analytics'
+import AppointmentDetailPage from '../pages/appointments/AppointmentDetailPage'
+import AppointmentsPage from '../pages/appointments/AppointmentsPage'
+import BookAppointmentPage from '../pages/appointments/BookAppointmentPage'
 import AuditLogs from '../pages/AuditLogs'
 import BiasPage from '../pages/Bias'
 import CaseDetail from '../pages/CaseDetail'
@@ -17,6 +20,7 @@ import FollowupsPage from '../pages/Followups'
 import HealthCamps from '../pages/HealthCamps'
 import IntakeForm from '../components/intake/IntakeForm'
 import ModelCardPage from '../pages/ModelCard'
+import NotificationsPage from '../pages/Notifications'
 import ReferralsPage from '../pages/Referrals'
 import ReportsPage from '../pages/Reports'
 import SecurityPage from '../pages/Security'
@@ -60,6 +64,9 @@ export const APP_ROUTES: AppRoute[] = [
   { path: 'cases/:caseId', to: '/app/cases', title: 'Case Detail', label: 'Case detail', roles: EVERYONE, nav: false, Component: CaseDetail },
   { path: 'new-intake', to: '/app/new-intake', title: 'New Intake', label: 'New Intake', roles: EVERYONE, nav: true, Component: IntakeForm },
   { path: 'intake', to: '/app/new-intake', title: 'New Intake', label: 'New Intake', roles: EVERYONE, nav: false, Component: IntakeForm },
+  { path: 'appointments', to: '/app/appointments', title: 'Appointments', label: 'Book Appointment', roles: EVERYONE, nav: true, Component: AppointmentsPage },
+  { path: 'appointments/book', to: '/app/appointments/book', title: 'Book Appointment', label: 'Book Appointment', roles: EVERYONE, nav: false, Component: BookAppointmentPage },
+  { path: 'appointments/:id', to: '/app/appointments', title: 'Appointment Detail', label: 'Appointment detail', roles: EVERYONE, nav: false, Component: AppointmentDetailPage },
   { path: 'reports', to: '/app/reports', title: 'Reports', label: 'Reports', roles: CLINICAL_ROLES, nav: true, Component: ReportsPage },
   { path: 'referrals', to: '/app/referrals', title: 'Referrals', label: 'Referrals', roles: CLINICAL_ROLES, nav: true, Component: ReferralsPage },
   { path: 'followups', to: '/app/followups', title: 'Follow-ups', label: 'Follow-ups', roles: EVERYONE, nav: true, Component: FollowupsPage },
@@ -74,6 +81,7 @@ export const APP_ROUTES: AppRoute[] = [
   { path: 'bias', to: '/app/bias', title: 'Bias Evaluation', label: 'Bias Evaluation', roles: ADMIN_ROLES, nav: true, Component: BiasPage },
   { path: 'feedback', to: '/app/feedback', title: 'Feedback', label: 'Feedback', roles: EVERYONE, nav: true, Component: FeedbackPage },
   { path: 'data-privacy', to: '/app/data-privacy', title: 'Data & Privacy', label: 'Data & Privacy', roles: EVERYONE, nav: true, Component: DataPrivacyPage },
+  { path: 'notifications', to: '/app/notifications', title: 'Notifications', label: 'Notifications', roles: EVERYONE, nav: true, Component: NotificationsPage },
 ]
 
 /** Nav-visible routes the role may use (drives the sidebar, bottom bar, More sheet). */

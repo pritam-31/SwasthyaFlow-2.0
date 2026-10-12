@@ -92,9 +92,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addCase = useCallback(
     (input: Partial<CaseRecord>): CaseRecord => {
       const existing = cases.length
-      const id = `case-${String(existing + 1).padStart(4, '0')}`
+      const id = input.id ?? `case-${String(existing + 1).padStart(4, '0')}`
       const num = new Date().getFullYear()
-      const patientId = `SYN-${num}-${String(existing + 1).padStart(3, '0')}`
+      const patientId = input.patientId ?? `SYN-${num}-${String(existing + 1).padStart(3, '0')}`
       const time = nowTime()
       const record: CaseRecord = {
         language: 'English',

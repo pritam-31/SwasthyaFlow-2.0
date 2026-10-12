@@ -69,9 +69,9 @@ export default function AnonymisationMetricsDashboard({ language = 'en' }: { lan
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-400">{t.category}</p>
-                <ul className="space-y-1">
+                <ul className="divide-y divide-ink-100 overflow-hidden rounded-xl border border-ink-200 bg-white">
                   {topCategories.map(([category, count]) => (
-                    <li key={category} className="flex items-center justify-between text-xs text-ink-600">
+                    <li key={category} className="flex items-center justify-between bg-white px-3 py-2 text-xs text-ink-600 odd:bg-brand-50/40">
                       <span className="font-medium">{category}</span>
                       <span className="font-mono text-ink-500">{count}</span>
                     </li>
@@ -80,9 +80,9 @@ export default function AnonymisationMetricsDashboard({ language = 'en' }: { lan
               </div>
               <div>
                 <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink-400">{t.matchesHeading}</p>
-                <ul className="space-y-1">
+                <ul className="divide-y divide-ink-100 overflow-hidden rounded-xl border border-ink-200 bg-white">
                   {topModalities.map(([modality, count]) => (
-                    <li key={modality} className="flex items-center justify-between text-xs text-ink-600">
+                    <li key={modality} className="flex items-center justify-between bg-white px-3 py-2 text-xs text-ink-600 odd:bg-brand-50/40">
                       <span className="font-medium">{modality}</span>
                       <span className="font-mono text-ink-500">{count}</span>
                     </li>

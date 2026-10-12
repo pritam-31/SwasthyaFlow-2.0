@@ -232,7 +232,17 @@ export function AppDataGrid<Row extends GridValidRowModel>({
   }
 
   const Toolbar = () => (
-    <GridToolbarContainer sx={{ gap: 0.5, px: 1, py: 0.75, borderBottom: '1px solid', borderColor: 'divider' }}>
+    <GridToolbarContainer
+      sx={(theme) => ({
+        flexWrap: 'wrap',
+        gap: 0.5,
+        px: 1,
+        py: 0.75,
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        backgroundColor: theme.palette.mode === 'dark' ? '#121a26' : '#f7f9fb',
+      })}
+    >
       {checkboxSelection && selection.ids.size > 0 && bulkActions ? (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, pr: 1 }}>
           <Typography variant="caption" sx={{ fontWeight: 700 }}>
@@ -258,7 +268,7 @@ export function AppDataGrid<Row extends GridValidRowModel>({
             setFilterModel({ ...filterModel, quickFilterValues: value ? value.split(' ').filter(Boolean) : [] })
           }}
           slotProps={{ htmlInput: { 'aria-label': quickFilterPlaceholder } }}
-          sx={{ width: 240, '& .MuiInputBase-root': { fontSize: 13, height: 34 } }}
+          sx={{ width: { xs: 140, sm: 240 }, '& .MuiInputBase-root': { fontSize: 13, height: 34 } }}
         />
       )}
     </GridToolbarContainer>
@@ -306,42 +316,56 @@ export function AppDataGrid<Row extends GridValidRowModel>({
             noRowsOverlay: () => <NoRowsOverlay title={emptyTitle} body={emptyBody} action={emptyAction} />,
             noResultsOverlay: () => <NoRowsOverlay title="No matching rows" body="Try a different search or filter." />,
           }}
-          sx={{
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: '16px',
-            backgroundColor: 'background.paper',
-            ...(maxHeight ? { maxHeight } : {}),
-            height: gridHeight,
-            '--DataGrid-containerBackground': 'transparent',
-            '& .MuiDataGrid-columnHeaders': {
-              backgroundColor: 'action.hover',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              fontSize: 11,
-              color: 'text.secondary',
-            },
-            '& .MuiDataGrid-columnHeaderTitle': { fontWeight: 800 },
-            '& .MuiDataGrid-cell': {
-              borderBottom: '1px solid',
+          sx={(theme) => {
+            const dark = theme.palette.mode === 'dark'
+            return {
+              border: '1px solid',
               borderColor: 'divider',
-              display: 'flex',
-              alignItems: 'center',
-            },
-            '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': { outline: 'none' },
-            '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
-            '& .MuiDataGrid-columnHeader--moving': { backgroundColor: 'action.selected' },
-            '& .MuiDataGrid-row:hover': { backgroundColor: 'action.hover' },
-            '& .MuiDataGrid-row.Mui-selected': {
-              backgroundColor: 'color-mix(in srgb, currentColor 6%, transparent)',
-            },
-            '& .MuiDataGrid-footerContainer': { borderTop: '1px solid', borderColor: 'divider' },
-            '& .MuiDataGrid-cell:focus-visible, & .MuiDataGrid-columnHeader:focus-visible': {
-              outline: '2px solid',
-              outlineColor: 'primary.main',
-              outlineOffset: -2,
-            },
-            ...sx,
+              borderRadius: '16px',
+              backgroundColor: 'background.paper',
+              ...(maxHeight ? { maxHeight } : {}),
+              height: gridHeight,
+              boxShadow: dark
+                ? '0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.5)'
+                : '0 1px 2px rgb(16 24 40 / 0.04), 0 8px 24px -12px rgb(16 24 40 / 0.10)',
+              '--DataGrid-containerBackground': 'transparent',
+              '& .MuiDataGrid-columnHeaders': {
+                backgroundColor: dark ? '#15202e' : '#effaf7',
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                fontSize: 11,
+                color: 'text.secondary',
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+              },
+              '& .MuiDataGrid-columnHeaderTitle': { fontWeight: 800 },
+              '& .MuiDataGrid-cell': {
+                borderBottom: '1px solid',
+                borderColor: 'divider',
+                display: 'flex',
+                alignItems: 'center',
+                color: 'text.primary',
+              },
+              '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': { outline: 'none' },
+              '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within': { outline: 'none' },
+              '& .MuiDataGrid-columnHeader--moving': { backgroundColor: 'action.selected' },
+              '& .MuiDataGrid-row:nth-of-type(even)': {
+                backgroundColor: dark ? 'rgb(43 154 133 / 0.05)' : 'rgb(43 154 133 / 0.035)',
+              },
+              '& .MuiDataGrid-row:hover': {
+                backgroundColor: dark ? 'rgb(43 154 133 / 0.08)' : '#f0faf8',
+              },
+              '& .MuiDataGrid-row.Mui-selected': {
+                backgroundColor: 'color-mix(in srgb, #2b9a85 8%, transparent)',
+              },
+              '& .MuiDataGrid-footerContainer': { borderTop: '1px solid', borderColor: 'divider' },
+              '& .MuiDataGrid-cell:focus-visible, & .MuiDataGrid-columnHeader:focus-visible': {
+                outline: '2px solid',
+                outlineColor: 'primary.main',
+                outlineOffset: -2,
+              },
+              ...sx,
+            }
           }}
         />
       </div>

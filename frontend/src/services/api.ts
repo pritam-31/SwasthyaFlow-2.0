@@ -25,14 +25,11 @@ import type {
 import type { FollowUpQuestion } from '../types/followup.types'
 
 
-// The frontend API base URL. Set this (e.g. via Vite env vars) to your backend
-// deployment URL when the frontend and backend are on different origins
-// (e.g. Vercel + Railway). Falls back to the previous behaviour.
-const API_ORIGIN = import.meta.env.VITE_API_BASE_URL
-  ? import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '')
-  : (import.meta.env.DEV
-      ? (import.meta.env.VITE_API_BASE_URL?.trim() || '').replace(/\/+$/, '')
-      : '')
+// Production auth cookies must stay same-origin, so production always uses
+// the deployment's /api proxy. The override is only for local development.
+const API_ORIGIN = import.meta.env.DEV
+  ? (import.meta.env.VITE_API_BASE_URL?.trim() || '').replace(/\/+$/, '')
+  : ''
 
 const BASE = `${API_ORIGIN}/api`
 
@@ -163,6 +160,42 @@ function newRequestId(): string {
   })
 }
 
+/** HTTP statuses that mean "the backend is still booting / briefly unavailable". */
+const TRANSIENT_STATUSES = new Set([502, 503, 504])
+
+/** Maximum automatic retries after a transient failure (network or 5xx). */
+const MAX_TRANSIENT_RETRIES = 5
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+/**
+ * True once the backend reports it is fully booted and not degraded. `/health`
+ * is registered ahead of the auth/rate-limit/DB-health middleware, so it is safe
+ * to poll while the process restarts (and it never trips the login limiter).
+ */
+async function backendReady(): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_ORIGIN}/health`, { method: 'GET', credentials: 'include' })
+    if (!res.ok) return false
+    const payload = (await res.json().catch(() => null)) as { status?: string } | null
+    return payload?.status !== 'degraded'
+  } catch {
+    return false
+  }
+}
+
+/** Waits (bounded) for the backend to finish booting, then resolves. */
+async function waitForBackend(timeoutMs = 15000, intervalMs = 600): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs
+  for (;;) {
+    if (await backendReady()) return true
+    if (Date.now() >= deadline) return false
+    await sleep(intervalMs)
+  }
+}
+
 async function core<T>(path: string, init: RequestInit | undefined, meta: RequestMeta | undefined, isRetry: boolean): Promise<T> {
   const method = (init?.method ?? 'GET').toUpperCase()
   const mutating = method !== 'GET' && method !== 'HEAD'
@@ -171,23 +204,40 @@ async function core<T>(path: string, init: RequestInit | undefined, meta: Reques
   const idempotencyKey = meta?.idempotencyKey ?? (mutating ? newRequestId() : undefined)
   // Cookie-authenticated mutating calls must echo the double-submit token.
   const csrf = mutating ? readCsrfToken() : undefined
-  let res: Response
-  try {
-    res = await fetch(`${BASE}${path}`, {
-      ...init,
-      credentials: 'include',
-      headers: {
-        'content-type': 'application/json',
-        ...(token ? { authorization: `Bearer ${token}` } : {}),
-        ...(activeFacilityId ? { 'x-facility-id': activeFacilityId } : {}),
-        ...(idempotencyKey ? { 'idempotency-key': idempotencyKey } : {}),
-        ...(meta?.offlineOrigin ? { 'x-offline-origin': 'true' } : {}),
-        ...(csrf ? { 'x-csrf-token': csrf } : {}),
-        ...init?.headers,
-      },
-    })
-  } catch {
-    throw new ApiError('Backend is not reachable — start it with `npm run dev:backend`.', 0)
+  // A dev restart (tsx watch) or a brief DB blip makes the proxy answer 502/503
+  // while the backend is still booting. Retry transparently instead of surfacing
+  // a scary error — this keeps login working right after any code change.
+  let res!: Response
+  let attempt = 0
+  for (;;) {
+    try {
+      res = await fetch(`${BASE}${path}`, {
+        ...init,
+        credentials: 'include',
+        headers: {
+          'content-type': 'application/json',
+          ...(token ? { authorization: `Bearer ${token}` } : {}),
+          ...(activeFacilityId ? { 'x-facility-id': activeFacilityId } : {}),
+          ...(idempotencyKey ? { 'idempotency-key': idempotencyKey } : {}),
+          ...(meta?.offlineOrigin ? { 'x-offline-origin': 'true' } : {}),
+          ...(csrf ? { 'x-csrf-token': csrf } : {}),
+          ...init?.headers,
+        },
+      })
+    } catch {
+      if (attempt < MAX_TRANSIENT_RETRIES) {
+        attempt += 1
+        await waitForBackend()
+        continue
+      }
+      throw new ApiError('Backend is still starting up — please try again in a moment.', 0)
+    }
+    if (TRANSIENT_STATUSES.has(res.status) && attempt < MAX_TRANSIENT_RETRIES) {
+      attempt += 1
+      await waitForBackend()
+      continue
+    }
+    break
   }
 
   const payload = (await res.json().catch(() => ({}))) as Record<string, unknown>

@@ -37,6 +37,7 @@ import { cx, EASE } from './ui'
 import { FacilitySwitcher } from './facility/FacilitySwitcher'
 import { SyncStatusIndicator } from './offline/SyncStatusIndicator'
 import { SyncQueuePanel } from './offline/SyncQueuePanel'
+import { ThemeToggle } from './theme/ThemeToggle'
 
 /* ------------------------------------------------------------------ */
 /*  Account meta                                                       */
@@ -689,13 +690,13 @@ export function AppLayout() {
         <div className="px-2 py-2 sm:px-4 sm:py-4">
           <div className="glass-card overflow-hidden rounded-2xl">
             {/* -------- Top navbar -------- */}
-            <header className="relative border-b border-ink-100/80 px-4 py-4 sm:px-6 sm:py-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            <header className="relative border-b border-ink-100/80 px-3 py-3 sm:px-6 sm:py-5">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-3">
                 {/* Greeting */}
-                <div className="flex min-w-0 items-center gap-3">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-3">
                   <span
                     className={cx(
-                      'flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-[13px] font-extrabold text-ink-900 ring-1 ring-inset ring-black/5',
+                      'hidden h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-[13px] font-extrabold text-ink-900 ring-1 ring-inset ring-black/5 sm:flex',
                       tile,
                     )}
                     aria-hidden="true"
@@ -703,10 +704,10 @@ export function AppLayout() {
                     {authUser ? initialsOf(authUser.displayName) : meta.initials}
                   </span>
                   <div className="min-w-0">
-                    <h1 className="truncate text-[20px] font-extrabold leading-tight tracking-tight text-ink-900 sm:text-[24px]">
+                    <h1 className="truncate text-[17px] font-extrabold leading-tight tracking-tight text-ink-900 sm:text-[24px]">
                       Hi {greetingName}
                     </h1>
-                    <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-ink-600">
+                    <p className="mt-1 hidden flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] text-ink-600 sm:flex">
                       <span className="inline-flex items-center gap-1 font-semibold text-brand-700">
                         <Stethoscope size={13} /> {ROLE_LABEL[role]}
                       </span>
@@ -716,12 +717,15 @@ export function AppLayout() {
                   </div>
                 </div>
 
-                {/* Right cluster */}
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="hidden md:block">
+                {/* Controls — second row on mobile, right cluster from md up */}
+                <div className="flex flex-wrap items-center gap-x-1 gap-y-1.5 sm:gap-x-1.5 md:flex-nowrap md:justify-end md:shrink-0">
+                  <div className="hidden lg:block">
                     <SyncStatusIndicator onOpen={() => setQueueOpen(true)} />
                   </div>
-                  <FacilitySwitcher />
+
+                  <div className="min-w-0 flex-1 md:flex-none">
+                    <FacilitySwitcher />
+                  </div>
 
                   <div className="hidden items-center gap-1.5 rounded-2xl bg-ink-100/80 p-1 md:flex">
                     <div className="relative">
@@ -758,7 +762,7 @@ export function AppLayout() {
                   </div>
 
                   {/* Mobile helper icons (below md) */}
-                  <div className="flex items-center gap-1 md:hidden">
+                  <div className="flex flex-wrap items-center gap-1 md:hidden">
                     <div className="relative">
                       <button
                         ref={quickMobileRef}
@@ -771,11 +775,11 @@ export function AppLayout() {
                         aria-haspopup="menu"
                         aria-expanded={quickOpen}
                         className={cx(
-                          'flex h-11 w-11 items-center justify-center rounded-2xl bg-ink-100 text-ink-500',
+                          'flex h-9 w-9 items-center justify-center rounded-lg bg-ink-100 text-ink-500',
                           quickOpen && 'bg-ink-900 text-white',
                         )}
                       >
-                        <Plus size={18} />
+                        <Plus size={16} />
                       </button>
                     </div>
 
@@ -789,31 +793,30 @@ export function AppLayout() {
                       aria-label="Search"
                       aria-haspopup="menu"
                       aria-expanded={searchOpen}
-                      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-ink-100 text-ink-500"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-ink-100 text-ink-500"
                     >
-                      <Search size={18} />
+                      <Search size={16} />
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setQueueOpen(true)}
                       aria-label="Offline queue"
-                      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-ink-100 text-ink-500"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-ink-100 text-ink-500"
                     >
-                      <Wifi size={18} />
+                      <Wifi size={16} />
                     </button>
                   </div>
 
-                  {/* Shared popovers — anchored to whichever trigger is visible */}
-                  <QuickAddMenu anchorRef={quickAnchor} open={quickOpen} onClose={() => setQuickOpen(false)} />
-                  <SearchPalette anchorRef={searchAnchor} open={searchOpen} onClose={() => setSearchOpen(false)} />
+                  {/* Appearance — Light / Dark / System */}
+                  <ThemeToggle />
 
                   {/* Clock (icon-only below sm, full chip from sm) */}
                   <div
-                    className="flex items-center gap-2.5 rounded-2xl bg-ink-100/80 px-2.5 py-2.5 sm:px-3.5"
+                    className="flex shrink-0 items-center gap-1.5 rounded-lg bg-ink-100/80 px-1.5 py-1.5 sm:rounded-2xl sm:px-3.5"
                     title={`${time} ${day}`}
                   >
-                    <span className="text-[14px] font-extrabold tabular-nums leading-none tracking-tight text-ink-900 sm:text-[15px]">
+                    <span className="text-[12px] font-extrabold tabular-nums leading-none tracking-tight text-ink-900 sm:text-[15px]">
                       {timeShort}
                     </span>
                     <span className="hidden text-[10px] font-semibold leading-tight text-ink-500 sm:block">{day}</span>
@@ -821,7 +824,7 @@ export function AppLayout() {
 
                   {/* Signed-in account (info only — sign-out lives in the rail profile menu) */}
                   <div
-                    className="hidden items-center gap-2 rounded-2xl bg-ink-100/80 px-3 py-2 md:flex"
+                    className="hidden items-center gap-2 rounded-2xl bg-ink-100/80 px-3 py-2 lg:flex"
                     title={authUser ? `${authUser.username} — ${ROLE_LABEL[role]}` : ROLE_LABEL[role]}
                   >
                     <UserIcon size={14} className="text-ink-400" />
@@ -834,6 +837,10 @@ export function AppLayout() {
                       </span>
                     </span>
                   </div>
+
+                  {/* Shared popovers — anchored to whichever trigger is visible */}
+                  <QuickAddMenu anchorRef={quickAnchor} open={quickOpen} onClose={() => setQuickOpen(false)} />
+                  <SearchPalette anchorRef={searchAnchor} open={searchOpen} onClose={() => setSearchOpen(false)} />
                 </div>
               </div>
             </header>

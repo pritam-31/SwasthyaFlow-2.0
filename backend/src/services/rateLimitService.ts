@@ -74,17 +74,33 @@ export async function consume(key: string, max: number): Promise<RateLimitResult
     prev.count = count
     return { allowed: count <= limit, retryAfter: retryAfterSeconds(windowStart), current: count }
   }
+  const windowStartDate = new Date(windowStart)
   const expiresAt = new Date(windowStart + SECONDS_PER_WINDOW * 2 * 1000)
+  // Atomic fixed-window increment: when the stored windowStart no longer
+  // matches the current window the counter is reset to 1, otherwise it is
+  // incremented. A plain $inc would never roll over and would lock an actor
+  // out permanently once the ceiling was ever exceeded.
   const doc = await RateLimitModel.findOneAndUpdate(
     { key },
-    { $inc: { count: 1 }, $setOnInsert: { _id: key, key, windowStart: new Date(windowStart), expiresAt } },
+    [
+      {
+        $set: {
+          key,
+          windowStart: windowStartDate,
+          expiresAt,
+          count: {
+            $cond: [
+              { $eq: ['$windowStart', windowStartDate] },
+              { $add: [{ $ifNull: ['$count', 0] }, 1] },
+              1,
+            ],
+          },
+        },
+      },
+    ],
     { upsert: true, returnDocument: 'after', includeResultMetadata: false },
   ).lean().exec()
   const count = doc?.count ?? 1
-  if (count === 1) {
-    // Fresh window but the doc may carry an old windowStart; reset it.
-    await RateLimitModel.updateOne({ key, windowStart: { $ne: new Date(windowStart) } }, { windowStart: new Date(windowStart), expiresAt, count }).lean().exec()
-  }
   return { allowed: count <= limit, retryAfter: retryAfterSeconds(windowStart), current: count }
 }
 

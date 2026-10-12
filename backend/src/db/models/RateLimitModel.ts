@@ -6,7 +6,6 @@ import mongoose, { Schema } from 'mongoose'
  * shortly after their window ends.
  */
 export interface DbRateLimit {
-  _id: string
   key: string
   windowStart: Date
   count: number
@@ -15,13 +14,12 @@ export interface DbRateLimit {
 
 const RateLimitSchema = new Schema<DbRateLimit>(
   {
-    _id: { type: String, required: true },
     key: { type: String, required: true, index: true, unique: true },
     windowStart: { type: Date, required: true },
     count: { type: Number, required: true, default: 0 },
     expiresAt: { type: Date, required: true },
   },
-  { versionKey: false, _id: false },
+  { versionKey: false },
 )
 
 RateLimitSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 })

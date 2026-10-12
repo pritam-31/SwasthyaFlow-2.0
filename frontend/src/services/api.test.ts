@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { AUTH_EXPIRED_EVENT, fetchBlobUrl, request, setAuthToken } from './api'
+import { AUTH_EXPIRED_EVENT, fetchBlobUrl, login, register, request, setAuthToken } from './api'
 
 function jsonResponse(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
@@ -35,6 +35,23 @@ describe('API authentication recovery', () => {
     const refresh = calls.find((call) => call.url.endsWith('/auth/refresh'))
     expect(new Headers(refresh?.init?.headers).get('x-csrf-token')).toBe('csrf-value')
     expect(calls.filter((call) => call.url.endsWith('/protected'))).toHaveLength(2)
+  })
+
+  it('sends login and signup through the same-origin API with cookies enabled', async () => {
+    const calls: Array<{ url: string; init?: RequestInit }> = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        calls.push({ url: String(input), init })
+        return jsonResponse(200, {})
+      }),
+    )
+
+    await login({ username: 'patient', password: 'Patient@123' })
+    await register({ username: 'new-user', displayName: 'New User', password: 'Password123' })
+
+    expect(calls.map(({ url }) => url)).toEqual(['/api/auth/login', '/api/auth/register'])
+    expect(calls.every(({ init }) => init?.credentials === 'include')).toBe(true)
   })
 
   it('does not expire the login after a transient refresh network error', async () => {

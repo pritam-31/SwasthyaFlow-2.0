@@ -225,6 +225,47 @@ export function seedDefaultFacility(): Facility {
   return facility
 }
 
+/**
+ * Seeds a demo directory of clinics, hospitals and community health units so
+ * the facility registry looks realistic across every healthcare type.
+ */
+export function seedDemoFacilities(): Facility[] {
+  const demo: Array<{ name: string; type: FacilityType; region?: string; district?: string; state?: string }> = [
+    { name: 'Sunrise Multi-Speciality Clinic', type: 'company-clinic', region: 'Pune West', district: 'Pune', state: 'Maharashtra' },
+    { name: 'GreenLeaf Primary Health Centre', type: 'phc', region: 'Belgaum North', district: 'Belgaum', state: 'Karnataka' },
+    { name: 'Navjivan Community Health Centre', type: 'government-hospital', region: 'Nagpur City', district: 'Nagpur', state: 'Maharashtra' },
+    { name: 'CityCare Corporate Clinic', type: 'company-clinic', region: 'Andheri East', district: 'Mumbai', state: 'Maharashtra' },
+    { name: 'Swasthya Mobile Health Camp', type: 'health-camp', region: 'Remote block', district: 'Bhopal', state: 'Madhya Pradesh' },
+    { name: 'Railway Employees Health Unit', type: 'industrial-health-unit', region: 'Rail colony', district: 'Howrah', state: 'West Bengal' },
+    { name: 'Campus Wellness Health Centre', type: 'campus-health-centre', region: 'Main campus', district: 'Kharagpur', state: 'West Bengal' },
+    { name: 'MediCore Diagnostics & Clinic', type: 'other', region: 'Civil Lines', district: 'Jaipur', state: 'Rajasthan' },
+    { name: 'Bahubali Rural Health Camp', type: 'health-camp', region: 'Sonepat block', district: 'Sonepat', state: 'Haryana' },
+    { name: 'Anand Maternity & Child Clinic', type: 'phc', region: 'Nashik East', district: 'Nashik', state: 'Maharashtra' },
+  ]
+  const created: Facility[] = []
+  for (const item of demo) {
+    if ([...facilities.values()].some((f) => f.name === item.name)) continue
+    const stamp = now()
+    const facility: Facility = {
+      id: `fac-${randomUUID().slice(0, 8)}`,
+      name: item.name,
+      type: item.type,
+      status: 'active',
+      region: item.region,
+      district: item.district,
+      state: item.state,
+      createdAt: stamp,
+      updatedAt: stamp,
+      createdBy: 'system',
+      updatedBy: 'system',
+    }
+    facilities.set(facility.id, facility)
+    persist(facility)
+    created.push(facility)
+  }
+  return created
+}
+
 export async function hydrateFacilities(): Promise<void> {
   const rows = await listPersistedFacilities()
   facilities.clear()

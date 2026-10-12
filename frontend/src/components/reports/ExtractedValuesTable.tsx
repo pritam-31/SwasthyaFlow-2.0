@@ -117,6 +117,7 @@ export default function ExtractedValuesTable({
             getRowId={(v) => v.id}
             hideToolbar
             hideFooter
+            autoHeight
             defaultDensity="compact"
           />
         </section>
@@ -134,6 +135,7 @@ export default function ExtractedValuesTable({
             getRowId={(v) => v.id}
             hideToolbar
             hideFooter
+            autoHeight
             defaultDensity="compact"
           />
         </section>

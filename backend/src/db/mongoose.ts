@@ -51,18 +51,37 @@ export async function connectMongo(uri: string = mongoUri()): Promise<typeof mon
   if (connected) return mongoose
   if (connecting) return connecting
   mongoose.set('strictQuery', true)
-  connecting = mongoose.connect(uri, {
-    dbName: process.env.MONGODB_DB_NAME?.trim() || 'swasthyaflow',
-    serverSelectionTimeoutMS: 5000,
-    autoIndex: process.env.NODE_ENV !== 'production',
-  })
-  try {
-    await connecting
-    connected = true
-  } finally {
-    connecting = null
+  const open = async (): Promise<void> => {
+    connecting = mongoose.connect(uri, {
+      dbName: process.env.MONGODB_DB_NAME?.trim() || 'swasthyaflow',
+      serverSelectionTimeoutMS: 5000,
+      autoIndex: process.env.NODE_ENV !== 'production',
+    })
+    try {
+      await connecting
+      connected = true
+    } finally {
+      connecting = null
+    }
   }
-  return mongoose
+  // A transient network / DNS / Atlas blip at boot must not kill the server.
+  // Retry the initial handshake with backoff before giving up.
+  const maxAttempts = 3
+  let lastErr: unknown
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      await open()
+      return mongoose
+    } catch (err) {
+      lastErr = err
+      console.error(
+        `[db] Mongo connection failed (attempt ${attempt}/${maxAttempts}):`,
+        err instanceof Error ? err.message : err,
+      )
+      if (attempt < maxAttempts) await new Promise((resolve) => setTimeout(resolve, 1500 * attempt))
+    }
+  }
+  throw lastErr
 }
 
 export async function disconnectMongo(): Promise<void> {

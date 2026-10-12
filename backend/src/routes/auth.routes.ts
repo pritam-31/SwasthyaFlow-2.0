@@ -12,6 +12,7 @@ import {
   endAllSessionsForUser,
   endSession,
   getUser,
+  isReservedUsername,
   isSystemAdmin,
   listSessionsForUser,
   listUsers,
@@ -56,6 +57,7 @@ import {
 import { record } from '../services/securityEventService'
 import type { SecurityEventType } from '../types/security.types'
 import type { UserRole } from '../types'
+import { seedDemoData } from '../db/bootstrap'
 
 export const authRouter = Router()
 
@@ -147,6 +149,10 @@ authRouter.post('/register', ah(async (req, res) => {
   const displayName = requiredString(req.body, 'displayName')
   const password = requiredString(req.body, 'password')
 
+  if (isReservedUsername(username)) {
+    throw new HttpError(409, 'That username is reserved. Please choose another.')
+  }
+
   const user = createUser({ username, displayName, password, role: 'patient' })
   const policy = await getEffectivePolicy(user.facilityId)
 
@@ -171,6 +177,14 @@ authRouter.post('/login', ah(async (req, res) => {
   const username = requiredString(req.body, 'username')
   const password = requiredString(req.body, 'password')
   const ctx = context(req)
+
+  // A brand-new or previously-unseeded database has no accounts at all. Restore
+  // the documented demo directory so the demo credentials shown on the login
+  // screen always work. Guarded: only runs while the directory is completely
+  // empty, so real accounts are never overwritten.
+  if (listUsers().length === 0) {
+    await seedDemoData()
+  }
 
   const locked = checkLockout(username, ctx.ip)
   if (locked.locked) {

@@ -36,6 +36,11 @@ import { richCoverageRouter } from './routes/richCoverage.routes'
 import { sessionsRouter } from './routes/sessions.routes'
 import { triageRouter } from './routes/triage.routes'
 import { visualsRouter } from './routes/visuals.routes'
+import { departmentsRouter } from './routes/departments.routes'
+import { doctorsRouter } from './routes/doctors.routes'
+import { appointmentsRouter } from './routes/appointments.routes'
+import { notificationsRouter } from './routes/notifications.routes'
+import { adminAppointmentsRouter } from './routes/adminAppointments.routes'
 
 
 const ALLOWED_ORIGINS = ( process.env.CORS_ORIGIN ?? 'http://localhost:5173,http://127.0.0.1:5173,https://swasthya-flow-2-0.vercel.app' )
@@ -122,6 +127,13 @@ export function createApp(): express.Express {
   // param would otherwise swallow /queue/stream).
   app.use('/api', queueStreamRouter)
   app.use('/api', queueRouter)
+
+  // Appointment system (bookings, directory, schedules, notifications).
+  app.use('/api/departments', departmentsRouter)
+  app.use('/api/doctors', doctorsRouter)
+  app.use('/api/appointments', appointmentsRouter)
+  app.use('/api/notifications', notificationsRouter)
+  app.use('/api/admin/appointments', adminAppointmentsRouter)
 
   app.use(notFound)
   app.use(errorHandler)

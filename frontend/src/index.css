@@ -2,6 +2,92 @@
 
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
+/* =========================================================
+   Dark appearance  — driven by <html class="dark"> (ThemeToggle)
+   Tokens are referenced via var() by every Tailwind utility,
+   so redefining them here flips the whole chassis at once.
+   ========================================================= */
+.dark {
+  color-scheme: dark;
+
+  --color-canvas: #0b0f16;
+  --color-ink-50: #131a26;
+  --color-ink-100: #1a2332;
+  --color-ink-200: #263248;
+  --color-ink-300: #3b4960;
+  --color-ink-400: #64748a;
+  --color-ink-500: #91a0b5;
+  --color-ink-600: #bfccdb;
+  --color-ink-700: #d3dde8;
+  --color-ink-800: #e5ebf3;
+  --color-ink-900: #f1f5f9;
+
+  /* Brand: darker tints for backgrounds, lighter teals for text/hover. */
+  --color-brand-50: #0f2925;
+  --color-brand-100: #123a31;
+  --color-brand-200: #174b40;
+  --color-brand-300: #1d6d5c;
+  --color-brand-400: #269076;
+  --color-brand-500: #2b9a85;
+  --color-brand-600: #2eaa92;
+  --color-brand-700: #38bda3;
+  --color-brand-800: #3dc3ab;
+  --color-brand-900: #57d2bd;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 1px 3px rgb(0 0 0 / 0.5);
+  --shadow-lift: 0 16px 40px -12px rgb(0 0 0 / 0.6), 0 4px 12px rgb(0 0 0 / 0.4);
+  --shadow-soft: 0 6px 24px -8px rgb(0 0 0 / 0.5);
+}
+
+/* Keep white text readable on solid brand buttons in dark mode. */
+.dark [class~="bg-brand-600"] { background-color: #1f7d6b; }
+.dark [class~="bg-brand-700"] { background-color: #1a6457; }
+.dark [class~="bg-brand-800"] { background-color: #164f46; }
+.dark [class~="bg-brand-900"] { background-color: #12413a; }
+
+/* The sidebar rail + dark tiles stay dark in BOTH themes (they carry white icons/text). */
+.dark [class~="bg-ink-900"] { background-color: #141c2b; }
+.dark [class~="bg-ink-900/60"] { background-color: rgb(20 28 43 / 0.6); }
+.dark [class~="bg-ink-900/45"] { background-color: rgb(20 28 43 / 0.45); }
+.dark [class~="bg-ink-900/40"] { background-color: rgb(20 28 43 / 0.4); }
+.dark [class~="bg-ink-900/30"] { background-color: rgb(20 28 43 / 0.3); }
+
+/* White utility surfaces flip to dark panels so the whole layout matches. */
+.dark [class~="bg-white"] { background-color: #111721; }
+.dark [class~="bg-white/95"] { background-color: rgb(17 23 33 / 0.95); }
+.dark [class~="bg-white/80"] { background-color: rgb(17 23 33 / 0.8); }
+.dark [class~="bg-white/70"] { background-color: rgb(17 23 33 / 0.7); }
+.dark [class~="bg-white/60"] { background-color: rgb(17 23 33 / 0.6); }
+
+:root:not(.dark) {
+  color-scheme: light;
+}
+
+/* Frosted card — dark variant */
+.dark .glass-card {
+  background-color: rgb(17 23 33 / 0.72);
+  background-image: linear-gradient(180deg, rgb(23 30 44 / 0.9) 0%, rgb(12 17 26 / 0.6) 100%);
+  border-color: rgb(255 255 255 / 0.08);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.4),
+    0 8px 24px -12px rgb(0 0 0 / 0.6),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+}
+
+/* Inputs */
+.dark .inp {
+  background-color: #111721;
+  border-color: var(--color-ink-200);
+  color: var(--color-ink-800);
+}
+
+/* Skeleton shimmer */
+.dark .sf-skeleton::after {
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.06), transparent);
+}
+
 @theme {
   --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", Roboto, "Noto Sans", "Noto Sans Devanagari", "Noto Sans Oriya", sans-serif;

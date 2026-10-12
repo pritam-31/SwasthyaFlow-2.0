@@ -217,12 +217,18 @@ export function createUser(input: {
  */
 export async function verifyCredentials(username: string, password: string): Promise<AuthUser> {
   const normalized = username.trim().toLowerCase()
-  const user = [...users.values()].find((u) => u.username === normalized)
+  const candidates = [...users.values()].filter((u) => u.username === normalized)
+  let user: StoredUser | undefined
+  for (const candidate of candidates) {
+    const algorithm = candidate.passwordAlgorithm ?? (candidate.passwordHash.startsWith('$argon2') ? 'argon2id' : 'scrypt')
+    if (await verifyPassword(password, candidate.passwordHash, algorithm, candidate.salt)) {
+      user = candidate
+      break
+    }
+  }
   if (!user) throw new AuthError(401, 'Invalid username or password.')
 
   const algorithm = user.passwordAlgorithm ?? (user.passwordHash.startsWith('$argon2') ? 'argon2id' : 'scrypt')
-  const ok = await verifyPassword(password, user.passwordHash, algorithm, user.salt)
-  if (!ok) throw new AuthError(401, 'Invalid username or password.')
   if (user.deactivatedAt) {
     throw new AuthError(401, 'This account has been deactivated. Contact the facility administrator.')
   }
@@ -582,16 +588,27 @@ export class AuthError extends Error {
   }
 }
 
+/** The four documented demo accounts (one per role) shown on the login screen. */
+export const DEMO_ACCOUNTS: ReadonlyArray<{ username: string; displayName: string; password: string; role: UserRole }> = [
+  { username: 'admin', displayName: 'S. Kiro', password: 'Admin@123', role: 'admin' },
+  { username: 'nurse', displayName: 'R. Sharma', password: 'Nurse@123', role: 'nurse' },
+  { username: 'doctor', displayName: 'Dr. A. Mehta', password: 'Doctor@123', role: 'doctor' },
+  { username: 'patient', displayName: 'Ramesh Kumar', password: 'Patient@123', role: 'patient' },
+]
+
+/**
+ * True when a username belongs to the demo directory. Self-registration must
+ * not claim these, otherwise a patient account would shadow a demo login.
+ */
+export function isReservedUsername(username: string): boolean {
+  const normalized = username.trim().toLowerCase()
+  return DEMO_ACCOUNTS.some((account) => account.username === normalized)
+}
+
 /** Seeds the four demo accounts (one per role) so the app is usable immediately. */
 export function seedUsers(): void {
   if (users.size > 0) return
-  const demo: Array<{ username: string; displayName: string; password: string; role: UserRole }> = [
-    { username: 'admin', displayName: 'S. Kiro', password: 'Admin@123', role: 'admin' },
-    { username: 'nurse', displayName: 'R. Sharma', password: 'Nurse@123', role: 'nurse' },
-    { username: 'doctor', displayName: 'Dr. A. Mehta', password: 'Doctor@123', role: 'doctor' },
-    { username: 'patient', displayName: 'Ramesh Kumar', password: 'Patient@123', role: 'patient' },
-  ]
-  for (const account of demo) createUser(account)
+  for (const account of DEMO_ACCOUNTS) createUser({ ...account })
 }
 
 /** Loads persisted users + live login sessions on boot (persistent mode only). */

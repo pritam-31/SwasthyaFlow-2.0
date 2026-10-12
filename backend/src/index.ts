@@ -1,3 +1,4 @@
+import type { Server } from 'node:http'
 import { createApp } from './app'
 import { initPersistence, shutdownPersistence } from './db/bootstrap'
 import { startRetentionScheduler } from './services/retentionScheduler'
@@ -20,18 +21,11 @@ function resolvePort(raw: string | undefined): number {
 const PORT = resolvePort(process.env.PORT)
 
 async function main(): Promise<void> {
-  await initPersistence()
+  await initPersistenceWithRetry()
   ensureAuditChains()
   auditRuleRegistryLoad()
 
-  const server = createApp().listen(PORT, () => {
-    console.log(`[api] SwasthyaFlow backend listening on http://localhost:${PORT}`)
-    console.log('[api] non-diagnostic prototype — no diagnosis, no prescriptions.')
-    console.log('[api] anonymisation: unified P0-7 pipeline active across all modalities (en/hi/or).')
-    startRetentionScheduler()
-    startPriorityScheduler()
-    startAuditVerificationScheduler()
-  })
+  const server = startServer(createApp())
 
   const shutdown = (signal: string): void => {
     console.log(`[api] ${signal} received — flushing writes and closing.`)
@@ -40,9 +34,70 @@ async function main(): Promise<void> {
     server.close(() => {
       void shutdownPersistence().finally(() => process.exit(0))
     })
+    // Release idle keep-alive sockets (the Vite proxy holds them) so the port is
+    // freed promptly for the next `tsx watch` restart instead of lingering.
+    server.closeIdleConnections?.()
   }
   process.on('SIGTERM', () => shutdown('SIGTERM'))
   process.on('SIGINT', () => shutdown('SIGINT'))
+}
+
+/**
+ * Binds the HTTP port, retrying briefly when it is still held by the previous
+ * process. During fast dev restarts (`tsx watch`) the old process can hold port
+ * 4000 for a moment; without a handler an `EADDRINUSE` emits an unhandled
+ * `'error'` event that crashes the new process — leaving the dev proxy (and the
+ * deployed URL) answering 502 on every request until a manual restart.
+ */
+function startServer(app: ReturnType<typeof createApp>): Server {
+  const server = app.listen(PORT)
+  let attempts = 0
+  const maxAttempts = 20
+  const retryDelayMs = 500
+
+  server.on('listening', () => {
+    console.log(`[api] SwasthyaFlow backend listening on http://localhost:${PORT}`)
+    console.log('[api] non-diagnostic prototype — no diagnosis, no prescriptions.')
+    console.log('[api] anonymisation: unified P0-7 pipeline active across all modalities (en/hi/or).')
+    startRetentionScheduler()
+    startPriorityScheduler()
+    startAuditVerificationScheduler()
+  })
+
+  server.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE' && attempts < maxAttempts) {
+      attempts += 1
+      console.warn(`[api] port ${PORT} still busy (attempt ${attempts}/${maxAttempts}) — retrying in ${retryDelayMs}ms`)
+      setTimeout(() => server.listen(PORT), retryDelayMs)
+      return
+    }
+    console.error('[api] server error:', err instanceof Error ? err.message : err)
+    process.exit(1)
+  })
+
+  return server
+}
+
+/**
+ * Retries the whole persistence bootstrap so a transient Mongo/network outage
+ * during startup does not permanently kill the server (which would leave the
+ * dev proxy answering 502 on every request). `connectMongo` already retries the
+ * initial handshake; this adds a second, coarser layer for hydrate failures.
+ */
+async function initPersistenceWithRetry(attempts = 3, delayMs = 2000): Promise<void> {
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      await initPersistence()
+      return
+    } catch (err) {
+      console.error(
+        `[api] startup attempt ${attempt}/${attempts} failed:`,
+        err instanceof Error ? err.message : err,
+      )
+      if (attempt === attempts) throw err
+      await new Promise((resolve) => setTimeout(resolve, delayMs))
+    }
+  }
 }
 
 /**
