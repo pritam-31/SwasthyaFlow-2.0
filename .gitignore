@@ -17,6 +17,9 @@ coverage/
 .vite/
 .cache/
 *.log
+
+# Railway CLI local project link
+.railway/
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
