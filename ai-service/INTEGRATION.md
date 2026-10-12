@@ -41,9 +41,9 @@ Leave `AI_SERVICE_URL` empty to disable the integration entirely — triage then
 uses only the in-process priority scorer and the UI shows a **Local fallback**
 badge.
 
-**Production (Render):** deploy the AI service with the root `render.yaml`
-Blueprint (see `ai-service/README.md`), then set the backend's environment to
-the deployed URL and the same shared secret:
+**Production (Render or Railway):** deploy the AI service with the root
+`render.yaml` Blueprint or `ai-service/railway.json` (see `ai-service/README.md`),
+then set the backend's environment to the deployed URL and the same shared secret:
 
 ```env
 AI_SERVICE_URL=https://swasthyaflow-ai.onrender.com
@@ -51,9 +51,9 @@ AI_SERVICE_TOKEN=<same value as the AI service's AI_SERVICE_TOKEN>
 AI_SERVICE_TIMEOUT_MS=8000
 ```
 
-Raise the timeout in production: the Render free plan cold-starts after idling,
-so the first call can exceed the 4 s local default (it falls back cleanly if it
-does).
+Raise the timeout in production: hosted free tiers (e.g. Render's free plan)
+cold-start after idling, so the first call can exceed the 4 s local default (it
+falls back cleanly if it does).
 
 ## 3. Backend surface (`backend/src`)
 

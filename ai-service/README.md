@@ -240,6 +240,35 @@ Notes:
 
 To run locally as a container instead: `docker compose up --build`.
 
+## Deploy to Railway
+
+Railway builds the same Docker image. Because this is a monorepo, point the
+service at the AI service directory (a `railway.json` is included here):
+
+1. Push the repo to GitHub.
+2. In Railway: **New Project → Deploy from GitHub repo**, pick the repo.
+3. Open the service → **Settings → Source → Root Directory** = `ai-service`.
+   Railway auto-detects `ai-service/Dockerfile` (per `railway.json`).
+4. **Variables** → add:
+   - `INSTALL_ML=lite` — passed as a Docker build arg (`none` = smallest,
+     `full` = whole stack, needs more RAM).
+   - `AI_PII_SALT` — a long random string (keep it secret).
+   - `AI_SERVICE_TOKEN` — a random string; reuse the same value in the backend.
+   - optional: `AI_LOG_LEVEL=info`, `AI_ENABLE_FEEDBACK=true`.
+5. **Settings → Networking → Generate Domain** to get a public URL (e.g.
+   `https://swasthyaflow-ai.up.railway.app`), then set it in the backend:
+   `AI_SERVICE_URL=https://swasthyaflow-ai.up.railway.app`.
+
+Notes:
+
+- Railway forwards service variables to the Docker build as build arguments, so
+  `INSTALL_ML` is picked up at build time (the Dockerfile declares it via `ARG`).
+- Railway only deploys git-tracked files; the baked `models/` and `data/` are
+  committed, so the learned weights ship inside the image.
+- Railway has no permanent free tier (trial credit, then the Hobby plan). Attach
+  a **Volume** mounted at `/app/data` if you want the feedback store to persist
+  across deploys.
+
 ---
 
 ## Project layout
