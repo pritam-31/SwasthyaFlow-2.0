@@ -62,9 +62,12 @@ function LandingScene() {
         animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ duration: 0.8, delay: 0.35, ease: EASE }}
       >
-        <span>Voice note</span>
-        <strong>Fever, cough, 3 days</strong>
-        <small>Hindi detected</small>
+        <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-lime-300/20 text-lime-200">
+          <Languages size={18} />
+        </div>
+        <span>Multilingual intake</span>
+        <strong>Speak in any language</strong>
+        <small>Hindi · Odia · English</small>
       </motion.div>
 
       <motion.div
@@ -73,9 +76,12 @@ function LandingScene() {
         animate={{ opacity: 1, x: 0, y: 0 }}
         transition={{ duration: 0.8, delay: 0.55, ease: EASE }}
       >
-        <span>Priority</span>
-        <strong>Review in 12 min</strong>
-        <small>Clinician approval required</small>
+        <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-sky-300/20 text-sky-200">
+          <ShieldCheck size={18} />
+        </div>
+        <span>Clinician oversight</span>
+        <strong>AI suggests, you decide</strong>
+        <small>No diagnosis, ever</small>
       </motion.div>
 
       <motion.div
@@ -99,11 +105,11 @@ export default function LandingPage() {
         <div className="absolute inset-0 opacity-[0.16] [background-image:linear-gradient(rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:54px_54px]" />
 
         <nav className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-5 py-5 sm:px-8">
-          <Link to="/" className="flex items-center gap-2.5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-lime-300 text-ink-900 shadow-lg shadow-lime-300/20">
-              <HeartPulse size={20} strokeWidth={2.4} />
+          <Link to="/" className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-lime-300 text-ink-900 shadow-lg shadow-lime-300/20">
+              <HeartPulse size={23} strokeWidth={2.4} />
             </span>
-            <span className="text-[15px] font-extrabold tracking-tight">SwasthyaFlow</span>
+            <span className="text-[20px] font-black tracking-tight sm:text-[22px]">आरोग्य Sathi</span>
           </Link>
           <div className="flex items-center gap-2">
             <Link
@@ -132,10 +138,10 @@ export default function LandingPage() {
               <Sparkles size={13} /> Non-diagnostic clinical workflow AI
             </div>
             <h1 className="max-w-[12ch] text-[52px] font-black leading-[0.95] tracking-normal text-white sm:text-[76px] lg:text-[88px]">
-              Care flow, upgraded.
+              Every case, seen sooner.
             </h1>
             <p className="mt-6 max-w-[58ch] text-[15px] leading-7 text-white/68 sm:text-[17px]">
-              SwasthyaFlow helps frontline health teams capture symptoms, structure reports, prioritize queues,
+              आरोग्य Sathi helps frontline health teams capture symptoms, structure reports, prioritize queues,
               refer cases and follow up with patients while keeping every clinical decision human-led.
             </p>
 
