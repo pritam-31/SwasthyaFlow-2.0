@@ -178,7 +178,10 @@ function sleep(ms: number): Promise<void> {
 async function backendReady(): Promise<boolean> {
   try {
     const res = await fetch(`${API_ORIGIN}/health`, { method: 'GET', credentials: 'include' })
-    if (!res.ok) return false
+    // A static host without an /api proxy answers 200 with the SPA HTML here —
+    // that is NOT a ready backend, so require a real JSON health payload.
+    const type = res.headers.get('content-type') ?? ''
+    if (!res.ok || !type.includes('application/json')) return false
     const payload = (await res.json().catch(() => null)) as { status?: string } | null
     return payload?.status !== 'degraded'
   } catch {
@@ -242,6 +245,19 @@ async function core<T>(path: string, init: RequestInit | undefined, meta: Reques
 
   const payload = (await res.json().catch(() => ({}))) as Record<string, unknown>
   const isAuthPath = path === '/auth/login' || path === '/auth/register' || path === '/auth/refresh'
+
+  // A successful API response is JSON (or empty for 204). If we instead get
+  // HTML, the host is serving the SPA for /api (e.g. a static deploy with no
+  // /api proxy) — fail loudly rather than silently returning an empty object.
+  if (res.ok) {
+    const type = res.headers.get('content-type') ?? ''
+    if (type.includes('text/html')) {
+      throw new ApiError(
+        'The app is not connected to its API — this deployment is missing its /api proxy. See frontend/server.mjs.',
+        res.status,
+      )
+    }
+  }
 
   if (res.status === 401 && !isRetry && !isAuthPath) {
     const refreshed = await refreshSessionState()

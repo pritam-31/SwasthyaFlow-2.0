@@ -5,14 +5,21 @@ import { Button, Card, cx } from '../components/ui'
 import { useAuth } from '../context/AuthContext'
 import { ApiError } from '../services/api'
 
-const DEMO_ACCOUNTS = import.meta.env.DEV
-  ? [
-      { label: 'Patient', username: 'patient', password: 'Patient@123' },
-      { label: 'Nurse', username: 'nurse', password: 'Nurse@123' },
-      { label: 'Doctor', username: 'doctor', password: 'Doctor@123' },
-      { label: 'Admin', username: 'admin', password: 'Admin@123' },
-    ]
-  : []
+/**
+ * Synthetic demo credentials (the backend seeds these accounts on first boot).
+ * Shown in every build — including the deployed prototype — so reviewers can
+ * sign in without hunting for credentials. Set VITE_HIDE_DEMO_ACCOUNTS=true to
+ * hide the panel for a public/customer-facing deployment.
+ */
+const DEMO_ACCOUNTS =
+  import.meta.env.VITE_HIDE_DEMO_ACCOUNTS === 'true'
+    ? []
+    : [
+        { label: 'Patient', username: 'patient', password: 'Patient@123' },
+        { label: 'Nurse', username: 'nurse', password: 'Nurse@123' },
+        { label: 'Doctor', username: 'doctor', password: 'Doctor@123' },
+        { label: 'Admin', username: 'admin', password: 'Admin@123' },
+      ]
 
 const ROLE_CAPABILITIES = [
   { label: 'Patient', copy: 'Submit your own intake, answer follow-ups, read your own record.' },
