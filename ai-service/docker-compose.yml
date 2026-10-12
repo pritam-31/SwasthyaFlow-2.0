@@ -1,0 +1,32 @@
+# Local / single-host deployment for the AI triage service.
+#   docker compose up --build
+#
+# To enable the full ML stack set AI_INSTALL_ML=true in the environment and use
+# the build arg below (compose passes it through build.args).
+services:
+  ai-service:
+    build:
+      context: .
+      args:
+        INSTALL_ML: "${AI_INSTALL_ML:-false}"
+    image: swasthyaflow-ai:latest
+    ports:
+      - "8000:8000"
+    environment:
+      AI_LOG_LEVEL: info
+      AI_PII_SALT: "${AI_PII_SALT:-change-me-in-production}"
+      AI_SERVICE_TOKEN: "${AI_SERVICE_TOKEN:-}"
+      AI_ENABLE_FEEDBACK: "true"
+    volumes:
+      - ai-models:/app/models
+      - ai-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  ai-models:
+  ai-data:

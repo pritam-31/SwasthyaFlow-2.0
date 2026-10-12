@@ -1,6 +1,7 @@
 import {
   Bell,
   BookOpen,
+  BrainCircuit,
   Building2,
   CalendarClock,
   CalendarDays,
@@ -77,6 +78,7 @@ const NAV_META: Record<string, NavMeta> = {
   '/app': { id: 'dashboard', icon: LayoutDashboard, order: 0, sidebar: 'primary', bottom: true },
   '/app/triage': { id: 'triage', icon: ListTodo, order: 1, sidebar: 'primary', bottom: false },
   '/app/review': { id: 'review', icon: ClipboardCheck, order: 2, sidebar: 'primary', bottom: false },
+  '/app/ai-triage': { id: 'ai-triage', icon: BrainCircuit, order: 2.5, sidebar: 'primary', bottom: false },
   '/app/cases': { id: 'cases', icon: Users, order: 3, sidebar: 'primary', bottom: true },
   '/app/new-intake': { id: 'intake', icon: PlusCircle, order: 4, sidebar: 'primary', bottom: true, center: true },
   '/app/reports': { id: 'reports', icon: FileText, order: 5, sidebar: 'primary', bottom: false },

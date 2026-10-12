@@ -23,6 +23,12 @@ import type {
   UserRole,
 } from '../types/triage'
 import type { FollowUpQuestion } from '../types/followup.types'
+import type {
+  AiSeverityResult,
+  AiTriageStatus,
+  SeverityOverrideInput,
+  SeverityOverrideResult,
+} from '../types/severity.types'
 
 
 // Production auth cookies must stay same-origin, so production always uses
@@ -501,6 +507,34 @@ export function createReferral(
 
 export function approveReferral(id: string, body: { role: UserRole; actor: string }): Promise<{ session: ApiSession }> {
   return request(`/sessions/${id}/referral/approve`, { method: 'POST', body: JSON.stringify(body) })
+}
+
+/* ---------------- AI triage severity (decision support) ---------------- */
+
+/**
+ * Ask the backend to run the AI severity pipeline for a stored session. The
+ * backend returns a clearly-labelled result even if the AI service is down
+ * (source: 'fallback'), so callers always get a usable triage level.
+ */
+export function predictSeverityForSession(sessionId: string): Promise<{ result: AiSeverityResult }> {
+  return request('/ai-triage/predict-severity', { method: 'POST', body: JSON.stringify({ sessionId }) })
+}
+
+/** Evaluate a raw AI patient payload directly (requires the AI service up). */
+export function predictSeverityForPayload(
+  patient: Record<string, unknown>,
+): Promise<{ result: AiSeverityResult }> {
+  return request('/ai-triage/predict-severity', { method: 'POST', body: JSON.stringify({ patient }) })
+}
+
+/** Record a doctor's confirmation or override of the AI level (feedback loop). */
+export function submitSeverityOverride(body: SeverityOverrideInput): Promise<{ result: SeverityOverrideResult }> {
+  return request('/ai-triage/override', { method: 'POST', body: JSON.stringify(body) })
+}
+
+/** Is the AI severity service configured and reachable? */
+export function fetchAiTriageStatus(): Promise<AiTriageStatus> {
+  return request('/ai-triage/status')
 }
 
 /** PII preview for the intake form (same rules as the analysis layer). */

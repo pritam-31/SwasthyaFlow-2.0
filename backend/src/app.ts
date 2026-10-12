@@ -41,6 +41,7 @@ import { doctorsRouter } from './routes/doctors.routes'
 import { appointmentsRouter } from './routes/appointments.routes'
 import { notificationsRouter } from './routes/notifications.routes'
 import { adminAppointmentsRouter } from './routes/adminAppointments.routes'
+import { aiTriageRouter } from './routes/aiTriage.routes'
 
 
 const ALLOWED_ORIGINS = ( process.env.CORS_ORIGIN ?? 'http://localhost:5173,http://127.0.0.1:5173,https://swasthya-flow-2-0.vercel.app' )
@@ -116,6 +117,7 @@ export function createApp(): express.Express {
   app.use('/api/consent', consentRouter)
   app.use('/api/anonymisation', anonymisationRouter)
   app.use('/api/triage', triageRouter)
+  app.use('/api/ai-triage', aiTriageRouter)
   app.use('/api/language', languageRouter)
   app.use('/api/audit', auditRouter)
   app.use('/api/confidence', confidenceRouter)

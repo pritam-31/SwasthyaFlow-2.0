@@ -39,6 +39,12 @@ const EnvSchema = z.object({
   ENABLE_RATE_LIMIT: z.string().optional(),
   CSP_REPORT_ONLY: booleanish.default(false),
   SECURITY_LOG_LEVEL: z.string().default('info'),
+  /** Base URL of the Python AI triage service (empty = feature disabled). */
+  AI_SERVICE_URL: z.string().optional(),
+  /** Optional shared secret forwarded as a Bearer token to the AI service. */
+  AI_SERVICE_TOKEN: z.string().optional(),
+  /** Outbound timeout for AI service calls, in milliseconds. */
+  AI_SERVICE_TIMEOUT_MS: z.string().optional(),
 })
 
 export type Env = z.infer<typeof EnvSchema>
@@ -65,6 +71,30 @@ export function env(): Env {
 /** True when running the production profile. */
 export function isProduction(): boolean {
   return env().NODE_ENV === 'production'
+}
+
+/**
+ * Base URL of the Python AI triage service, or null when the integration is
+ * disabled (the feature then falls back to the in-process priority scorer).
+ */
+export function aiServiceUrl(): string | null {
+  const raw = env().AI_SERVICE_URL ?? process.env.AI_SERVICE_URL
+  if (!raw || !raw.trim()) return null
+  return raw.trim().replace(/\/+$/, '')
+}
+
+/** Optional bearer token presented to the AI service. */
+export function aiServiceToken(): string | null {
+  const raw = env().AI_SERVICE_TOKEN ?? process.env.AI_SERVICE_TOKEN
+  return raw && raw.trim() ? raw.trim() : null
+}
+
+/** Outbound AI-service timeout in milliseconds (default 4000, min 500). */
+export function aiServiceTimeoutMs(): number {
+  const raw = env().AI_SERVICE_TIMEOUT_MS ?? process.env.AI_SERVICE_TIMEOUT_MS
+  const parsed = raw ? Number(raw) : NaN
+  if (!Number.isFinite(parsed)) return 4000
+  return Math.max(500, Math.floor(parsed))
 }
 
 /**

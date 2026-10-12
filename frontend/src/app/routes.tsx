@@ -5,6 +5,7 @@ import { useApp } from '../store/AppStore'
 import type { Role } from '../types'
 
 import AnalyticsPage from '../pages/Analytics'
+import AiTriagePage from '../pages/AiTriage'
 import AppointmentDetailPage from '../pages/appointments/AppointmentDetailPage'
 import AppointmentsPage from '../pages/appointments/AppointmentsPage'
 import BookAppointmentPage from '../pages/appointments/BookAppointmentPage'
@@ -60,6 +61,7 @@ export const APP_ROUTES: AppRoute[] = [
   { path: '', to: '/app', title: 'Dashboard', label: 'Dashboard', roles: EVERYONE, nav: true, Component: Dashboard },
   { path: 'triage', to: '/app/triage', title: 'Triage Queue', label: 'Triage Queue', roles: CLINICAL_ROLES, nav: true, Component: TriageQueue },
   { path: 'review', to: '/app/review', title: 'Reviewer Workspace', label: 'Reviewer', roles: CLINICAL_ROLES, nav: true, Component: TriageDashboard },
+  { path: 'ai-triage', to: '/app/ai-triage', title: 'AI Triage', label: 'AI Triage', roles: CLINICAL_ROLES, nav: true, Component: AiTriagePage },
   { path: 'cases', to: '/app/cases', title: 'Patients', label: 'Patients', roles: EVERYONE, nav: true, Component: CasesPage },
   { path: 'cases/:caseId', to: '/app/cases', title: 'Case Detail', label: 'Case detail', roles: EVERYONE, nav: false, Component: CaseDetail },
   { path: 'new-intake', to: '/app/new-intake', title: 'New Intake', label: 'New Intake', roles: EVERYONE, nav: true, Component: IntakeForm },

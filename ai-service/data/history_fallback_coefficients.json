@@ -1,0 +1,19 @@
+{
+  "intercept": -3.1,
+  "coefficients": {
+    "age": 0.055,
+    "male": 0.25,
+    "female": -0.1,
+    "diabetes": 0.55,
+    "hypertension": 0.4,
+    "smoker": 0.6,
+    "kidney_disease": 0.8,
+    "heart_disease": 0.9,
+    "lung_disease": 0.6,
+    "cancer": 1.0,
+    "obesity": 0.35,
+    "past_admissions": 0.28,
+    "days_since_visit_norm": -0.6,
+    "polypharmacy": 0.45
+  }
+}

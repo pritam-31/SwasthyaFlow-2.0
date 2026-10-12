@@ -1,0 +1,16 @@
+{
+  "prediction_id": null,
+  "patient_id": "P12345",
+  "session_id": "sess-demo-001",
+  "doctor_level": "URGENT",
+  "reason": "Vitals improved after oxygen; still needs urgent review but not immediate resuscitation.",
+  "doctor_id": "doc-001",
+  "doctor_role": "doctor",
+  "ai_severity_score": 83.6,
+  "ai_triage_level": "CRITICAL",
+  "features": {
+    "age": 62,
+    "spo2": 88,
+    "troponin": 0.9
+  }
+}

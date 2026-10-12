@@ -1,0 +1,31 @@
+{
+  "patient_id": "P12345",
+  "age": 62,
+  "gender": "male",
+  "vitals": {
+    "bp_systolic": 150,
+    "bp_diastolic": 95,
+    "heart_rate": 118,
+    "spo2": 88,
+    "temperature": 38.4,
+    "respiratory_rate": 26,
+    "blood_glucose": 210
+  },
+  "symptoms_text": "Severe chest pain radiating to the left arm for the last 40 minutes, breathlessness, sweating and nausea. Known diabetic and hypertensive, smokes.",
+  "symptoms_language": "en",
+  "medical_history": ["diabetes", "hypertension", "smoker"],
+  "medications": ["metformin", "amlodipine"],
+  "lab_reports": {
+    "troponin": 0.9,
+    "hemoglobin": 10.2,
+    "creatinine": 1.6,
+    "sodium": 133,
+    "potassium": 5.4
+  },
+  "past_admissions": 2,
+  "last_visit_days_ago": 14,
+  "ecg_image_url": null,
+  "xray_image_url": null,
+  "facility_id": "facility-demo",
+  "session_id": "sess-demo-001"
+}
