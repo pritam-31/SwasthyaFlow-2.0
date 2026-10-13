@@ -56,7 +56,7 @@ function startServer(app: ReturnType<typeof createApp>): Server {
   const retryDelayMs = 500
 
   server.on('listening', () => {
-    console.log(`[api] SwasthyaFlow backend listening on http://localhost:${PORT}`)
+    console.log(`[api] आरोग्य Sathi backend listening on http://localhost:${PORT}`)
     console.log('[api] non-diagnostic prototype — no diagnosis, no prescriptions.')
     console.log('[api] anonymisation: unified P0-7 pipeline active across all modalities (en/hi/or).')
     startRetentionScheduler()

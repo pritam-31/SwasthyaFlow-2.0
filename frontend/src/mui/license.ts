@@ -15,7 +15,7 @@ if (key && key.trim().length > 0) {
 } else if (import.meta.env.DEV) {
   // eslint-disable-next-line no-console
   console.info(
-    '[SwasthyaFlow] VITE_MUI_X_LICENSE_KEY is not set — @mui/x-data-grid-pro runs in ' +
+    '[आरोग्य Sathi] VITE_MUI_X_LICENSE_KEY is not set — @mui/x-data-grid-pro runs in ' +
       'evaluation mode (watermark shown). Add the key to .env.local to silence this.',
   )
 }

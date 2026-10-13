@@ -1,4 +1,4 @@
-# SwasthyaFlow AI — Frontend Audit
+# आरोग्य Sathi — Frontend Audit
 
 Date: 2026-10-11
 Scope: `frontend/` — routing, navigation, layout/overlays, role correctness, offline UX, responsiveness, accessibility.

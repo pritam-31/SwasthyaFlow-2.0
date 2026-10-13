@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test'
 
 /**
  * End-to-end smoke suite. The Vite dev server (this webServer) proxies /api to
- * http://localhost:4000, so the SwasthyaFlow backend must already be running
+ * http://localhost:4000, so the आरोग्य Sathi backend must already be running
  * (see project root instructions) for the login steps to succeed.
  */
 export default defineConfig({

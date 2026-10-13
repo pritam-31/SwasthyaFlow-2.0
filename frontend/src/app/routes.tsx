@@ -133,7 +133,7 @@ export function RouteMeta() {
   const location = useLocation()
   useEffect(() => {
     const route = matchAppRoute(location.pathname)
-    document.title = route ? `${route.title} · SwasthyaFlow AI` : 'SwasthyaFlow AI'
+    document.title = route ? `${route.title} · आरोग्य Sathi` : 'आरोग्य Sathi'
     const main = document.getElementById('app-main')
     const heading = main?.querySelector('h1')
     const target = (heading as HTMLElement | null) ?? main

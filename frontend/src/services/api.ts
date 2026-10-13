@@ -1,5 +1,5 @@
 /**
- * Single HTTP client for the SwasthyaFlow backend (see /backend).
+ * Single HTTP client for the आरोग्य Sathi backend (see /backend).
  *
  * The backend owns anonymization, mock analysis, session storage and the
  * audit trail — the frontend must never reimplement those rules.

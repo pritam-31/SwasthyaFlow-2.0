@@ -30,7 +30,7 @@ import type {
 } from '../types/feedback.types'
 
 export const NON_DIAGNOSTIC_STATEMENT =
-  'SwasthyaFlow organises patient information and prepares a triage note for a qualified healthcare worker. ' +
+  'आरोग्य Sathi organises patient information and prepares a triage note for a qualified healthcare worker. ' +
   'It does not diagnose, does not prescribe, and does not replace a medical professional. ' +
   'Every AI-prepared note is a draft until a human accepts or edits it.'
 

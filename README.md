@@ -1,14 +1,14 @@
-# SwasthyaFlow
+# आरोग्य Sathi
 
 **Human-in-the-loop multimodal healthcare triage assistant (non-diagnostic).**
 
-SwasthyaFlow organises patient information and prepares a triage note for a qualified healthcare worker. It does not diagnose, does not prescribe, and does not replace a medical professional. Every AI-prepared note is a draft until a human accepts or edits it.
+आरोग्य Sathi organises patient information and prepares a triage note for a qualified healthcare worker. It does not diagnose, does not prescribe, and does not replace a medical professional. Every AI-prepared note is a draft until a human accepts or edits it.
 
 ---
 
 ## Purpose
 
-SwasthyaFlow is a prototype human-in-the-loop system that assists healthcare triage by:
+आरोग्य Sathi is a prototype human-in-the-loop system that assists healthcare triage by:
 
 - **Organising patient intake data** (voice, text, attachments) into structured format
 - **Redacting PII** (personal identifiers) before any analysis layer
@@ -48,7 +48,7 @@ It is explicitly **non-diagnostic**: the AI outputs observations, urgency signal
 ## Architecture
 
 ```
-SwasthyaFlow/
+आरोग्य Sathi/
 ├── package.json              # root scripts (dev/build/lint)
 ├── README.md
 ├── MIGRATION.md

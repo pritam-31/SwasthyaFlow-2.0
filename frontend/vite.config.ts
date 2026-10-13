@@ -19,8 +19,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'SwasthyaFlow AI',
-        short_name: 'SwasthyaFlow',
+        name: 'आरोग्य Sathi',
+        short_name: 'आरोग्य Sathi',
         description:
           'AI-powered Human-in-the-Loop Healthcare Triage & Referral Assistant. Synthetic/public sample data only.',
         theme_color: '#1f7d6b',

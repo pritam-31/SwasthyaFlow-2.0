@@ -17,7 +17,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     // eslint-disable-next-line no-console
-    console.error('SwasthyaFlow UI error:', error, info.componentStack)
+    console.error('आरोग्य Sathi UI error:', error, info.componentStack)
   }
 
   private reset = () => {

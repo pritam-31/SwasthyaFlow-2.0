@@ -1,6 +1,6 @@
 # Integrating the AI Triage Service
 
-How the AI service connects to the rest of SwasthyaFlow:
+How the AI service connects to the rest of आरोग्य Sathi:
 
 ```
 ┌────────────┐   /api/ai-triage/*   ┌──────────────┐   HTTP (JSON)   ┌──────────────────┐

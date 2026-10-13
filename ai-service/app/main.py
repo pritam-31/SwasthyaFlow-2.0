@@ -1,4 +1,4 @@
-"""STEP 2 — FastAPI application for the SwasthyaFlow AI triage service.
+"""STEP 2 — FastAPI application for the आरोग्य Sathi AI triage service.
 
 Endpoints
     GET  /health                 liveness + model status
@@ -33,7 +33,7 @@ from .schemas import (
 )
 
 app = FastAPI(
-    title="SwasthyaFlow AI Triage Service",
+    title="आरोग्य Sathi AI Triage Service",
     version=__version__,
     description=(
         "Data-driven, non-diagnostic patient severity scoring and triage-level "

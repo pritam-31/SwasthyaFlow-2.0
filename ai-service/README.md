@@ -1,4 +1,4 @@
-# SwasthyaFlow AI Triage Service
+# आरोग्य Sathi AI Triage Service
 
 Data-driven, **non-diagnostic** patient severity scoring and triage
 decision-support. It takes a real patient record (vitals, symptoms text, labs,

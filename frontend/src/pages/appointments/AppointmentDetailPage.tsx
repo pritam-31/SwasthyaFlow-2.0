@@ -253,7 +253,7 @@ export default function AppointmentDetailPage() {
   const a = appointment
 
   const facilityLabel =
-    facilities.find((f) => f.id === a.facilityId)?.name ?? 'SwasthyaFlow Health & Wellness Centre'
+    facilities.find((f) => f.id === a.facilityId)?.name ?? 'आरोग्य Sathi Health & Wellness Centre'
 
   const printLetter = () => {
     const ok = openPrintWindow(buildAppointmentLetterHtml(a, facilityLabel))

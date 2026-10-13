@@ -1,4 +1,4 @@
-"""Runtime configuration for the SwasthyaFlow AI triage service.
+"""Runtime configuration for the आरोग्य Sathi AI triage service.
 
 Everything is environment-driven with safe defaults so the service boots with
 zero configuration. This module is intentionally dependency-light (stdlib only)

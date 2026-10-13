@@ -87,7 +87,7 @@ export default function LoginPage() {
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-lime-400 text-ink-900">
             <HeartPulse size={19} strokeWidth={2.4} />
           </span>
-          <span className="text-[15px] font-extrabold tracking-tight">SwasthyaFlow</span>
+          <span className="text-[15px] font-extrabold tracking-tight">आरोग्य Sathi</span>
         </div>
 
         <div className="relative space-y-5">
@@ -125,7 +125,7 @@ export default function LoginPage() {
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-lime-400 text-ink-900">
               <HeartPulse size={19} strokeWidth={2.4} />
             </span>
-            <span className="text-[15px] font-extrabold tracking-tight text-ink-900">SwasthyaFlow</span>
+            <span className="text-[15px] font-extrabold tracking-tight text-ink-900">आरोग्य Sathi</span>
           </div>
 
           <div className="mb-5 flex gap-1 rounded-2xl bg-ink-100/80 p-1">

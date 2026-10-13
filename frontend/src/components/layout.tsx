@@ -293,7 +293,7 @@ function SidebarContent() {
           whileHover={{ scale: 1.04 }}
           transition={{ type: 'spring', stiffness: 380, damping: 20 }}
           className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 text-white shadow-lg shadow-brand-900/30 ring-1 ring-inset ring-white/20"
-          title="SwasthyaFlow AI"
+          title="आरोग्य Sathi"
         >
           <HeartPulse size={18} />
         </motion.div>

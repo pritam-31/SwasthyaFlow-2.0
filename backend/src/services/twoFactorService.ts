@@ -13,7 +13,7 @@ import { getTwoFactorSecret, setTwoFactor, type AuthUser } from './authStore'
  * Verification uses otplib's constant-time comparison with a one-step window.
  */
 
-const ISSUER = 'SwasthyaFlow'
+const ISSUER = 'आरोग्य Sathi'
 const ENCRYPTION_ALGORITHM = 'aes-256-gcm'
 
 const pendingEnrollments = new Map<string, string>()

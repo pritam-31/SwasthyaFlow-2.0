@@ -28,7 +28,7 @@ export function buildAppointmentLetterHtml(a: Appointment, facilityLabel: string
   const letterNo = a.bookingReference
   const body = [
     `<header class="head">`,
-    `<div><p class="brand">SwasthyaFlow</p><p class="clinic">${esc(facilityLabel)}</p></div>`,
+    `<div><p class="brand">आरोग्य Sathi</p><p class="clinic">${esc(facilityLabel)}</p></div>`,
     `<div class="ref"><p class="ref-label">Booking reference</p><p class="ref-value">${esc(letterNo)}</p></div>`,
     `</header>`,
     `<h1>Appointment Confirmation Letter</h1>`,
