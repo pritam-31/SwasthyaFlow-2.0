@@ -34,6 +34,8 @@ interface AppState {
   setRole: (role: Role) => void
   setOfflineMode: (on: boolean) => void
   addCase: (input: Partial<CaseRecord>) => CaseRecord
+  /** Project live backend sessions + reports into the registry (upsert by id). */
+  mergeSessionCases: (sessionCases: Partial<CaseRecord>[], sessionReports: Report[]) => void
   updateCase: (caseId: string, patch: Partial<CaseRecord>) => void
   verifyField: (caseId: string, symptomId: string, verifiedBy: string) => void
   verifyReportField: (reportId: string, fieldId: string) => void
@@ -89,14 +91,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [],
   )
 
-  const addCase = useCallback(
-    (input: Partial<CaseRecord>): CaseRecord => {
-      const existing = cases.length
-      const id = input.id ?? `case-${String(existing + 1).padStart(4, '0')}`
+  const makeCaseRecord = useCallback(
+    (input: Partial<CaseRecord>, fallbackIndex: number): CaseRecord => {
       const num = new Date().getFullYear()
-      const patientId = input.patientId ?? `SYN-${num}-${String(existing + 1).padStart(3, '0')}`
       const time = nowTime()
-      const record: CaseRecord = {
+      return {
         language: 'English',
         mode: 'opd',
         chiefConcern: '',
@@ -117,14 +116,50 @@ export function AppProvider({ children }: { children: ReactNode }) {
         corrections: [],
         referral: null,
         ...input,
-        id,
-        patientId,
+        id: input.id ?? `case-${String(fallbackIndex).padStart(4, '0')}`,
+        patientId: input.patientId ?? `SYN-${num}-${String(fallbackIndex).padStart(3, '0')}`,
       }
+    },
+    [],
+  )
+
+  const addCase = useCallback(
+    (input: Partial<CaseRecord>): CaseRecord => {
+      const record = makeCaseRecord(input, cases.length + 1)
       setCases((prev) => [record, ...prev])
-      addAudit(id, 'Patient / staff', 'Patient', 'Case created · intake · consent captured')
+      addAudit(record.id, 'Patient / staff', 'Patient', 'Case created · intake · consent captured')
       return record
     },
-    [cases.length, addAudit],
+    [cases.length, addAudit, makeCaseRecord],
+  )
+
+  const mergeSessionCases = useCallback(
+    (sessionCases: Partial<CaseRecord>[], sessionReports: Report[]) => {
+      if (sessionCases.length > 0) {
+        setCases((prev) => {
+          const byId = new Map(prev.map((c) => [c.id, c]))
+          sessionCases.forEach((input, i) => {
+            if (!input.id) return
+            const existing = byId.get(input.id)
+            byId.set(
+              input.id,
+              existing
+                ? { ...existing, ...input, id: input.id, patientId: input.patientId ?? existing.patientId }
+                : makeCaseRecord(input, byId.size + i + 1),
+            )
+          })
+          return [...byId.values()]
+        })
+      }
+      if (sessionReports.length > 0) {
+        setReports((prev) => {
+          const byId = new Map(prev.map((r) => [r.id, r]))
+          for (const report of sessionReports) byId.set(report.id, report)
+          return [...byId.values()]
+        })
+      }
+    },
+    [makeCaseRecord],
   )
 
   const updateCase = useCallback(
@@ -348,6 +383,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setRole,
       setOfflineMode,
       addCase,
+      mergeSessionCases,
       updateCase,
       verifyField,
       verifyReportField,
@@ -371,6 +407,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       audit,
       toasts,
       addCase,
+      mergeSessionCases,
       updateCase,
       verifyField,
       verifyReportField,

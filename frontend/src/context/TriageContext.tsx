@@ -20,6 +20,7 @@ import * as confidenceApi from '../services/confidenceApi'
 import * as feedbackApi from '../services/feedbackApi'
 import { CONSENT_POLICY_VERSION, FEEDBACK_SECTION_LABELS, OFFLINE_SECTION_LABELS } from '../services/safetyPolicy'
 import { useApp } from '../store/AppStore'
+import { sessionReports, sessionToCase } from '../lib/sessionBridge'
 import { useAuth } from './AuthContext'
 import { useOffline } from './OfflineContext'
 import { isNetworkError } from '../services/syncService'
@@ -327,7 +328,7 @@ interface TriageContextValue {
 const TriageContext = createContext<TriageContextValue | null>(null)
 
 export function TriageProvider({ children }: { children: ReactNode }) {
-  const { role, pushToast } = useApp()
+  const { role, pushToast, mergeSessionCases } = useApp()
   const { user } = useAuth()
   const { enqueue } = useOffline()
   const [sessions, setSessions] = useState<PatientSession[]>([])
@@ -1355,6 +1356,16 @@ export function TriageProvider({ children }: { children: ReactNode }) {
       alive = false
     }
   }, [])
+
+  // Project live sessions + their reports into the Patient registry / dashboard.
+  // The registry reads the in-memory AppStore, so without this a submitted
+  // report exists only in the review queue and never appears in the registry.
+  useEffect(() => {
+    const incomingCases = sessions.map((s) => sessionToCase(s, reportsBySession[s.id]?.reports))
+    const incomingReports = sessions.flatMap((s) => sessionReports(s, reportsBySession[s.id]?.reports))
+    if (incomingCases.length === 0) return
+    mergeSessionCases(incomingCases, incomingReports)
+  }, [sessions, reportsBySession, mergeSessionCases])
 
   // Retention policy + history load for staff once the role is known.
   useEffect(() => {
