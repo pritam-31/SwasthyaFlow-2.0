@@ -33,7 +33,8 @@ export default function Reports() {
       {
         field: 'name',
         headerName: 'Report',
-        width: 280,
+        flex: 1.6,
+        minWidth: 240,
         renderCell: (p: { row: Report }) => (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, height: '100%' }}>
             <Box
@@ -66,7 +67,8 @@ export default function Reports() {
       {
         field: 'caseId',
         headerName: 'Case',
-        width: 170,
+        flex: 1,
+        minWidth: 150,
         valueGetter: (_value, row: Report) => cases.find((c) => c.id === row.caseId)?.patientId ?? row.caseId,
         renderCell: (p: { row: Report }) => (
           <Typography variant="body2" sx={{ fontWeight: 700, color: 'primary.main' }}>
@@ -77,19 +79,24 @@ export default function Reports() {
       {
         field: 'kind',
         headerName: 'Kind',
-        width: 140,
+        flex: 0.9,
+        minWidth: 120,
         renderCell: (p: { row: Report }) => <StatusPill tone="ink">{p.row.kind}</StatusPill>,
       },
       {
         field: 'ocrStatus',
         headerName: 'OCR status',
-        width: 170,
+        flex: 1,
+        minWidth: 150,
         renderCell: (p: { row: Report }) => <StatusPill tone={OCR_TONE[p.row.ocrStatus]}>{OCR_LABEL[p.row.ocrStatus]}</StatusPill>,
       },
       {
         field: 'fields',
         headerName: 'Fields',
-        width: 100,
+        flex: 0.7,
+        minWidth: 100,
+        align: 'left' as const,
+        headerAlign: 'left' as const,
         type: 'number' as const,
         valueGetter: (_value, row: Report) => row.fields.length,
         renderCell: (p: { row: Report }) => <Typography variant="body2">{p.row.fields.length}</Typography>,
@@ -97,11 +104,12 @@ export default function Reports() {
       {
         field: 'verified',
         headerName: 'Verified',
-        width: 170,
+        flex: 1.1,
+        minWidth: 160,
         sortable: false,
         filterable: false,
         renderCell: (p: { row: Report }) => (
-          <Box sx={{ width: 110 }}>
+          <Box sx={{ width: '100%', maxWidth: 170 }}>
             <LinearProgress
               variant="determinate"
               value={verifiedRatio(p.row)}
