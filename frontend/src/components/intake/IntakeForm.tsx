@@ -336,39 +336,69 @@ export default function IntakeForm() {
         title="2 · Narrative (text or voice)"
         subtitle={`Multilingual capture — ${language}. Your words are anonymized before any processing.`}
       >
-        <div className="rounded-xl border border-ink-200 bg-ink-50/60 p-4">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col gap-4 rounded-[14px] border border-ink-200 bg-ink-50 p-5 sm:p-6">
+          {/* Buttons row — equal height, one line on ≥640px, stacked full-width on mobile */}
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
             <Button
+              size="lg"
               variant={stt.listening ? 'danger' : 'primary'}
               onClick={() => (stt.listening ? stt.stop() : stt.start(language))}
               aria-pressed={stt.listening}
+              aria-label={stt.listening ? `Stop recording in ${language}` : `Speak the symptoms in ${language}`}
               title={stt.supported ? 'Speak the symptoms' : 'Live transcription unavailable'}
+              className="min-h-[48px] w-full whitespace-nowrap focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 sm:w-auto"
             >
-              <Mic size={15} />
+              <Mic size={16} />
               {stt.listening ? 'Stop recording' : `Speak in ${language}`}
             </Button>
             <FilePicker
               id="voice-file"
               accept="audio/*"
               label="Upload a recording"
-              hint={stt.supported ? 'Alternative to live capture.' : 'Live transcription is unavailable in this browser — upload a recording instead.'}
+              ariaLabel="Upload an audio recording of the symptoms"
               onFile={attachAudio}
+              hideHint
+              className="w-full sm:w-auto"
             />
           </div>
 
-          <div aria-live="polite" className="mt-3 text-xs text-ink-600">
-            {stt.listening && <span className="font-semibold text-rose-600">Listening… speak clearly.</span>}
-            {stt.listening && stt.interim && <span className="ml-2 text-ink-400">{stt.interim}</span>}
-            {!stt.listening && stt.supported && <span className="text-ink-400">Microphone idle.</span>}
+          {/* Helper text — consistent placement below the buttons row */}
+          <p className="text-left text-[13px] text-ink-500">
+            {stt.supported
+              ? 'Alternative to live capture.'
+              : 'Live transcription is unavailable in this browser — upload a recording instead.'}
+          </p>
+
+          {/* Status row — pinned to the bottom of the panel with a divider and dot */}
+          <div
+            aria-live="polite"
+            className="flex items-center gap-2 border-t border-ink-200 pt-4 text-[13px] text-ink-500"
+          >
+            <span
+              aria-hidden="true"
+              className={cx(
+                'h-2.5 w-2.5 shrink-0 rounded-full',
+                stt.error ? 'bg-rose-500' : stt.listening ? 'bg-emerald-500' : 'bg-ink-300',
+              )}
+            />
+            {stt.error ? (
+              <span role="alert" className="font-semibold text-rose-600">
+                {stt.error}
+              </span>
+            ) : stt.listening ? (
+              <span className="font-semibold text-rose-600">
+                Listening… speak clearly.
+                {stt.interim && <span className="ml-2 font-normal text-ink-400">{stt.interim}</span>}
+              </span>
+            ) : stt.supported ? (
+              <span>Microphone idle.</span>
+            ) : (
+              <span>Live transcription unavailable — upload a recording instead.</span>
+            )}
           </div>
-          {stt.error && (
-            <p role="alert" className="mt-2 text-xs font-semibold text-rose-600">
-              {stt.error}
-            </p>
-          )}
 
           {voice && (
-            <div className="mt-3 rounded-lg border border-ink-200 bg-white p-3">
+            <div className="rounded-lg border border-ink-200 bg-white p-3">
               <p className="flex items-center justify-between gap-2 text-xs font-semibold text-ink-700">
                 <span>{voice.source === 'file' ? 'Uploaded recording' : 'Live transcript'}</span>
                 <button
@@ -783,37 +813,46 @@ function FilePicker({
   label,
   hint,
   onFile,
+  className,
+  hideHint,
+  ariaLabel,
 }: {
   id: string
   accept: string
   label: string
-  hint: string
+  hint?: string
   onFile: (file: File) => void
+  className?: string
+  hideHint?: boolean
+  ariaLabel?: string
 }) {
   return (
-    <div className="min-w-0">
+    <div className={cx('min-w-0', className)}>
       <label
         htmlFor={id}
-        className="inline-flex min-h-[40px] cursor-pointer items-center gap-2 rounded-xl border border-ink-200 bg-white px-3.5 py-2 text-xs font-bold text-ink-700 transition hover:border-brand-400 hover:text-brand-700 focus-within:ring-2 focus-within:ring-brand-500/40"
+        className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-ink-200 bg-white px-5 text-[15px] font-semibold text-ink-700 transition-colors hover:border-brand-400 hover:text-brand-700 focus-within:ring-2 focus-within:ring-brand-500/40 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-brand-600"
       >
-        <Paperclip size={14} />
+        <Paperclip size={16} />
         {label}
       </label>
       <input
         id={id}
         type="file"
         accept={accept}
+        aria-label={ariaLabel ?? label}
         className="sr-only"
-        aria-describedby={`${id}-hint`}
+        aria-describedby={hint && !hideHint ? `${id}-hint` : undefined}
         onChange={(e) => {
           const file = e.target.files?.[0]
           if (file) onFile(file)
           e.target.value = ''
         }}
       />
-      <p id={`${id}-hint`} className="mt-1 max-w-xs text-[11px] text-ink-400">
-        {hint}
-      </p>
+      {hint && !hideHint && (
+        <p id={`${id}-hint`} className="mt-1 max-w-xs text-[11px] text-ink-400">
+          {hint}
+        </p>
+      )}
     </div>
   )
 }
