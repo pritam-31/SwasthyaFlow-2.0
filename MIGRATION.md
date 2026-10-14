@@ -1,5 +1,6 @@
 # Migration guide — P1-12 security hardening
 
+
 This guide describes what changed in the P1-12 hardening pass and what a
 deployment / development setup has to do to move from the previous build. No
 public API route has been removed; the hardening layers sit in front of the
